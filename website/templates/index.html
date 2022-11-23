@@ -1,11 +1,13 @@
 {% extends "base.html" %}
 
 {% block content %}
-<form method="POST" action="/txt2img/">
-    <div class="form-group">
-        <input type="text" name="prompt" placeholder="Phrase ex. Poland's football team celebrate winning World Cup"/>
-        <small class="form-text text-muted">Generating might take a minute.</small>
+    <div class="w-50">
+        <form method="POST" action="/txt2img/" class="d-flex flex-column justify-content-center align-items-center">
+            <div class="form-group w-100">
+                <input type="text" class="form-control" name="prompt" required placeholder="Enter phrase ex. Poland's football team celebrate winning World Cup" />
+                <small class="form-text text-muted">Generating might take a minute or two.</small>
+            </div>
+            <button class="btn btn-primary btn-lg" type="submit">Generate</button>
+        </form>
     </div>
-    <button class="btn btn-primary" type="submit">Generate</button>
-</form>
 {% endblock %}

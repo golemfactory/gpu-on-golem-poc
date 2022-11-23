@@ -1,4 +1,3 @@
-from typing import Union
 import uuid
 
 from fastapi import FastAPI, Request, Form, status
@@ -17,6 +16,7 @@ q = Queue(connection=redis_conn)
 templates = Jinja2Templates(directory="templates")
 app = FastAPI()
 app.mount("/images", StaticFiles(directory="images"), name="images")
+app.mount("/static", StaticFiles(directory="static"), name="static")
 
 
 @app.get("/")
@@ -36,7 +36,17 @@ async def add_job_to_queue(request: Request, prompt: str = Form(...)):
 @app.get("/txt2img/{job_id}/")
 async def job_detail(request: Request, job_id: str, prompt: str = ""):
     job = Job.fetch(job_id, connection=redis_conn)
-    task_status = job.get_status()
+    JOB_STATUS_TO_STATUS = {
+        'queued': 'Processing',
+        'started': 'Processing',
+        'deferred': 'Processing',
+        'finished': 'Ready',
+        'stopped': 'Failed',
+        'scheduled': 'Processing',
+        'canceled': 'Failed',
+        'failed': 'Failed',
+    }
+    task_status = JOB_STATUS_TO_STATUS[job.get_status()]
     img_path = f'/images/{job_id}.png'
     return templates.TemplateResponse(
         "job-detail.html",
