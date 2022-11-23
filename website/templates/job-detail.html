@@ -6,4 +6,14 @@
     <h3>Phrase: {{ prompt }}</h3>
     <img src="{{ img_path }}" />
 </div>
+
+<script type="text/javascript">
+    let jobStatus = '{{ status }}';
+    if( jobStatus !== 'finished'){
+        setTimeout(function(){
+            location.reload();
+        },
+        5000);
+    }
+</script>
 {% endblock %}

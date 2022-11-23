@@ -1,2 +1,4 @@
 website/website_venv/
 website/__pycache__/
+website/images
+website/sd-golem.log
