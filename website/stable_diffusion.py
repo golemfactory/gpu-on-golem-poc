@@ -21,6 +21,7 @@ async def _worker(context: WorkContext, tasks: AsyncIterable[Task]):
 
 async def _generate_on_golem(phrase, job_id):
     package = await vm.repo(
+        # VM image placed at private server.
         image_hash="5080b041087e342f258955abfa2042cf1a162697b589b00964b923be",
         image_url='http://116.203.41.115:8000/docker-diffusers-golem-latest-16ef828013.gvmi',
     )
@@ -28,9 +29,9 @@ async def _generate_on_golem(phrase, job_id):
     tasks = [Task(data={'phrase': phrase, 'id': job_id})]
 
     async with Golem(budget=10.0, subnet_tag="sd-test") as golem:
-        async for completed in golem.execute_tasks(_worker, tasks, payload=package, timeout=timedelta(minutes=90),
-                                                   max_workers=1):
-            print(completed.result.stdout)
+        async for _ in golem.execute_tasks(_worker, tasks, payload=package, timeout=timedelta(minutes=90),
+                                           max_workers=1):
+            pass
 
 
 def generate_image(phrase, job_id):
