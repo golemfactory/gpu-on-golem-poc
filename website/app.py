@@ -1,4 +1,5 @@
 import uuid
+from pathlib import Path
 
 from fastapi import FastAPI, Request, Form, status
 from fastapi.staticfiles import StaticFiles
@@ -36,23 +37,24 @@ async def add_job_to_queue(request: Request, prompt: str = Form(...)):
 @app.get("/txt2img/{job_id}/")
 async def job_detail(request: Request, job_id: str, prompt: str = ""):
     job = Job.fetch(job_id, connection=redis_conn)
-    JOB_STATUS_TO_STATUS = {
+    img_path = f'/images/{job_id}.png'
+    img_exists = Path(f'/images/{job_id}.png').exists()
+    job_status_to_status = {
         'queued': 'Processing',
         'started': 'Processing',
         'deferred': 'Processing',
-        'finished': 'Ready',
+        'finished': 'Ready' if img_exists else 'Failed',
         'stopped': 'Failed',
         'scheduled': 'Processing',
         'canceled': 'Failed',
         'failed': 'Failed',
     }
-    task_status = JOB_STATUS_TO_STATUS[job.get_status()]
-    img_path = f'/images/{job_id}.png'
+    task_status = job_status_to_status[job.get_status()]
     return templates.TemplateResponse(
         "job-detail.html",
         {
             "request": request,
             "prompt": prompt,
             "status": task_status,
-            "img_path": img_path
+            "img_path": img_path,
         })
