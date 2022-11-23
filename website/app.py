@@ -38,7 +38,7 @@ async def add_job_to_queue(request: Request, prompt: str = Form(...)):
 async def job_detail(request: Request, job_id: str, prompt: str = ""):
     job = Job.fetch(job_id, connection=redis_conn)
     img_path = f'/images/{job_id}.png'
-    img_exists = Path(f'/images/{job_id}.png').exists()
+    img_exists = Path(f'images/{job_id}.png').exists()
     job_status_to_status = {
         'queued': 'Processing',
         'started': 'Processing',
