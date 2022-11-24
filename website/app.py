@@ -1,7 +1,8 @@
 import uuid
+import math
 from pathlib import Path
 
-from fastapi import FastAPI, Depends, Request, Form, status
+from fastapi import FastAPI, Depends, Request, Response, Header, HTTPException, Form, status
 from fastapi.staticfiles import StaticFiles
 from fastapi_limiter import FastAPILimiter
 from fastapi_limiter.depends import RateLimiter
@@ -42,6 +43,30 @@ async def add_job_to_queue(request: Request, prompt: str = Form(...)):
     url += ("?prompt=" + prompt)
     return RedirectResponse(url=url, status_code=status.HTTP_302_FOUND)
 
+
+@app.exception_handler(HTTPException)
+async def unicorn_exception_handler(request: Request, exc: HTTPException):
+    return templates.TemplateResponse(
+        "throttling.html",
+        {
+            "request": request,
+            "expire": exc.headers["Retry-After"],
+        }
+    )
+
+async def default_callback(request: Request, response: Response, pexpire: int):
+    """
+    default callback when too many requests
+    :param request:
+    :param pexpire: The remaining milliseconds
+    :param response:
+    :return:
+    """
+    expire = math.ceil(pexpire / 1000)
+
+    raise HTTPException(
+    status.HTTP_429_TOO_MANY_REQUESTS, "Too Many Requests", headers={"Retry-After": str(expire)}
+    )
 
 @app.get("/txt2img/{job_id}/")
 async def job_detail(request: Request, job_id: str, prompt: str = ""):

@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="d-flex flex-column justify-content-center align-items-center w-75">
+    <h3><span class="text-muted">Too many requests for image. Try after {{expire}} seconds.</span> <strong>{{ status }}</strong></h3>
+
+    <a href="/" class="btn btn-outline-dark mt-5" role="button">Go back</a>
+</div>
+
+{% endblock %}
