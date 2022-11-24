@@ -2,7 +2,7 @@
 
 {% block content %}
     <div class="w-50">
-        <form method="POST" action="/txt2img/" class="d-flex flex-column justify-content-center align-items-center">
+        <form method="POST" action="{{root_path}}/txt2img/" class="d-flex flex-column justify-content-center align-items-center">
             <div class="form-group w-100">
                 <input type="text" class="form-control" name="prompt" required placeholder="Enter phrase ex. Poland's football team celebrate winning World Cup" />
                 <small class="form-text text-muted">Generating might take a minute or two.</small>

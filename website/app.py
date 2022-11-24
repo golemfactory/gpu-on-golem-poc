@@ -22,7 +22,7 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 
 @app.get("/")
 async def index(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request})
+    return templates.TemplateResponse("index.html", {"request": request, 'root_path': request.scope.get("root_path")})
 
 
 @app.post("/txt2img/")
@@ -37,8 +37,8 @@ async def add_job_to_queue(request: Request, prompt: str = Form(...)):
 @app.get("/txt2img/{job_id}/")
 async def job_detail(request: Request, job_id: str, prompt: str = ""):
     job = Job.fetch(job_id, connection=redis_conn)
-    img_path = f'/images/{job_id}.png'
-    img_exists = Path(f'images/{job_id}.png').exists()
+    img_path = f'images/{job_id}.png'
+    img_exists = Path(img_path).exists()
     job_status_to_status = {
         'queued': 'Processing',
         'started': 'Processing',
@@ -54,6 +54,7 @@ async def job_detail(request: Request, job_id: str, prompt: str = ""):
         "job-detail.html",
         {
             "request": request,
+            'root_path': request.scope.get("root_path"),
             "prompt": prompt,
             "status": task_status,
             "img_path": img_path,
