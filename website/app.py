@@ -29,8 +29,8 @@ async def index(request: Request):
 async def add_job_to_queue(request: Request, prompt: str = Form(...)):
     uuid_str = str(uuid.uuid4())
     q.enqueue(generate_image, prompt, uuid_str, job_id=uuid_str)
-    url = app.url_path_for("job_detail", job_id=uuid_str)
-    url += ("?prompt=" + prompt)
+    detail_url = app.url_path_for("job_detail", job_id=uuid_str)
+    url = f'{request.scope.get("root_path")}{detail_url}?prompt={prompt}'
     return RedirectResponse(url=url, status_code=status.HTTP_302_FOUND)
 
 
