@@ -2,6 +2,7 @@ website/website_venv/*
 provider/provider_venv/
 provider/output/img.png
 provider/stable-diffusion-v1-5/*
+provider/stable-diffusion-v1-5.zip
 website/__pycache__/
 website/images
 website/sd-golem.log
