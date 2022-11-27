@@ -1,0 +1,2 @@
+## requirements.txt file
+Commented requirements in `requirements.txt` file are dependent on your particular device. Please check your own configuration before installation and provide necessary `pip instal <depends_on_your_device>` command to continue. You will be able to acquire this request on 'https://pytorch.org/' website.

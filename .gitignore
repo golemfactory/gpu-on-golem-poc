@@ -1,4 +1,8 @@
-website/website_venv/
+website/website_venv/*
+provider/provider_venv/
+provider/output/img.png
+provider/stable-diffusion-v1-5/*
 website/__pycache__/
 website/images
 website/sd-golem.log
+dump.rdb
