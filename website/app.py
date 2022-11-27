@@ -1,14 +1,14 @@
 import uuid
-import math
 from pathlib import Path
 
-from fastapi import FastAPI, Depends, Request, Response, Header, HTTPException, Form, status
+from fastapi import FastAPI, Request, Form, status
 from fastapi.staticfiles import StaticFiles
-from fastapi_limiter import FastAPILimiter
-from fastapi_limiter.depends import RateLimiter
+
+from slowapi.errors import RateLimitExceeded
+from slowapi import Limiter
+from slowapi.util import get_remote_address
 
 from redis import Redis
-import redis.asyncio as async_redis
 from rq import Queue
 from rq.job import Job
 
@@ -17,56 +17,38 @@ from starlette.templating import Jinja2Templates
 
 from stable_diffusion import generate_image
 
+async def unicorn_exception_handler(request: Request, exc: RateLimitExceeded):
+    return templates.TemplateResponse(
+        "throttling.html",
+        {
+            "request": request,
+            "expire": 1,
+        }
+    )
 
 redis_conn = Redis()
+limiter = Limiter(key_func=get_remote_address)
 q = Queue(connection=redis_conn)
 templates = Jinja2Templates(directory="templates")
 app = FastAPI()
 app.mount("/images", StaticFiles(directory="images"), name="images")
 app.mount("/static", StaticFiles(directory="static"), name="static")
-
-@app.on_event("startup")
-async def startup():
-    redis_connection_details = async_redis.from_url("redis://localhost", encoding="utf-8", decode_responses=True)
-    await FastAPILimiter.init(redis_connection_details)
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, unicorn_exception_handler)
 
 @app.get("/")
 async def index(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
 
 
-@app.post("/txt2img/", dependencies=[Depends(RateLimiter(times=1, seconds=20))])
+@app.post("/txt2img/")
+@limiter.limit("3/minute")
 async def add_job_to_queue(request: Request, prompt: str = Form(...)):
     uuid_str = str(uuid.uuid4())
     q.enqueue(generate_image, prompt, uuid_str, job_id=uuid_str)
     url = app.url_path_for("job_detail", job_id=uuid_str)
     url += ("?prompt=" + prompt)
     return RedirectResponse(url=url, status_code=status.HTTP_302_FOUND)
-
-
-@app.exception_handler(HTTPException)
-async def unicorn_exception_handler(request: Request, exc: HTTPException):
-    return templates.TemplateResponse(
-        "throttling.html",
-        {
-            "request": request,
-            "expire": exc.headers["Retry-After"],
-        }
-    )
-
-async def default_callback(request: Request, response: Response, pexpire: int):
-    """
-    default callback when too many requests
-    :param request:
-    :param pexpire: The remaining milliseconds
-    :param response:
-    :return:
-    """
-    expire = math.ceil(pexpire / 1000)
-
-    raise HTTPException(
-    status.HTTP_429_TOO_MANY_REQUESTS, "Too Many Requests", headers={"Retry-After": str(expire)}
-    )
 
 @app.get("/txt2img/{job_id}/")
 async def job_detail(request: Request, job_id: str, prompt: str = ""):
