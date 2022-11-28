@@ -21,9 +21,8 @@ async def _worker(context: WorkContext, tasks: AsyncIterable[Task]):
 
 async def _generate_on_golem(phrase, job_id):
     package = await vm.repo(
-        # VM image placed at private server.
         image_hash="5080b041087e342f258955abfa2042cf1a162697b589b00964b923be",
-        image_url='http://116.203.41.115:8000/docker-diffusers-golem-latest-16ef828013.gvmi',
+        image_url='https://lukasz-glen.com/docker-diffusers-golem-latest-16ef828013.gvmi',
     )
 
     tasks = [Task(data={'phrase': phrase, 'id': job_id})]
