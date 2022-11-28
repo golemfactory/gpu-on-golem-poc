@@ -3,19 +3,17 @@ from pathlib import Path
 
 from fastapi import FastAPI, Request, Form, status
 from fastapi.staticfiles import StaticFiles
-
-from slowapi.errors import RateLimitExceeded
-from slowapi import Limiter
-from slowapi.util import get_remote_address
-
 from redis import Redis
 from rq import Queue
 from rq.job import Job
-
+from slowapi.errors import RateLimitExceeded
+from slowapi import Limiter
+from slowapi.util import get_remote_address
 from starlette.responses import RedirectResponse
 from starlette.templating import Jinja2Templates
 
 from stable_diffusion import generate_image
+
 
 async def unicorn_exception_handler(request: Request, exc: RateLimitExceeded):
     return templates.TemplateResponse(
@@ -36,6 +34,7 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, unicorn_exception_handler)
 
+
 @app.get("/")
 async def index(request: Request):
     return templates.TemplateResponse("index.html", {"request": request, 'root_path': request.scope.get("root_path")})
@@ -49,6 +48,7 @@ async def add_job_to_queue(request: Request, prompt: str = Form(...)):
     detail_url = app.url_path_for("job_detail", job_id=uuid_str)
     url = f'{request.scope.get("root_path")}{detail_url}?prompt={prompt}'
     return RedirectResponse(url=url, status_code=status.HTTP_302_FOUND)
+
 
 @app.get("/txt2img/{job_id}/")
 async def job_detail(request: Request, job_id: str, prompt: str = ""):

@@ -1,5 +1,4 @@
 import sys
-import datetime
 
 from diffusers import StableDiffusionPipeline
 

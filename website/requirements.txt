@@ -5,4 +5,4 @@ yapapi==0.9.3
 redis==4.3.5
 rq==1.11.1
 Jinja2==3.1.2
-slowapi==0.1.6
+slowapi==0.1.7
