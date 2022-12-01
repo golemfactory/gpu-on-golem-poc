@@ -5,7 +5,7 @@ import asyncio
 from diffusers import StableDiffusionPipeline
 
 
-logging.basicConfig(filename='debug.log',
+logging.basicConfig(filename='output/debug.log',
                     filemode='a',
                     format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
                     datefmt='%H:%M:%S',
