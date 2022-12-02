@@ -12,7 +12,7 @@ from slowapi.util import get_remote_address
 from starlette.responses import RedirectResponse
 from starlette.templating import Jinja2Templates
 
-from stable_diffusion import generate_image
+from stable_diffusion_task import generate_image
 
 
 async def unicorn_exception_handler(request: Request, exc: RateLimitExceeded):
