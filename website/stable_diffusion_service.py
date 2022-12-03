@@ -1,4 +1,6 @@
 import asyncio
+from multiprocessing import Queue
+import queue
 from typing import Optional
 
 from yapapi import Golem
@@ -10,6 +12,7 @@ from yapapi.services import Service, ServiceState, Cluster
 enable_default_logger(log_file="sd-golem-service.log")
 
 cluster: Optional[Cluster] = None
+q: Optional[Queue] = None
 
 
 class GenerateImageService(Service):
@@ -36,20 +39,23 @@ class GenerateImageService(Service):
         idx = 0
         while True:
             print(f'{self.name} RUN: waiting for next job')
-            idx += 1
-            await asyncio.sleep(20)
-
-            script = self._ctx.new_script()
-            print(f'{self.name} RUN: running generation #{idx}')
-            run_result = script.run('generate.sh', 'random hero')
-            yield script
-            await run_result
-            print(f'{self.name} RUN: after generation')
-
-            script = self._ctx.new_script()
-            script.download_file('/usr/src/app/output/img.png', f'images/img_{self.name}_{idx}.png')
-            print(f'{self.name} RUN: finished job #{idx}')
-            yield script
+            try:
+                # Cannot wait here because it might block other service job execution.
+                phrase = q.get_nowait()
+            except queue.Empty:
+                print(f'{self.name} RUN: no new job. Sleeping')
+                await asyncio.sleep(10)
+            else:
+                idx += 1
+                print(f'{self.name} RUN: running generation for: {phrase}')
+                script = self._ctx.new_script()
+                run_result = script.run('generate.sh', phrase)
+                yield script
+                await run_result
+                script = self._ctx.new_script()
+                script.download_file('/usr/src/app/output/img.png', f'images/img_{self.name}_{idx}.png')
+                print(f'{self.name} RUN: finished job #{idx} ({phrase})')
+                yield script
 
 
 async def main(num_instances):
@@ -91,9 +97,16 @@ def print_instances():
     )
 
 
-if __name__ == '__main__':
+def run_sd_service(main_process_queue):
+    global q
+    q = main_process_queue
     try:
         asyncio.run(main(2))
     except KeyboardInterrupt:
         print('STOPPING CLUSTER')
         cluster.stop()
+
+
+if __name__ == '__main__':
+    q = Queue()
+    run_sd_service(q)
