@@ -2,8 +2,11 @@ import multiprocessing
 from pathlib import Path
 from typing import Optional
 import uuid
+import queue
 
-from fastapi import FastAPI, Request, Form, status, Response
+import aioprocessing
+from fastapi import FastAPI, Request, Form, status
+from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from redis import Redis
 from rq import Queue
@@ -17,7 +20,7 @@ import uvicorn
 from stable_diffusion_service import run_sd_service
 
 
-q: Optional[multiprocessing.Queue] = None
+q: Optional[aioprocessing.Queue] = None
 redis_conn = Redis()
 job_queue = Queue(connection=redis_conn)
 
@@ -50,15 +53,17 @@ async def index(request: Request):
 @app.post("/txt2img/")
 @limiter.limit("3/minute")
 async def add_job_to_queue(request: Request, prompt: str = Form(...)):
-    if len(job_queue) >= QUEUE_MAX_SIZE:
-        return Response({'error': 'Service busy. Try again later.'}, status_code=status.HTTP_429_TOO_MANY_REQUESTS)
-    else:
-        uuid_str = str(uuid.uuid4())
-        if prompt:
-            q.put(prompt)
-            return Response({'job_id': uuid_str}, status_code=status.HTTP_202_ACCEPTED)
+    uuid_str = str(uuid.uuid4())
+    if prompt:
+        try:
+            q.put(prompt, block=False)
+        except queue.Full:
+            return JSONResponse({'error': 'Service busy. Try again later.'},
+                                status_code=status.HTTP_429_TOO_MANY_REQUESTS)
         else:
-            return Response({'error': 'Phrase cannot be empty.'}, status_code=status.HTTP_400_BAD_REQUEST)
+            return JSONResponse({'job_id': uuid_str}, status_code=status.HTTP_202_ACCEPTED)
+    else:
+        return JSONResponse({'error': 'Phrase cannot be empty.'}, status_code=status.HTTP_400_BAD_REQUEST)
 
 
 @app.get("/txt2img/{job_id}/")
@@ -91,7 +96,7 @@ async def job_detail(request: Request, job_id: str, prompt: str = ""):
 
 if __name__ == "__main__":
     # Creating a process and exchanging queue with it for communication
-    q = multiprocessing.Queue()
+    q = aioprocessing.AioQueue(QUEUE_MAX_SIZE)
     p = multiprocessing.Process(target=run_sd_service, args=(q,))
     p.start()
     uvicorn.run(app, host="0.0.0.0", port=8000)

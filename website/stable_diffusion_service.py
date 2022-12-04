@@ -1,6 +1,5 @@
 import asyncio
-from multiprocessing import Queue
-import queue
+from aioprocessing import AioQueue
 from typing import Optional
 
 from yapapi import Golem
@@ -12,7 +11,7 @@ from yapapi.services import Service, ServiceState, Cluster
 enable_default_logger(log_file="sd-golem-service.log")
 
 cluster: Optional[Cluster] = None
-q: Optional[Queue] = None
+q: Optional[AioQueue] = None
 
 
 class GenerateImageService(Service):
@@ -39,23 +38,18 @@ class GenerateImageService(Service):
         idx = 0
         while True:
             print(f'{self.name} RUN: waiting for next job')
-            try:
-                # Cannot wait here because it might block other service job execution.
-                phrase = q.get_nowait()
-            except queue.Empty:
-                print(f'{self.name} RUN: no new job. Sleeping')
-                await asyncio.sleep(10)
-            else:
-                idx += 1
-                print(f'{self.name} RUN: running generation for: {phrase}')
-                script = self._ctx.new_script()
-                run_result = script.run('generate.sh', phrase)
-                yield script
-                await run_result
-                script = self._ctx.new_script()
-                script.download_file('/usr/src/app/output/img.png', f'images/img_{self.name}_{idx}.png')
-                print(f'{self.name} RUN: finished job #{idx} ({phrase})')
-                yield script
+            phrase = await q.coro_get()
+
+            idx += 1
+            print(f'{self.name} RUN: running generation for: {phrase}')
+            script = self._ctx.new_script()
+            run_result = script.run('generate.sh', phrase)
+            yield script
+            await run_result
+            script = self._ctx.new_script()
+            script.download_file('/usr/src/app/output/img.png', f'images/img_{self.name}_{idx}.png')
+            print(f'{self.name} RUN: finished job #{idx} ({phrase})')
+            yield script
 
 
 async def main(num_instances):
@@ -108,5 +102,9 @@ def run_sd_service(main_process_queue):
 
 
 if __name__ == '__main__':
-    q = Queue()
+    q = AioQueue()
+    q.put('random hero')
+    q.put('astronaut on a horse')
+    q.put('cat on a bike')
+    q.put('dog on a surf board')
     run_sd_service(q)
