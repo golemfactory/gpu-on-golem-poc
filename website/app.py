@@ -1,3 +1,4 @@
+import aioredis
 import multiprocessing
 from pathlib import Path
 from typing import Optional
@@ -17,12 +18,14 @@ from slowapi.util import get_remote_address
 from starlette.templating import Jinja2Templates
 import uvicorn
 
+from pubsub import publish_job_status
 from stable_diffusion_service import run_sd_service
 
 
 q: Optional[aioprocessing.Queue] = None
 redis_conn = Redis()
 job_queue = Queue(connection=redis_conn)
+job_publisher = aioredis.Redis.from_url("redis://localhost", decode_responses=True)
 
 
 async def unicorn_exception_handler(request: Request, exc: RateLimitExceeded):
@@ -56,11 +59,12 @@ async def add_job_to_queue(request: Request, prompt: str = Form(...)):
     uuid_str = str(uuid.uuid4())
     if prompt:
         try:
-            q.put(prompt, block=False)
+            q.put({'prompt': prompt, 'job_id': uuid_str}, block=False)
         except queue.Full:
             return JSONResponse({'error': 'Service busy. Try again later.'},
                                 status_code=status.HTTP_429_TOO_MANY_REQUESTS)
         else:
+            await publish_job_status(uuid_str, "queued")
             return JSONResponse({'job_id': uuid_str}, status_code=status.HTTP_202_ACCEPTED)
     else:
         return JSONResponse({'error': 'Phrase cannot be empty.'}, status_code=status.HTTP_400_BAD_REQUEST)

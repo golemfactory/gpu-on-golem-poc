@@ -1,11 +1,14 @@
 import asyncio
 from aioprocessing import AioQueue
 from typing import Optional
+import uuid
 
 from yapapi import Golem
 from yapapi.log import enable_default_logger
 from yapapi.payload import vm
 from yapapi.services import Service, ServiceState, Cluster
+
+from pubsub import publish_job_status
 
 
 enable_default_logger(log_file="sd-golem-service.log")
@@ -35,20 +38,22 @@ class GenerateImageService(Service):
         yield script
 
     async def run(self):
-        idx = 0
         while True:
             print(f'{self.name} RUN: waiting for next job')
-            phrase = await q.coro_get()
+            job = await q.coro_get()
 
-            idx += 1
-            print(f'{self.name} RUN: running generation for: {phrase}')
+            await publish_job_status(job["job_id"], "running")
+
+            print(f'{self.name} RUN: running generation for: {job["prompt"]}')
             script = self._ctx.new_script()
-            run_result = script.run('generate.sh', phrase)
+            run_result = script.run('generate.sh', job["prompt"])
             yield script
             await run_result
+
             script = self._ctx.new_script()
-            script.download_file('/usr/src/app/output/img.png', f'images/img_{self.name}_{idx}.png')
-            print(f'{self.name} RUN: finished job #{idx} ({phrase})')
+            script.download_file('/usr/src/app/output/img.png', f'images/{job["job_id"]}.png')
+            print(f'{self.name} RUN: finished job {job["job_id"]} ({job["prompt"]})')
+            await publish_job_status(job["job_id"], "finished")
             yield script
 
 
@@ -103,8 +108,8 @@ def run_sd_service(main_process_queue):
 
 if __name__ == '__main__':
     q = AioQueue()
-    q.put('random hero')
-    q.put('astronaut on a horse')
-    q.put('cat on a bike')
-    q.put('dog on a surf board')
+    q.put({'prompt': 'random hero', 'job_id': str(uuid.uuid4())})
+    q.put({'prompt': 'astronaut on a horse', 'job_id': str(uuid.uuid4())})
+    q.put({'prompt': 'cat on a bike', 'job_id': str(uuid.uuid4())})
+    q.put({'prompt': 'dog on a surf board', 'job_id': str(uuid.uuid4())})
     run_sd_service(q)
