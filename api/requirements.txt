@@ -3,8 +3,7 @@ uvicorn==0.20.0
 python-multipart==0.0.5
 yapapi==0.9.3
 redis==4.3.5
-rq==1.11.1
-Jinja2==3.1.2
 slowapi==0.1.7
 aioprocessing==2.0.1
 aioredis==2.0.1
+websockets==10.4

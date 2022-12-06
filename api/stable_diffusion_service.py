@@ -1,14 +1,14 @@
 import asyncio
+import datetime
 from aioprocessing import AioQueue
 from typing import Optional
-import uuid
 
 from yapapi import Golem
 from yapapi.log import enable_default_logger
 from yapapi.payload import vm
 from yapapi.services import Service, ServiceState, Cluster
 
-from pubsub import publish_job_status
+from redis_functions import publish_job_status, update_job_data
 
 
 enable_default_logger(log_file="sd-golem-service.log")
@@ -39,10 +39,16 @@ class GenerateImageService(Service):
 
     async def run(self):
         while True:
-            print(f'{self.name} RUN: waiting for next job')
+            print(f"{self.name} RUN: waiting for next job")
             job = await q.coro_get()
 
-            await publish_job_status(job["job_id"], "running")
+            job_data_update = {
+                "status": "processing",
+                'provider_name': self.provider_name,
+                'started_at': datetime.datetime.now().isoformat(),
+            }
+            await update_job_data(job["job_id"], job_data_update)
+            await publish_job_status(job["job_id"], "processing")
 
             print(f'{self.name} RUN: running generation for: {job["prompt"]}')
             script = self._ctx.new_script()
@@ -51,10 +57,19 @@ class GenerateImageService(Service):
             await run_result
 
             script = self._ctx.new_script()
-            script.download_file('/usr/src/app/output/img.png', f'images/{job["job_id"]}.png')
+            img_path = f'images/{job["job_id"]}.png'
+            script.download_file('/usr/src/app/output/img.png', img_path)
             print(f'{self.name} RUN: finished job {job["job_id"]} ({job["prompt"]})')
-            await publish_job_status(job["job_id"], "finished")
+
             yield script
+
+            job_data_update = {
+                "status": "finished",
+                "ended_at": datetime.datetime.now().isoformat(),
+                "img_url": img_path,
+            }
+            await update_job_data(job["job_id"], job_data_update)
+            await publish_job_status(job["job_id"], "finished")
 
 
 async def main(num_instances):
@@ -73,7 +88,7 @@ async def main(num_instances):
             await asyncio.sleep(5)
 
         while True:
-            await asyncio.sleep(60)
+            await asyncio.sleep(60 * 5)
             print_instances()
 
             instance_to_reset = next((i for i in cluster.instances if i.state == ServiceState.terminated), None)
@@ -104,12 +119,3 @@ def run_sd_service(main_process_queue):
     except KeyboardInterrupt:
         print('STOPPING CLUSTER')
         cluster.stop()
-
-
-if __name__ == '__main__':
-    q = AioQueue()
-    q.put({'prompt': 'random hero', 'job_id': str(uuid.uuid4())})
-    q.put({'prompt': 'astronaut on a horse', 'job_id': str(uuid.uuid4())})
-    q.put({'prompt': 'cat on a bike', 'job_id': str(uuid.uuid4())})
-    q.put({'prompt': 'dog on a surf board', 'job_id': str(uuid.uuid4())})
-    run_sd_service(q)
