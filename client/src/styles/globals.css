@@ -1,0 +1,28 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    @apply font-mono text-[10px];
+  }
+
+  body {
+    @apply bg-[#1f1f1f] text-center text-white;
+  }
+
+  button {
+    @apply bg-blue text-white;
+  }
+
+  h1,
+  h2 {
+    @apply font-sans;
+  }
+}
+
+@layer components {
+  .button {
+    @apply m-[1.8rem] min-h-[5.6rem] min-w-[18.2rem] rounded-[0.8rem] font-sans text-[1.6rem] font-bold leading-[2.4rem] tracking-[0.143rem];
+  }
+}

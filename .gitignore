@@ -8,3 +8,12 @@ api/images/*
 api/sd-golem-service.log
 dump.rdb
 *.gvmi
+
+client/node_modules
+client/.next/
+client/build
+client/out
+
+client/npm-debug.log*
+client/*.tsbuildinfo
+client/next-env.d.ts
