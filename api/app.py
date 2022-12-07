@@ -58,7 +58,12 @@ async def add_job_to_queue(request: Request, prompt: str = Form(...)):
         await update_job_data(job_id, {'job_id': job_id, 'status': 'queued'})
         # Publishing job's status
         await publish_job_status(job_id, "queued")
-        return JSONResponse({'job_id': job_id}, status_code=status.HTTP_202_ACCEPTED)
+        return_data = {
+            'job_id': job_id,
+            'job_detail_url': f'{request.scope.get("root_path")}{app.url_path_for("job_detail", job_id=job_id)}',
+            'job_progress_feed': f'{request.scope.get("root_path")}{app.url_path_for("job_detail_ws", job_id=job_id)}',
+        }
+        return JSONResponse(return_data, status_code=status.HTTP_202_ACCEPTED)
 
 
 @app.get("/txt2img/{job_id}/")
