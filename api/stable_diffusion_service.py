@@ -78,7 +78,7 @@ async def main(num_instances):
         cluster = await golem.run_service(
             GenerateImageService,
             instance_params=[{"instance_name": f"sd-service-{i + 1}"} for i in range(num_instances)],
-            expiration=datetime.datetime(2100, 1, 1)
+            expiration=datetime.datetime.now() + datetime.timedelta(days=365)
         )
 
         def still_starting():
@@ -117,5 +117,7 @@ def run_sd_service(main_process_queue):
     try:
         asyncio.run(main(2))
     except KeyboardInterrupt:
+        print('Interruption')
+    finally:
         print('STOPPING CLUSTER')
         cluster.stop()
