@@ -1,8 +1,8 @@
 import asyncio
 import datetime
-from aioprocessing import AioQueue
 from typing import Optional
 
+from aioprocessing import AioQueue
 from yapapi import Golem
 from yapapi.log import enable_default_logger
 from yapapi.payload import vm
@@ -78,6 +78,7 @@ async def main(num_instances):
         cluster = await golem.run_service(
             GenerateImageService,
             instance_params=[{"instance_name": f"sd-service-{i + 1}"} for i in range(num_instances)],
+            expiration=datetime.datetime(2100, 1, 1)
         )
 
         def still_starting():
@@ -94,8 +95,7 @@ async def main(num_instances):
             instance_to_reset = next((i for i in cluster.instances if i.state == ServiceState.terminated), None)
             if instance_to_reset is not None:
                 print(f'{instance_to_reset.name} needs restart.')
-                # TODO: find out how to reset an instance
-                # await instance_to_reset.reset()
+                # It should not happen
 
 
 def print_instances():
