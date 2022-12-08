@@ -9,6 +9,7 @@ import aioprocessing
 import aioredis
 import async_timeout
 from fastapi import FastAPI, Request, Form, status, WebSocket
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from slowapi.errors import RateLimitExceeded
@@ -34,6 +35,12 @@ app = FastAPI()
 app.mount("/images", StaticFiles(directory="images"), name="images")
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, unicorn_exception_handler)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 @app.get("/jobs-in-queue/")
