@@ -1,5 +1,3 @@
-import aioredis
-import async_timeout
 import asyncio
 import multiprocessing
 from pathlib import Path
@@ -8,6 +6,8 @@ import uuid
 import queue
 
 import aioprocessing
+import aioredis
+import async_timeout
 from fastapi import FastAPI, Request, Form, status, WebSocket
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
