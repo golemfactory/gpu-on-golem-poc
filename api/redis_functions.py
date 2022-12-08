@@ -4,6 +4,7 @@ from typing import Callable, Awaitable
 import aioredis
 
 
+JOB_INFO_RETENCY_SECONDS = 60 * 60 * 24
 job_publisher = aioredis.Redis.from_url("redis://localhost", decode_responses=True)
 redis = aioredis.Redis.from_url("redis://localhost", max_connections=10, decode_responses=True)
 
@@ -39,7 +40,7 @@ async def update_job_data(job_id: str, obj: dict) -> None:
     else:
         data = obj
     raw_data = json.dumps(data)
-    await redis.set(get_job_data_key(job_id), raw_data, ex=60 * 10)
+    await redis.set(get_job_data_key(job_id), raw_data, ex=JOB_INFO_RETENCY_SECONDS)
 
 
 def get_job_data_key(job_id: str) -> str:
