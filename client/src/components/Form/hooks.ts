@@ -26,12 +26,8 @@ export function useForm(dispatch: (action: Action) => void): useFormType {
     });
     const result = await response.json();
 
-    if (result.detail) {
-      dispatch({ type: Status.Error });
-      setError(result.detail[0].msg);
-    } else {
-      dispatch({ type: Status.Processing, payload: result.job_id });
-    }
+    if (result.detail) return setError(result.detail[0].msg);
+    else return dispatch({ type: Status.Processing, payload: result.job_id });
   };
 
   const handleReset = () => {

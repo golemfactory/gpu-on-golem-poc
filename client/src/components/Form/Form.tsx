@@ -30,8 +30,8 @@ function Form({ state, value, onChange, error, onSubmit }: { state: State } & us
       >
         {disabled ? 'Generating...' : 'Generate'}
       </button>
-      {[Status.Error].includes(state.status) && (
-        <span className="absolute right-0 top-[5.8rem] max-w-[50%] text-right text-[#ff0000]">{error}</span>
+      {!!error?.length && (
+        <span className="absolute top-[5.8rem] right-0 max-w-[50%] text-right text-[#ff0000]">{error}</span>
       )}
     </form>
   );
