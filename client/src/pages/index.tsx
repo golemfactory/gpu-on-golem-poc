@@ -2,7 +2,7 @@ import { Reducer, useEffect, useReducer, useState } from 'react';
 import useWebSocket, { ReadyState } from 'react-use-websocket';
 import { Queue } from 'enums/queue';
 import { Status } from 'enums/status';
-import { Form, Loader, Result, useForm } from 'components';
+import { Error, Form, Layout, Loader, Result, useForm } from 'components';
 
 function Main() {
   const reducer = (state: State, action: { type: Status; payload?: string }) => ({
@@ -17,6 +17,9 @@ function Main() {
 
   const handleQueue = async () => {
     const response = await fetch(`${process.env.NEXT_PUBLIC_API}jobs-in-queue/`);
+
+    if (response.status === 404) return dispatch({ type: Status.Error });
+
     const result = await response.json();
 
     if (result.jobs_in_queue < Queue.Max) {
@@ -59,12 +62,12 @@ function Main() {
 
   const { value, onReset, ...form } = useForm(dispatch);
 
+  const handleReload = () => window.location.reload();
+
   return (
-    <main className="container flex min-h-screen max-w-screen-md flex-col">
+    <Layout>
       <Loader state={state} />
-      {[Status.Loading, Status.Waiting, Status.Ready, Status.Queued, Status.Processing, Status.Error].includes(
-        state.status,
-      ) && (
+      {[Status.Loading, Status.Waiting, Status.Ready, Status.Queued, Status.Processing].includes(state.status) && (
         <div className="mt-[20rem]">
           <h1 className="mb-[5.7rem] text-34">
             AI image generator supported by the computing power of the{' '}
@@ -93,7 +96,12 @@ function Main() {
         </>
       )}
       {[Status.Finished].includes(state.status) && <Result data={data} value={value} onReset={onReset} />}
-    </main>
+      {[Status.Error].includes(state.status) && (
+        <div className="mt-[20rem]">
+          <Error label="Refresh site" onClick={handleReload} />
+        </div>
+      )}
+    </Layout>
   );
 }
 

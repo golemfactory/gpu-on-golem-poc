@@ -24,6 +24,9 @@ export function useForm(dispatch: (action: Action) => void): useFormType {
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       method: 'POST',
     });
+
+    if (response.status === 404) return dispatch({ type: Status.Error });
+
     const result = await response.json();
 
     if (result.detail) return setError(result.detail[0].msg);
