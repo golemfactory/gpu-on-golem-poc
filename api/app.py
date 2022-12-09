@@ -134,6 +134,8 @@ async def job_detail_ws(job_id: str, websocket: WebSocket):
                         if job_message['status'] == 'finished':
                             break
                     await asyncio.sleep(0.01)
+            except ConnectionClosed:
+                break
             except asyncio.TimeoutError:
                 pass
 
@@ -141,8 +143,7 @@ async def job_detail_ws(job_id: str, websocket: WebSocket):
     if job_data:
         if job_data['status'] != 'finished':
             await subscribe_to_job_status(job_id, job_status_reader)
-        else:
-            await websocket.close(reason='Job finished.')
+        await websocket.close(reason='Job finished.')
     else:
         await websocket.close(reason='Not found.')
 
