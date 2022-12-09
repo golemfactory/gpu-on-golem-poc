@@ -17,6 +17,7 @@ from slowapi.errors import RateLimitExceeded
 from slowapi import Limiter
 from slowapi.util import get_remote_address
 import uvicorn
+from websockets import ConnectionClosed
 
 from redis_functions import publish_job_status, subscribe_to_job_status, update_job_data, get_job_data
 from stable_diffusion_service import run_sd_service
@@ -32,6 +33,7 @@ async def unicorn_exception_handler(request: Request, exc: RateLimitExceeded):
 
 limiter = Limiter(key_func=get_remote_address)
 QUEUE_MAX_SIZE = 30
+QUEUE_STATE_WS_REFRESH_SECONDS = 30
 api_params = {}
 if os.getenv('ROOT_PATH', ''):
     api_params = {
@@ -61,6 +63,20 @@ async def index(request: Request):
 @app.get("/jobs-in-queue/")
 async def get_queue_length(request: Request):
     return JSONResponse({"jobs_in_queue": q.qsize(), 'max_queue_size': QUEUE_MAX_SIZE}, status_code=status.HTTP_200_OK)
+
+
+@app.websocket("/jobs-in-queue/ws/")
+async def get_queue_length_ws(websocket: WebSocket):
+    await websocket.accept()
+
+    try:
+        while True:
+            await websocket.send_json({"jobs_in_queue": q.qsize(), 'max_queue_size': QUEUE_MAX_SIZE})
+            await asyncio.sleep(QUEUE_STATE_WS_REFRESH_SECONDS)
+    except ConnectionClosed:
+        pass
+    except asyncio.CancelledError:
+        await websocket.close()
 
 
 @app.post("/txt2img/")
