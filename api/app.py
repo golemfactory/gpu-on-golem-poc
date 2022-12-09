@@ -154,5 +154,6 @@ if __name__ == "__main__":
     p = multiprocessing.Process(target=run_sd_service, args=(q,))
     p.start()
     root_path = os.getenv('ROOT_PATH', '')
-    uvicorn.run(app, host="0.0.0.0", port=8000, root_path=root_path)
+    working_dir = Path(__file__).parent.resolve()
+    uvicorn.run(app, host="0.0.0.0", port=8000, root_path=root_path, log_config=f'{working_dir}/log.ini')
     p.terminate()
