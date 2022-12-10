@@ -1,6 +1,6 @@
 import { Status } from 'enums/status';
 
-function Form({ state, value, onChange, error, onSubmit }: { state: State } & useFormType) {
+function Form({ state, value, onChange, error, onSubmit, onExample }: { state: State } & useFormType) {
   const disabled = [Status.Queued, Status.Processing].includes(state.status);
 
   return (
@@ -30,6 +30,15 @@ function Form({ state, value, onChange, error, onSubmit }: { state: State } & us
       >
         {disabled ? 'Generating...' : 'Generate'}
       </button>
+      {!disabled && (
+        <button
+          className="absolute top-[5.8rem] left-0 ml-[8.4rem] text-10 uppercase underline"
+          type="button"
+          onClick={onExample}
+        >
+          New Example
+        </button>
+      )}
       {!!error?.length && (
         <span className="absolute top-[5.8rem] right-0 max-w-[50%] text-right text-[#ff0000]">{error}</span>
       )}

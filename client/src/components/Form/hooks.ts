@@ -1,11 +1,24 @@
 import { FormEvent, useState } from 'react';
+import { adjectives, animals, colors, uniqueNamesGenerator } from 'unique-names-generator';
 import { Status } from 'enums/status';
 import queryBuild from 'utils/query';
+import { nouns, verbs } from './dictionaries';
+
+const example = () =>
+  uniqueNamesGenerator({
+    dictionaries: [adjectives, animals, verbs, colors, nouns],
+    separator: ' ',
+    length: 5,
+  });
 
 export function useForm(dispatch: (action: Action) => void): useFormType {
-  const example = 'grey hair man in the mountains wearing red jacket sci-fi';
-  const [value, setValue] = useState<string>(example);
+  const [value, setValue] = useState<string>(example());
   const [error, setError] = useState<string | undefined>(undefined);
+
+  const handleExample = () => {
+    setValue(example());
+    setError(undefined);
+  };
 
   const handleChange = async (e: FormEvent) => {
     const value = (e.target as HTMLInputElement).value;
@@ -39,11 +52,11 @@ export function useForm(dispatch: (action: Action) => void): useFormType {
   };
 
   return {
-    example,
     value,
     onChange: handleChange,
     error,
     onSubmit: handleSubmit,
     onReset: handleReset,
+    onExample: handleExample,
   };
 }

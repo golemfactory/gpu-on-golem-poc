@@ -12,6 +12,14 @@ module.exports = {
       mono: ['Roboto Mono', 'mono'],
     },
     fontSize: {
+      10: [
+        '1rem',
+        {
+          lineHeight: '1.3rem',
+          letterSpacing: '0.007rem',
+          fontWeight: '700',
+        },
+      ],
       12: [
         '1.2rem',
         {
