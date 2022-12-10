@@ -8,7 +8,7 @@
   }
 
   body {
-    @apply bg-[#1f1f1f] text-center text-white;
+    @apply relative bg-[#1f1f1f] text-center text-white;
   }
 
   button {
@@ -18,6 +18,10 @@
   h1,
   h2 {
     @apply font-sans;
+  }
+
+  footer {
+    @apply font-sans font-light leading-[1.5rem] tracking-[0.009rem] text-grey;
   }
 }
 

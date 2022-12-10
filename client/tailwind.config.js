@@ -6,6 +6,7 @@ module.exports = {
       white: '#ffffff',
       blue: '#007dff',
       black: '#000000',
+      grey: '#c3c3c3',
     },
     fontFamily: {
       sans: ['Inter', 'sans'],
