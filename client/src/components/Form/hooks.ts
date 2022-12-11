@@ -1,7 +1,9 @@
 import { FormEvent, useState } from 'react';
 import { adjectives, animals, colors, uniqueNamesGenerator } from 'unique-names-generator';
+import { Api } from 'enums/api';
 import { Status } from 'enums/status';
 import queryBuild from 'utils/query';
+import url from 'utils/url';
 import { nouns, verbs } from './dictionaries';
 
 const example = () =>
@@ -32,7 +34,7 @@ export function useForm(dispatch: (action: Action) => void): useFormType {
 
     if (!value.length) return setError('This field is required');
 
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API}txt2img/`, {
+    const response = await fetch(url(Api.txt2img, false), {
       body: queryBuild({ prompt: value }),
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       method: 'POST',

@@ -1,8 +1,10 @@
 import { Reducer, useEffect, useReducer, useState } from 'react';
-import useWebSocket, { ReadyState } from 'react-use-websocket';
-import { Queue } from 'enums/queue';
+import useWebSocket from 'react-use-websocket';
+import { Api } from 'enums/api';
 import { Status } from 'enums/status';
+import { Queue } from 'enums/queue';
 import { Error, Form, Layout, Loader, Result, useForm } from 'components';
+import url from 'utils/url';
 
 function Main() {
   const reducer = (state: State, action: { type: Status; payload?: string }) => ({
@@ -16,7 +18,7 @@ function Main() {
   });
 
   const handleQueue = async () => {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API}jobs-in-queue/`);
+    const response = await fetch(url(Api.jobsInQueue, false));
 
     if (response.status === 404) return dispatch({ type: Status.Error });
 
@@ -37,17 +39,9 @@ function Main() {
   const { lastMessage, readyState } = useWebSocket(socketUrl);
   const [data, setData] = useState<Data | undefined>(undefined);
 
-  const connectionStatus = {
-    [ReadyState.CONNECTING]: 'Connecting',
-    [ReadyState.OPEN]: 'Open',
-    [ReadyState.CLOSING]: 'Closing',
-    [ReadyState.CLOSED]: 'Closed',
-    [ReadyState.UNINSTANTIATED]: 'Uninstantiated',
-  }[readyState];
-
   useEffect(() => {
     if (state.job_id) {
-      setSocketUrl(`${process.env.NEXT_PUBLIC_WS}${state.job_id}/`);
+      setSocketUrl(url(Api.txt2img, true, state.job_id));
     }
   }, [state]);
 
@@ -58,7 +52,7 @@ function Main() {
       setData(data);
       dispatch({ type: status });
     }
-  }, [connectionStatus, lastMessage]);
+  }, [readyState, lastMessage]);
 
   const { value, onReset, ...form } = useForm(dispatch);
 
