@@ -2,7 +2,7 @@ import { Reducer, useEffect, useReducer } from 'react';
 import { Api } from 'enums/api';
 import { Status } from 'enums/status';
 import { Queue } from 'enums/queue';
-import { Error, Form, Layout, Loader, Result, useForm, useResult } from 'components';
+import { Error, Form, Layout, Loader, Process, Result, useForm, useResult } from 'components';
 import url from 'utils/url';
 
 function Main() {
@@ -71,6 +71,7 @@ function Main() {
           </p>
         </>
       )}
+      {[Status.Processing].includes(state.status) && <Process status={state.status} progress={data?.progress} />}
       {[Status.Finished].includes(state.status) && <Result data={data} value={value} onReset={onReset} />}
       {[Status.Error].includes(state.status) && (
         <div className="mt-[20rem]">
