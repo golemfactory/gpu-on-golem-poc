@@ -3,4 +3,4 @@ export { default as Footer } from './Footer';
 export { default as Form, useForm } from './Form';
 export { default as Layout } from './Layout';
 export { default as Loader } from './Loader';
-export { default as Result } from './Result';
+export { default as Result, useResult } from './Result';

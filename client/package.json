@@ -15,6 +15,7 @@
     "@types/react-dom": "18.0.9",
     "eslint": "8.29.0",
     "eslint-config-next": "13.0.6",
+    "file-saver": "^2.0.5",
     "next": "13.0.6",
     "react": "18.2.0",
     "react-dom": "18.2.0",
@@ -24,6 +25,7 @@
     "unique-names-generator": "^4.7.1"
   },
   "devDependencies": {
+    "@types/file-saver": "^2.0.5",
     "autoprefixer": "^10.4.13",
     "eslint-config-prettier": "^8.5.0",
     "postcss": "^8.4.19",

@@ -1,9 +1,8 @@
-import { Reducer, useEffect, useReducer, useState } from 'react';
-import useWebSocket from 'react-use-websocket';
+import { Reducer, useEffect, useReducer } from 'react';
 import { Api } from 'enums/api';
 import { Status } from 'enums/status';
 import { Queue } from 'enums/queue';
-import { Error, Form, Layout, Loader, Result, useForm } from 'components';
+import { Error, Form, Layout, Loader, Result, useForm, useResult } from 'components';
 import url from 'utils/url';
 
 function Main() {
@@ -35,26 +34,9 @@ function Main() {
     handleQueue().then();
   }, []);
 
-  const [socketUrl, setSocketUrl] = useState<string | null>(null);
-  const { lastMessage, readyState } = useWebSocket(socketUrl);
-  const [data, setData] = useState<Data | undefined>(undefined);
-
-  useEffect(() => {
-    if (state.job_id) {
-      setSocketUrl(url(Api.txt2img, true, state.job_id));
-    }
-  }, [state]);
-
-  useEffect(() => {
-    if (lastMessage) {
-      const { status, ...data } = JSON.parse(lastMessage.data);
-
-      setData(data);
-      dispatch({ type: status });
-    }
-  }, [readyState, lastMessage]);
-
   const { value, onReset, ...form } = useForm(dispatch);
+
+  const { data } = useResult(state, dispatch);
 
   const handleReload = () => window.location.reload();
 
