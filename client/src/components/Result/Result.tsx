@@ -2,7 +2,7 @@ import Image from 'next/image';
 import { saveAs } from 'file-saver';
 import url from 'utils/url';
 
-function Result({ data, value, onReset }: { data?: Data; value: string; onReset?: () => void }) {
+function Result({ data, value, onReset }: { data?: Data; value: string; onReset: () => void }) {
   const src = url(data?.img_url ?? '', false);
 
   const handleSave = () => saveAs(src, `${value}.png`);

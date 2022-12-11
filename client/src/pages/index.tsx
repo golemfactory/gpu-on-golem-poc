@@ -34,9 +34,15 @@ function Main() {
     handleQueue().then();
   }, []);
 
-  const { value, onReset, ...form } = useForm(dispatch);
+  const { value, onExample, ...form } = useForm(dispatch);
 
-  const { data } = useResult(state, dispatch);
+  const { data, onReset } = useResult(state, dispatch);
+
+  const handleReset = () => {
+    dispatch({ type: Status.Ready });
+    onExample();
+    onReset();
+  };
 
   const handleReload = () => window.location.reload();
 
@@ -51,7 +57,7 @@ function Main() {
               golem.network
             </a>
           </h1>
-          <Form state={state} value={value} {...form} />
+          <Form state={state} value={value} onExample={onExample} {...form} />
         </div>
       )}
       {[Status.Ready].includes(state.status) && (
@@ -72,7 +78,7 @@ function Main() {
         </>
       )}
       {[Status.Processing].includes(state.status) && <Process status={state.status} progress={data?.progress} />}
-      {[Status.Finished].includes(state.status) && <Result data={data} value={value} onReset={onReset} />}
+      {[Status.Finished].includes(state.status) && <Result data={data} value={value} onReset={handleReset} />}
       {[Status.Error].includes(state.status) && (
         <div className="mt-[20rem]">
           <Error label="Refresh site" onClick={handleReload} />

@@ -23,5 +23,7 @@ export function useResult(state: State, dispatch: (action: Action) => void) {
     }
   }, [readyState, lastMessage]);
 
-  return { data };
+  const handleReset = () => setData(undefined);
+
+  return { data, onReset: handleReset };
 }

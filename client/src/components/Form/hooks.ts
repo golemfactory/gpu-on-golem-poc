@@ -48,17 +48,11 @@ export function useForm(dispatch: (action: Action) => void): useFormType {
     else return dispatch({ type: Status.Processing, payload: result.job_id });
   };
 
-  const handleReset = () => {
-    dispatch({ type: Status.Ready });
-    setValue(example);
-  };
-
   return {
     value,
     onChange: handleChange,
     error,
     onSubmit: handleSubmit,
-    onReset: handleReset,
     onExample: handleExample,
   };
 }
