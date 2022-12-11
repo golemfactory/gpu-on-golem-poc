@@ -5,4 +5,5 @@ export { default as Layout } from './Layout';
 export { default as Loader } from './Loader';
 export { default as Process } from './Process';
 export { default as Progress } from './Progress';
+export { default as Queue, useQueue } from './Queue';
 export { default as Result, useResult } from './Result';

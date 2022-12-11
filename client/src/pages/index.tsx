@@ -1,9 +1,6 @@
-import { Reducer, useEffect, useReducer } from 'react';
-import { Api } from 'enums/api';
+import { Reducer, useReducer } from 'react';
 import { Status } from 'enums/status';
-import { Queue } from 'enums/queue';
-import { Error, Form, Layout, Loader, Process, Result, useForm, useResult } from 'components';
-import url from 'utils/url';
+import { Error, Form, Layout, Loader, Process, Queue, Result, useForm, useQueue, useResult } from 'components';
 
 function Main() {
   const reducer = (state: State, action: { type: Status; payload?: string }) => ({
@@ -16,23 +13,7 @@ function Main() {
     job_id: undefined,
   });
 
-  const handleQueue = async () => {
-    const response = await fetch(url(Api.jobsInQueue, false));
-
-    if (response.status === 404) return dispatch({ type: Status.Error });
-
-    const result = await response.json();
-
-    if (result.jobs_in_queue < Queue.Max) {
-      dispatch({ type: Status.Ready });
-    } else {
-      dispatch({ type: Status.Waiting });
-    }
-  };
-
-  useEffect(() => {
-    handleQueue().then();
-  }, []);
+  const queue = useQueue(state, dispatch);
 
   const { value, onExample, ...form } = useForm(dispatch);
 
@@ -68,15 +49,7 @@ function Main() {
           play around with it and let us know what you think.
         </p>
       )}
-      {[Status.Queued].includes(state.status) && (
-        <>
-          <p className="mt-[5.7rem] mb-[2.4rem] text-14">Fun facts:</p>
-          <p className="text-18">
-            You are now waiting in the queue for your turn. There are 2 turns. Right and left. We have to hire a new
-            copywriter… you know anyone?
-          </p>
-        </>
-      )}
+      {[Status.Queued].includes(state.status) && <Queue {...queue} />}
       {[Status.Processing].includes(state.status) && <Process status={state.status} progress={data?.progress} />}
       {[Status.Finished].includes(state.status) && <Result data={data} value={value} onReset={handleReset} />}
       {[Status.Error].includes(state.status) && (
