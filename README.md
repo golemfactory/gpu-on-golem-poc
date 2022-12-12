@@ -60,6 +60,8 @@ cd api
 python app.py
 ```
 
+This will start server on port **8000** (You can change this in `app.py`). 
+
 ### Env variables to control settings 
 - `ROOT_PATH` - passed to FastApi app as `root_path` param.
 - `APP_ENV` - taken into consideration by JS code while running `npm run static` 
