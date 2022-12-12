@@ -32,7 +32,7 @@ function Result({ data, value, onReset }: { data?: Data; value: string; onReset:
         </button>
       </div>
       <a
-        className="font-sans font-light uppercase text-grey underline"
+        className="font-sans font-light uppercase text-grey underline hover:text-white"
         href="https://handbook.golem.network/"
         target="_blank"
         rel="noreferrer"

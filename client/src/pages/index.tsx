@@ -50,7 +50,12 @@ function Main() {
         <div className="mt-[20rem]">
           <h1 className="mb-[5.7rem] text-34">
             AI image generator supported by the computing power of the{' '}
-            <a className="text-blue underline" href="https://www.golem.network/" target="_blank" rel="noreferrer">
+            <a
+              className="text-blue underline hover:opacity-80"
+              href="https://www.golem.network/"
+              target="_blank"
+              rel="noreferrer"
+            >
               golem.network
             </a>
           </h1>

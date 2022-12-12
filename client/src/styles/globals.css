@@ -12,7 +12,7 @@
   }
 
   button {
-    @apply bg-blue text-white;
+    @apply bg-blue text-white hover:opacity-80;
   }
 
   h1,
