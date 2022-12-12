@@ -1,16 +1,5 @@
 # gpu-on-golem-poc
 
-When server is running behind proxy eg. your Apache conf has
-
-```
-...
-ProxyPass "/sd" "http://localhost:8000"
-ProxyPassReverse "/sd" "http://localhost:8000"
-...
-```
-
-you should start it with `uvicorn app:app --root-path /sd`.
-
 ### Client
 
 In the `/client` dir:
@@ -22,3 +11,55 @@ In the `/client` dir:
 5. For optimized static build run `npm run static`
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+
+
+# Deployment
+
+## Golem requestor installation
+
+### Get the code
+`git clone https://github.com/norbibi/golem_cuda.git`
+
+### Installation of Golem daemon and requestor service
+```shell
+cd golem_cuda
+./golem_cuda.sh -i requestor
+```
+
+### Configure env variable
+`export YAGNA_APPKEY=[yagna_key]`
+
+You can obtain yagna key with `yagna app-key list`
+
+## App
+
+### Get the code
+`git clone git@github.com:golemfactory/gpu-on-golem-poc.git`
+
+### Frontend build
+```shell
+cd gpu-on-golem-poc/client
+npm install
+npm run static
+rm -rf ../api/static/*
+cp -R out/* ../api/static/
+cd ..
+```
+
+### Backend preparations
+```shell
+python3 -m venv venv
+source venv/bin/activate
+pip install --update pip
+pip install -r api/requirements.txt
+```
+
+### Api start (can be started in `screen` or monitored by supervisor/monit):
+```shell
+cd api
+python app.py
+```
+
+### Env variables to control settings 
+- `ROOT_PATH` - passed to FastApi app as `root_path` param.
+- `APP_ENV` - taken into consideration by JS code while running `npm run static` 
