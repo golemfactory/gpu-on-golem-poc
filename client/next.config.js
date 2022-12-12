@@ -1,6 +1,6 @@
 /** @type {import('next').NextConfig} */
 
-const isLukaszServer = process.env.NODE_ENV === 'lukasz-biuro'
+const isLukaszServer = process.env.APP_ENV === 'lukasz-biuro'
 
 const nextConfig = {
   reactStrictMode: true,
