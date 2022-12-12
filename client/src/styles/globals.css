@@ -26,6 +26,20 @@
 }
 
 @layer components {
+  @media (min-width: 1024px) {
+    .background {
+      @apply min-h-[100%] bg-[url('/background.png')] bg-contain bg-no-repeat;
+
+      background-position-x: -40rem;
+    }
+  }
+
+  @media (min-width: 1440px) {
+    .background {
+      background-position-x: -20rem;
+    }
+  }
+
   .button {
     @apply m-[1.8rem] min-h-[5.6rem] min-w-[18.2rem] rounded-[0.8rem] font-sans text-[1.6rem] font-bold leading-[2.4rem] tracking-[0.143rem];
   }

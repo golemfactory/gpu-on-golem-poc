@@ -1,6 +1,19 @@
 import { Reducer, useReducer } from 'react';
 import { Status } from 'enums/status';
-import { Error, Form, Layout, Loader, Process, Queue, Result, useForm, useQueue, useResult } from 'components';
+import {
+  Background,
+  Error,
+  Form,
+  Layout,
+  Loader,
+  Process,
+  Queue,
+  Result,
+  useForm,
+  useQueue,
+  useResult,
+} from 'components';
+import { useStatusState } from 'utils/hooks';
 
 function Main() {
   const reducer = (state: State, action: { type: Status; payload?: string }) => ({
@@ -12,6 +25,8 @@ function Main() {
     status: Status.Loading,
     job_id: undefined,
   });
+
+  const { forState, notForState } = useStatusState(state);
 
   const queue = useQueue(state, dispatch);
 
@@ -29,8 +44,9 @@ function Main() {
 
   return (
     <Layout>
+      {notForState([Status.Finished]) && <Background />}
       <Loader state={state} />
-      {[Status.Loading, Status.Waiting, Status.Ready, Status.Queued, Status.Processing].includes(state.status) && (
+      {notForState([Status.Finished, Status.Error]) && (
         <div className="mt-[20rem]">
           <h1 className="mb-[5.7rem] text-34">
             AI image generator supported by the computing power of the{' '}
@@ -41,7 +57,7 @@ function Main() {
           <Form state={state} value={value} onExample={onExample} {...form} />
         </div>
       )}
-      {[Status.Ready].includes(state.status) && (
+      {forState([Status.Ready]) && (
         <p className="mt-[5.7rem] text-12">
           We have integrated open-source AI image generator <span className="underline">Stable Diffusion</span> with
           decentralized <span className="underline">golem.network</span> as&nbsp;a&nbsp;backend to showcase its
@@ -49,10 +65,10 @@ function Main() {
           play around with it and let us know what you think.
         </p>
       )}
-      {[Status.Queued].includes(state.status) && <Queue {...queue} />}
-      {[Status.Processing].includes(state.status) && <Process status={state.status} progress={data?.progress} />}
-      {[Status.Finished].includes(state.status) && <Result data={data} value={value} onReset={handleReset} />}
-      {[Status.Error].includes(state.status) && (
+      {forState([Status.Queued]) && <Queue {...queue} />}
+      {forState([Status.Processing]) && <Process status={state.status} progress={data?.progress} />}
+      {forState([Status.Finished]) && <Result data={data} value={value} onReset={handleReset} />}
+      {forState([Status.Error]) && (
         <div className="mt-[20rem]">
           <Error label="Refresh site" onClick={handleReload} />
         </div>

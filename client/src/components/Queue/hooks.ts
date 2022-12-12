@@ -2,9 +2,12 @@ import { useEffect, useState } from 'react';
 import useWebSocket from 'react-use-websocket';
 import { Api } from 'enums/api';
 import { Status } from 'enums/status';
+import { useStatusState } from 'utils/hooks';
 import url from 'utils/url';
 
 export function useQueue(state: State, dispatch: (action: Action) => void) {
+  const { forState } = useStatusState(state);
+
   const [socketUrl, setSocketUrl] = useState<string | null>(null);
   const { lastMessage, readyState } = useWebSocket(socketUrl);
   const [queue, setQueue] = useState({ jobs_in_queue: 0, max_queue_size: 30 });
@@ -33,7 +36,7 @@ export function useQueue(state: State, dispatch: (action: Action) => void) {
   }, []);
 
   useEffect(() => {
-    if ([Status.Waiting, Status.Queued].includes(state.status)) {
+    if (forState([Status.Waiting, Status.Queued])) {
       setSocketUrl(url(Api.jobsInQueue, true));
     }
   }, [state]);

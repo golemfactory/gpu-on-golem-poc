@@ -1,7 +1,10 @@
 import { useEffect, useState } from 'react';
 import { Status } from 'enums/status';
+import { useStatusState } from 'utils/hooks';
 
 function Loader({ state }: { state: State }) {
+  const { forState } = useStatusState(state);
+
   const [timer, setTimer] = useState(59);
 
   useEffect(() => {
@@ -16,15 +19,13 @@ function Loader({ state }: { state: State }) {
 
   return (
     <>
-      {[Status.Loading, Status.Waiting].includes(state.status) && (
-        <div className="fixed inset-0 z-10 bg-black opacity-60" />
-      )}
-      {[Status.Loading].includes(state.status) && (
+      {forState([Status.Loading, Status.Waiting]) && <div className="fixed inset-0 z-10 bg-black opacity-60" />}
+      {forState([Status.Loading]) && (
         <div className="fixed top-[10rem] left-0 z-20 min-w-[100%]">
           <h2 className="text-16">Checking queue...</h2>
         </div>
       )}
-      {[Status.Waiting].includes(state.status) && (
+      {forState([Status.Waiting]) && (
         <div className="fixed top-[10rem] left-0 z-20 min-w-[100%]">
           <h2 className="text-16">
             We are quite busy. <br />

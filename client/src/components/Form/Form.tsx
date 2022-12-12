@@ -1,7 +1,10 @@
 import { Status } from 'enums/status';
+import { useStatusState } from 'utils/hooks';
 
 function Form({ state, value, onChange, error, onSubmit, onExample }: { state: State } & useFormType) {
-  const disabled = [Status.Queued, Status.Processing].includes(state.status);
+  const { forState } = useStatusState(state);
+
+  const disabled = forState([Status.Queued, Status.Processing]);
 
   return (
     <form className="relative my-[2.6rem] flex justify-center text-12 text-black" onSubmit={onSubmit}>
