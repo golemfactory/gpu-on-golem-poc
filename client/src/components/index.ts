@@ -9,3 +9,4 @@ export { default as Process } from './Process';
 export { default as Progress } from './Progress';
 export { default as Queue, useQueue } from './Queue';
 export { default as Result, useResult } from './Result';
+export { default as Tooltip } from './Tooltip';
