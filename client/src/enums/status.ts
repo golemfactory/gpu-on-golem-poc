@@ -7,3 +7,13 @@ export enum Status {
   Finished = 'finished',
   Error = 'error',
 }
+
+export const Statuses = [
+  Status.Loading,
+  Status.Waiting,
+  Status.Ready,
+  Status.Queued,
+  Status.Processing,
+  Status.Finished,
+  Status.Error,
+];

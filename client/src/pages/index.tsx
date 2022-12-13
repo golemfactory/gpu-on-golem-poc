@@ -1,8 +1,19 @@
-import { Reducer, useEffect, useReducer, useState } from 'react';
-import useWebSocket, { ReadyState } from 'react-use-websocket';
-import { Queue } from 'enums/queue';
+import { Reducer, useReducer } from 'react';
 import { Status } from 'enums/status';
-import { Form, Loader, Result, useForm } from 'components';
+import {
+  Background,
+  Error,
+  Form,
+  Layout,
+  Loader,
+  Process,
+  Queue,
+  Result,
+  useForm,
+  useQueue,
+  useResult,
+} from 'components';
+import { useStatusState } from 'utils/hooks';
 
 function Main() {
   const reducer = (state: State, action: { type: Status; payload?: string }) => ({
@@ -15,67 +26,43 @@ function Main() {
     job_id: undefined,
   });
 
-  const handleQueue = async () => {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API}jobs-in-queue/`);
-    const result = await response.json();
+  const { forState, notForState } = useStatusState(state);
 
-    if (result.jobs_in_queue < Queue.Max) {
-      dispatch({ type: Status.Ready });
-    } else {
-      dispatch({ type: Status.Waiting });
-    }
+  const queue = useQueue(state, dispatch);
+
+  const { value, onExample, ...form } = useForm(dispatch);
+
+  const { data, onReset } = useResult(state, dispatch);
+
+  const handleReset = () => {
+    dispatch({ type: Status.Ready });
+    onExample();
+    onReset();
   };
 
-  useEffect(() => {
-    handleQueue().then();
-  }, []);
-
-  const [socketUrl, setSocketUrl] = useState<string | null>(null);
-  const { lastMessage, readyState } = useWebSocket(socketUrl);
-  const [data, setData] = useState<Data | undefined>(undefined);
-
-  const connectionStatus = {
-    [ReadyState.CONNECTING]: 'Connecting',
-    [ReadyState.OPEN]: 'Open',
-    [ReadyState.CLOSING]: 'Closing',
-    [ReadyState.CLOSED]: 'Closed',
-    [ReadyState.UNINSTANTIATED]: 'Uninstantiated',
-  }[readyState];
-
-  useEffect(() => {
-    if (state.job_id) {
-      setSocketUrl(`${process.env.NEXT_PUBLIC_WS}${state.job_id}/`);
-    }
-  }, [state]);
-
-  useEffect(() => {
-    if (lastMessage) {
-      const { status, ...data } = JSON.parse(lastMessage.data);
-
-      setData(data);
-      dispatch({ type: status });
-    }
-  }, [connectionStatus, lastMessage]);
-
-  const { value, onReset, ...form } = useForm(dispatch);
+  const handleReload = () => window.location.reload();
 
   return (
-    <main className="container flex min-h-screen max-w-screen-md flex-col">
+    <Layout>
+      {notForState([Status.Finished]) && <Background />}
       <Loader state={state} />
-      {[Status.Loading, Status.Waiting, Status.Ready, Status.Queued, Status.Processing, Status.Error].includes(
-        state.status,
-      ) && (
+      {notForState([Status.Finished, Status.Error]) && (
         <div className="mt-[20rem]">
           <h1 className="mb-[5.7rem] text-34">
             AI image generator supported by the computing power of the{' '}
-            <a className="text-blue underline" href="https://www.golem.network/" target="_blank" rel="noreferrer">
+            <a
+              className="text-blue underline hover:opacity-80"
+              href="https://www.golem.network/"
+              target="_blank"
+              rel="noreferrer"
+            >
               golem.network
             </a>
           </h1>
-          <Form state={state} value={value} {...form} />
+          <Form state={state} value={value} onExample={onExample} {...form} />
         </div>
       )}
-      {[Status.Ready].includes(state.status) && (
+      {forState([Status.Ready]) && (
         <p className="mt-[5.7rem] text-12">
           We have integrated open-source AI image generator <span className="underline">Stable Diffusion</span> with
           decentralized <span className="underline">golem.network</span> as&nbsp;a&nbsp;backend to showcase its
@@ -83,17 +70,15 @@ function Main() {
           play around with it and let us know what you think.
         </p>
       )}
-      {[Status.Queued].includes(state.status) && (
-        <>
-          <p className="mt-[5.7rem] mb-[2.4rem] text-14">Fun facts:</p>
-          <p className="text-18">
-            You are now waiting in the queue for your turn. There are 2 turns. Right and left. We have to hire a new
-            copywriter… you know anyone?
-          </p>
-        </>
+      {forState([Status.Queued]) && <Queue {...queue} />}
+      {forState([Status.Processing]) && <Process status={state.status} progress={data?.progress} />}
+      {forState([Status.Finished]) && <Result data={data} value={value} onReset={handleReset} />}
+      {forState([Status.Error]) && (
+        <div className="mt-[20rem]">
+          <Error label="Refresh site" onClick={handleReload} />
+        </div>
       )}
-      {[Status.Finished].includes(state.status) && <Result data={data} value={value} onReset={onReset} />}
-    </main>
+    </Layout>
   );
 }
 

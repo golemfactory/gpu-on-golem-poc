@@ -8,20 +8,38 @@
   }
 
   body {
-    @apply bg-[#1f1f1f] text-center text-white;
+    @apply relative bg-[#1f1f1f] text-center text-white;
   }
 
   button {
-    @apply bg-blue text-white;
+    @apply bg-blue text-white hover:opacity-80;
   }
 
   h1,
   h2 {
     @apply font-sans;
   }
+
+  footer {
+    @apply font-sans font-light leading-[1.5rem] tracking-[0.009rem] text-grey;
+  }
 }
 
 @layer components {
+  @media (min-width: 1024px) {
+    .background {
+      @apply min-h-[100%] bg-[url('/background.png')] bg-contain bg-no-repeat;
+
+      background-position-x: -40rem;
+    }
+  }
+
+  @media (min-width: 1440px) {
+    .background {
+      background-position-x: -20rem;
+    }
+  }
+
   .button {
     @apply m-[1.8rem] min-h-[5.6rem] min-w-[18.2rem] rounded-[0.8rem] font-sans text-[1.6rem] font-bold leading-[2.4rem] tracking-[0.143rem];
   }

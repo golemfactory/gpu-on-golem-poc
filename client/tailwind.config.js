@@ -6,12 +6,21 @@ module.exports = {
       white: '#ffffff',
       blue: '#007dff',
       black: '#000000',
+      grey: '#c3c3c3',
     },
     fontFamily: {
       sans: ['Inter', 'sans'],
       mono: ['Roboto Mono', 'mono'],
     },
     fontSize: {
+      10: [
+        '1rem',
+        {
+          lineHeight: '1.3rem',
+          letterSpacing: '0.007rem',
+          fontWeight: '700',
+        },
+      ],
       12: [
         '1.2rem',
         {
