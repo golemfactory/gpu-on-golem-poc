@@ -12,6 +12,10 @@ export function useResult(state: State, dispatch: (action: Action) => void) {
     if (state.job_id) {
       setSocketUrl(url(Api.txt2img, true, state.job_id));
     }
+
+    return () => {
+      setSocketUrl(null);
+    };
   }, [state]);
 
   useEffect(() => {
@@ -21,7 +25,7 @@ export function useResult(state: State, dispatch: (action: Action) => void) {
       setData(data);
       dispatch({ type: status });
     }
-  }, [readyState, lastMessage]);
+  }, [readyState, lastMessage, dispatch]);
 
   const handleReset = () => setData(undefined);
 

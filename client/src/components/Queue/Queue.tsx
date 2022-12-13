@@ -2,11 +2,15 @@ import { useEffect, useState } from 'react';
 import { Progress } from 'components';
 
 function Queue({ jobs_in_queue, max_queue_size }: { jobs_in_queue: number; max_queue_size: number }) {
-  const [percent, setPercent] = useState(10);
+  const [percent, setPercent] = useState(0);
 
   useEffect(() => {
     setPercent(Math.floor((jobs_in_queue * 100) / max_queue_size));
-  }, [jobs_in_queue]);
+
+    return () => {
+      setPercent(0);
+    };
+  }, [jobs_in_queue, max_queue_size]);
 
   return (
     <>

@@ -1,4 +1,4 @@
-import { FormEvent, useState } from 'react';
+import { FormEvent, useEffect, useState } from 'react';
 import { adjectives, animals, colors, uniqueNamesGenerator } from 'unique-names-generator';
 import { Api } from 'enums/api';
 import { Status } from 'enums/status';
@@ -14,8 +14,16 @@ const example = () =>
   });
 
 export function useForm(dispatch: (action: Action) => void): useFormType {
-  const [value, setValue] = useState<string>(example());
+  const [value, setValue] = useState<string>('');
   const [error, setError] = useState<string | undefined>(undefined);
+
+  useEffect(() => {
+    setValue(example());
+
+    return () => {
+      setValue('');
+    };
+  }, []);
 
   const handleExample = () => {
     setValue(example());
