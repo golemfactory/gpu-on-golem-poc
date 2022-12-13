@@ -16,7 +16,7 @@ you should start it with `uvicorn app:app --root-path /sd`.
 In the `/client` dir:
 
 1. Install dependencies: `npm install`
-2. To run the development server: `npm run dev` (If the server won't start, make a local change: remove `assetPrefix` from `next.config.js`)
+2. To run the development server: `npm run dev`
 3. To build an app `npm run build`
 4. Serve files `npm run start`
 5. For optimized static build run `npm run static`
