@@ -4,6 +4,7 @@ from typing import Callable, Awaitable
 import aioredis
 
 
+SERVICE_INFO_RETENCY_SECONDS = 60 * 20
 JOB_INFO_RETENCY_SECONDS = 60 * 60 * 24
 job_publisher = aioredis.Redis.from_url("redis://localhost", decode_responses=True)
 redis = aioredis.Redis.from_url("redis://localhost", max_connections=10, decode_responses=True)
@@ -45,3 +46,16 @@ async def update_job_data(job_id: str, obj: dict) -> None:
 
 def get_job_data_key(job_id: str) -> str:
     return f'job:{job_id}'
+
+
+async def set_service_data(data: dict) -> None:
+    raw_data = json.dumps(data)
+    await redis.set('service-state', raw_data, ex=SERVICE_INFO_RETENCY_SECONDS)
+
+
+async def get_service_data() -> dict:
+    raw_data = await redis.get('service-state')
+    if raw_data:
+        return json.loads(raw_data)
+    else:
+        return {}

@@ -1,5 +1,6 @@
 import asyncio
 import datetime
+import logging
 from typing import Optional
 
 from aioprocessing import AioQueue
@@ -8,10 +9,16 @@ from yapapi.log import enable_default_logger
 from yapapi.payload import vm
 from yapapi.services import Service, ServiceState, Cluster
 
-from redis_functions import publish_job_status, update_job_data
+from redis_functions import publish_job_status, update_job_data, set_service_data
 
+
+CLUSTER_INSTANCES_NUMBER = 2
+CLUSTER_SUBNET_TAG = 'sd-test'
+CLUSTER_BUDGET = 10.0
+CLUSTER_EXPIRATION_TIME = datetime.timedelta(days=365)
 
 enable_default_logger(log_file="sd-golem-service.log")
+logger = logging.getLogger('yapapi')
 
 cluster: Optional[Cluster] = None
 q: Optional[AioQueue] = None
@@ -39,7 +46,7 @@ class GenerateImageService(Service):
 
     async def run(self):
         while True:
-            print(f"{self.name} RUN: waiting for next job")
+            logger.info(f"{self.name}: waiting for next job")
             job = await q.coro_get()
 
             job_data_update = {
@@ -50,7 +57,7 @@ class GenerateImageService(Service):
             await update_job_data(job["job_id"], job_data_update)
             await publish_job_status(job["job_id"], "processing")
 
-            print(f'{self.name} RUN: running generation for: {job["prompt"]}')
+            logger.info(f'{self.name}: running job for: {job["prompt"]}')
             script = self._ctx.new_script()
             run_result = script.run('generate.sh', job["prompt"])
             yield script
@@ -59,7 +66,7 @@ class GenerateImageService(Service):
             script = self._ctx.new_script()
             img_path = f'images/{job["job_id"]}.png'
             script.download_file('/usr/src/app/output/img.png', img_path)
-            print(f'{self.name} RUN: finished job {job["job_id"]} ({job["prompt"]})')
+            logger.info(f'{self.name}: finished job {job["job_id"]} ({job["prompt"]})')
 
             yield script
 
@@ -73,51 +80,79 @@ class GenerateImageService(Service):
 
 
 async def main(num_instances):
-    async with Golem(budget=10.0, subnet_tag="sd-test") as golem:
-        global cluster
-        cluster = await golem.run_service(
-            GenerateImageService,
-            instance_params=[{"instance_name": f"sd-service-{i + 1}"} for i in range(num_instances)],
-            expiration=datetime.datetime.now() + datetime.timedelta(days=365)
-        )
+    global cluster
 
-        def still_starting():
-            return any(i.state in (ServiceState.pending, ServiceState.starting) for i in cluster.instances)
+    class ClusterNeedsRestart(Exception):
+        pass
 
-        while still_starting():
-            print_instances()
-            await asyncio.sleep(5)
+    while True:
+        try:
+            async with Golem(budget=CLUSTER_BUDGET, subnet_tag=CLUSTER_SUBNET_TAG) as golem:
+                cluster = await golem.run_service(
+                    GenerateImageService,
+                    instance_params=[{"instance_name": f"sd-service-{i + 1}"} for i in range(num_instances)],
+                    expiration=datetime.datetime.now() + CLUSTER_EXPIRATION_TIME
+                )
 
-        while True:
-            await asyncio.sleep(60 * 5)
-            print_instances()
+                def still_starting():
+                    return any(i.state in (ServiceState.pending, ServiceState.starting) for i in cluster.instances)
 
-            instance_to_reset = next((i for i in cluster.instances if i.state == ServiceState.terminated), None)
-            if instance_to_reset is not None:
-                print(f'{instance_to_reset.name} needs restart.')
-                # It should not happen
+                while still_starting():
+                    print_instances()
+                    await asyncio.sleep(5)
+
+                while True:
+                    await asyncio.sleep(60 * 3)
+                    print_instances()
+                    await set_service_data(prepare_service_data(cluster, golem))
+                    instance_to_reset = next((i for i in cluster.instances if i.state == ServiceState.terminated), None)
+                    if instance_to_reset is not None:
+                        # We must restart cluster. Should not happen often.
+                        logger.warning(f'{instance_to_reset.name} was terminated. Restarting Golem cluster')
+                        raise ClusterNeedsRestart
+        except ClusterNeedsRestart:
+            cluster.stop()
+
+
+def prepare_service_data(current_cluster: Cluster, golem: Golem) -> dict:
+    return {
+        'golem': {
+            'operative': golem.operative, 'payment_driver': golem.payment_driver,
+            'payment_network': golem.payment_network,
+        },
+        'cluster': {
+            'expiration': current_cluster.expiration.isoformat(timespec='seconds'),
+            'payload': {
+                'image_hash': current_cluster.payload.image_hash, 'image_url': current_cluster.payload.image_url,
+            },
+            'instances': [
+                {
+                    'name': i.name,
+                    'provider_name': i.provider_name,
+                    'provider_id': i.provider_id,
+                    'state': i.state.name,
+                }
+                for i in current_cluster.instances
+            ]
+        }
+    }
 
 
 def print_instances():
-    print(
-        f"instances: "
-        + str(
-            [
-                f"{s.name}: {s.state.value}"
-                + (f" on {s.provider_name}" if s.provider_id else "")
-                for s in cluster.instances
-            ]
-        )
-    )
+    message = f"Cluster instances: " + str([
+        f"{s.name}: {s.state.value}" + (f" on {s.provider_name}" if s.provider_id else "")
+        for s in cluster.instances
+    ])
+    logger.info(message)
 
 
 def run_sd_service(main_process_queue):
     global q
     q = main_process_queue
     try:
-        asyncio.run(main(2))
+        asyncio.run(main(CLUSTER_INSTANCES_NUMBER))
     except KeyboardInterrupt:
-        print('Interruption')
+        logger.info('Interruption')
     finally:
-        print('STOPPING CLUSTER')
+        logger.info('Stopping cluster')
         cluster.stop()

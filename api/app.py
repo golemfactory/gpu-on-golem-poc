@@ -19,9 +19,12 @@ from slowapi.util import get_remote_address
 import uvicorn
 from websockets import ConnectionClosed
 
-from redis_functions import publish_job_status, subscribe_to_job_status, update_job_data, get_job_data
+from redis_functions import publish_job_status, subscribe_to_job_status, update_job_data, get_job_data, get_service_data
 from stable_diffusion_service import run_sd_service
 
+
+QUEUE_MAX_SIZE = 30
+QUEUE_STATE_WS_REFRESH_SECONDS = 10
 
 q: Optional[aioprocessing.Queue] = None
 job_publisher = aioredis.Redis.from_url("redis://localhost", decode_responses=True)
@@ -32,8 +35,6 @@ async def unicorn_exception_handler(request: Request, exc: RateLimitExceeded):
 
 
 limiter = Limiter(key_func=get_remote_address)
-QUEUE_MAX_SIZE = 30
-QUEUE_STATE_WS_REFRESH_SECONDS = 30
 api_params = {}
 if os.getenv('ROOT_PATH', ''):
     api_params = {
@@ -147,6 +148,12 @@ async def job_detail_ws(job_id: str, websocket: WebSocket):
         await websocket.close(reason='Job finished.')
     else:
         await websocket.close(reason='Not found.')
+
+
+@app.get("/monitoring/")
+async def monitoring(request: Request):
+    service_data = await get_service_data()
+    return JSONResponse(service_data, status_code=status.HTTP_200_OK)
 
 
 if __name__ == "__main__":
