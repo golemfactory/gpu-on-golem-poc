@@ -98,6 +98,7 @@ async def add_job_to_queue(request: Request, prompt: str = Form(...)):
         await publish_job_status(job_id, "queued")
         return_data = {
             'job_id': job_id,
+            'status': "queued",
             'job_detail_url': f'{request.scope.get("root_path")}{app.url_path_for("job_detail", job_id=job_id)}',
             'job_progress_feed': f'{request.scope.get("root_path")}{app.url_path_for("job_detail_ws", job_id=job_id)}',
         }
