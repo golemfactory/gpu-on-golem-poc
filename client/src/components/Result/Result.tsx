@@ -1,5 +1,6 @@
 import Image from 'next/image';
 import { saveAs } from 'file-saver';
+import { renderIcon } from 'assets/utils';
 import url from 'utils/url';
 
 function Result({ data, value, onReset }: { data?: Data; value: string; onReset: () => void }) {
@@ -16,7 +17,8 @@ function Result({ data, value, onReset }: { data?: Data; value: string; onReset:
       <div className="relative mx-auto w-[36.2rem]">
         <Image className="mx-auto" src={src} alt={value} width={362} height={362} />
         <button
-          className="absolute bottom-[1rem] right-[1rem] h-[2rem] w-[1.8rem] bg-black bg-[url('/download.svg')] bg-center bg-no-repeat"
+          className="absolute bottom-[1rem] right-[1rem] h-[2rem] w-[1.8rem] bg-black bg-center bg-no-repeat"
+          style={{ backgroundImage: `url(${renderIcon('download')})` }}
           onClick={handleSave}
         />
       </div>

@@ -1,4 +1,5 @@
 import { Status } from 'enums/status';
+import { renderIcon } from 'assets/utils';
 import { Tooltip } from 'components';
 import { useStatusState } from 'utils/hooks';
 
@@ -37,7 +38,7 @@ function Form({ state, value, onChange, error, onSubmit, onExample }: { state: S
       />
       <button
         className="min-w-[14.4rem] rounded-r-full bg-[right_2rem_center] bg-no-repeat p-[1.7rem] text-left text-14 focus:outline-none focus:ring disabled:bg-[#6d6d6d]"
-        style={processing ? {} : { backgroundImage: 'url(/play.svg)' }}
+        style={processing ? {} : { backgroundImage: `url(${renderIcon('play')})` }}
         disabled={disabled}
       >
         {processing ? 'Generating...' : 'Generate'}

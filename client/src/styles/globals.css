@@ -28,7 +28,7 @@
 @layer components {
   @media (min-width: 1024px) {
     .background {
-      @apply min-h-[100%] bg-[url('/background.png')] bg-contain bg-no-repeat;
+      @apply min-h-[100%] bg-contain bg-no-repeat;
 
       background-position-x: -40rem;
     }

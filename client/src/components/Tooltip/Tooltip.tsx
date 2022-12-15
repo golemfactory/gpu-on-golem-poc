@@ -1,9 +1,11 @@
+import { renderIcon } from 'assets/utils';
+
 function Tooltip({ type, text, bottom }: { type: string; text: string; bottom?: boolean }) {
   return (
     <div className="group absolute -top-[2.5rem] right-[1.5rem] duration-300">
       <div
         className="h-[1.8rem] w-[1.8rem] bg-contain bg-center bg-no-repeat hover:opacity-80"
-        style={{ backgroundImage: `url('${type}.svg')` }}
+        style={{ backgroundImage: `url(${renderIcon(type)})` }}
       />
       <span
         className={`absolute ${

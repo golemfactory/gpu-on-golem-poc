@@ -1,9 +1,10 @@
 import Image from 'next/image';
+import { renderIcon } from 'assets/utils';
 
 const renderLink = (name: string, href: string) => (
   <a className="mx-[2rem] flex justify-center" href={href} target="_blank" rel="noreferrer">
     <div className="flex items-center hover:text-white">
-      <Image className="mr-[1rem]" src={`/${name}.svg`} alt={`${name} logo`} width={18} height={18} />
+      <Image className="mr-[1rem]" src={renderIcon(name)} alt={`${name} logo`} width={18} height={18} />
       <span className="uppercase underline">{name}</span>
     </div>
   </a>
