@@ -16,6 +16,7 @@ CLUSTER_INSTANCES_NUMBER = 2
 CLUSTER_SUBNET_TAG = 'sd-test'
 CLUSTER_BUDGET = 10.0
 CLUSTER_EXPIRATION_TIME = datetime.timedelta(days=365)
+INTERMEDIARY_IMAGES_NUMBER = 5
 
 enable_default_logger(log_file="sd-golem-service.log")
 logger = logging.getLogger('yapapi')
@@ -41,7 +42,7 @@ class GenerateImageService(Service):
         async for script in super().start():
             yield script
         script = self._ctx.new_script()
-        script.run("run_service.sh")
+        script.run("run_service.sh", INTERMEDIARY_IMAGES_NUMBER)
         yield script
 
     async def run(self):
@@ -62,6 +63,9 @@ class GenerateImageService(Service):
             run_result = script.run('generate.sh', job["prompt"])
             yield script
             await run_result
+
+            # TODO: Tutaj dodać pętle która sprawdza czy jest plik wynikowy
+            # Robi download plików pośrednich
 
             script = self._ctx.new_script()
             img_path = f'images/{job["job_id"]}.png'
