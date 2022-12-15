@@ -1,5 +1,6 @@
 import asyncio
 import datetime
+import json
 import logging
 from typing import Optional
 
@@ -12,7 +13,7 @@ from yapapi.services import Service, ServiceState, Cluster
 from redis_functions import publish_job_status, update_job_data, set_service_data
 
 
-CLUSTER_INSTANCES_NUMBER = 2
+CLUSTER_INSTANCES_NUMBER = 1
 CLUSTER_SUBNET_TAG = 'sd-test'
 CLUSTER_BUDGET = 10.0
 CLUSTER_EXPIRATION_TIME = datetime.timedelta(days=365)
@@ -34,15 +35,19 @@ class GenerateImageService(Service):
     async def get_payload():
         return await vm.repo(
             # VM image placed at private server.
-            image_hash='7b4c3af105db6b00b78b57752a0808919755c1f00ae6a78b9b85ffed',
-            image_url='http://116.203.41.115:8000/docker-diffusers-golem-latest-3fdf198f2f.gvmi',
+            # image_hash='7b4c3af105db6b00b78b57752a0808919755c1f00ae6a78b9b85ffed',
+            # image_url='http://116.203.41.115:8000/docker-diffusers-golem-latest-3fdf198f2f.gvmi',
+
+            # VM image with intermediate images generation
+            image_hash='b52c058386bb6ae89ef1a8cc774df753aba3bd88f6b646f7657cc3c5',
+            image_url='http://storage.googleapis.com/sd-golem-images/docker-diffusers-golem-latest-049f931c81.gvmi',
         )
 
     async def start(self):
         async for script in super().start():
             yield script
         script = self._ctx.new_script()
-        script.run("run_service.sh", INTERMEDIARY_IMAGES_NUMBER)
+        script.run("run_service.sh", str(INTERMEDIARY_IMAGES_NUMBER))
         yield script
 
     async def run(self):
@@ -62,10 +67,20 @@ class GenerateImageService(Service):
             script = self._ctx.new_script()
             run_result = script.run('generate.sh', job["prompt"])
             yield script
-            await run_result
+            # await run_result
 
             # TODO: Tutaj dodać pętle która sprawdza czy jest plik wynikowy
             # Robi download plików pośrednich
+            progress = 0
+            while progress < 100:
+                await asyncio.sleep(1)
+                print('Waiting for status download')
+                # TODO: tutaj staje na await - może trzeba bez.
+                await script.download_file('/usr/src/app/output/status.json', 'status.json')
+
+                progress_data = json.loads(open('status.json').read())
+                progress = progress_data['progress']
+                print(progress_data)
 
             script = self._ctx.new_script()
             img_path = f'images/{job["job_id"]}.png'
