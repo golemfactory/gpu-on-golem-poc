@@ -1,7 +1,7 @@
 import { FormEvent, useEffect, useState } from 'react';
 import { adjectives, animals, colors, uniqueNamesGenerator } from 'unique-names-generator';
 import { Api } from 'enums/api';
-import { Status } from 'enums/status';
+import { useFetch } from 'utils/hooks';
 import queryBuild from 'utils/query';
 import url from 'utils/url';
 import { nouns, verbs } from './dictionaries';
@@ -37,23 +37,21 @@ export function useForm(dispatch: (action: Action) => void): useFormType {
     setError(undefined);
   };
 
-  const handleSubmit = async (e: any) => {
+  const handlePost = useFetch(dispatch);
+
+  const handleSubmit = async (e: HTMLFormElement) => {
     e.preventDefault();
 
     if (!value.length) return setError('This field is required');
 
-    const response = await fetch(url(Api.txt2img, false), {
+    const result = await handlePost(url(Api.txt2img, false), {
       body: queryBuild({ prompt: value }),
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       method: 'POST',
     });
 
-    if (response.status === 404) return dispatch({ type: Status.Error });
-
-    const result = await response.json();
-
     if (result.detail) return setError(result.detail[0].msg);
-    else return dispatch({ type: Status.Processing, payload: result.job_id });
+    else return dispatch({ type: result.status, payload: result.job_id });
   };
 
   return {

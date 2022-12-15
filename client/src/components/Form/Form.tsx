@@ -6,7 +6,7 @@ import { useStatusState } from 'utils/hooks';
 function Form({ state, value, onChange, error, onSubmit, onExample }: { state: State } & useFormType) {
   const { forState } = useStatusState(state);
 
-  const disabled = forState([Status.Queued, Status.Processing]);
+  const disabled = !!state.job_id;
   const processing = forState([Status.Processing]);
 
   return (
