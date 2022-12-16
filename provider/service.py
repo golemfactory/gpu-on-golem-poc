@@ -47,15 +47,12 @@ def latents_to_pil(latents):
 
 
 def latents_callback(i, t, latents):
-    try:
-        status_file = open(f'output/status.json', 'r')
-    except FileNotFoundError:
-        progress_info = {}
-    else:
-        progress_info = json.loads(status_file.read())
-        status_file.close()
+    # TODO: just call update_status
 
-    progress_info['progress'] = int(i / STABLE_DIFFUSION_ITERATIONS_NUMBER * 100)
+    progress = int(i / (STABLE_DIFFUSION_ITERATIONS_NUMBER - 1) * 100)
+    # Do not save 100% progress while in callback. We want to do this when all is over.
+    if progress < 100:
+        progress_info['progress'] = progress
 
     if intermediary_images_number > 0:
         iterations_to_generate = set(
@@ -74,6 +71,19 @@ def latents_callback(i, t, latents):
                 progress_info['images'] = []
             progress_info['images'].append(intermediary_img_path)
 
+
+
+def update_status(progress: int, new_image: str):
+    try:
+        status_file = open(f'output/status.json', 'r')
+    except FileNotFoundError:
+        progress_info = {}
+    else:
+        progress_info = json.loads(status_file.read())
+        status_file.close()
+
+    # TODO: finish handling update
+
     with open(f'output/status.json', 'w') as f:
         f.write(json.dumps(progress_info))
 
@@ -91,6 +101,9 @@ async def main():
                     image.save("./output/img.png")
                     logger.info('Output file saved. Clearing phrase.txt file.')
                     f.truncate(0)
+
+                    #     TODO: call update_status with progress=100
+
                 else:
                     logger.info('No phrase in file. Ignoring.')
         except FileNotFoundError:

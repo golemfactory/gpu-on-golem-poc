@@ -39,8 +39,11 @@ class GenerateImageService(Service):
             # image_url='http://116.203.41.115:8000/docker-diffusers-golem-latest-3fdf198f2f.gvmi',
 
             # VM image with intermediate images generation
-            image_hash='b52c058386bb6ae89ef1a8cc774df753aba3bd88f6b646f7657cc3c5',
-            image_url='http://storage.googleapis.com/sd-golem-images/docker-diffusers-golem-latest-049f931c81.gvmi',
+            # image_hash='b52c058386bb6ae89ef1a8cc774df753aba3bd88f6b646f7657cc3c5',
+            # image_url='http://storage.googleapis.com/sd-golem-images/docker-diffusers-golem-latest-049f931c81.gvmi',
+
+            image_hash='eb824050bb0025ca6293724abb748068e33c4349ad40fbe81d8a9486',
+            image_url='http://storage.googleapis.com/sd-golem-images/docker-diffusers-golem-latest-88b11c78e2.gvmi',
         )
 
     async def start(self):
@@ -64,6 +67,7 @@ class GenerateImageService(Service):
             await publish_job_status(job["job_id"], "processing")
 
             logger.info(f'{self.name}: running job for: {job["prompt"]}')
+
             script = self._ctx.new_script()
             run_result = script.run('generate.sh', job["prompt"])
             yield script
@@ -76,7 +80,12 @@ class GenerateImageService(Service):
                 await asyncio.sleep(1)
                 print('Waiting for status download')
                 # TODO: tutaj staje na await - może trzeba bez.
-                await script.download_file('/usr/src/app/output/status.json', 'status.json')
+                status_script = self._ctx.new_script()
+                status_result = status_script.download_file('/usr/src/app/output/status.json', 'status.json')
+
+                yield status_script
+
+                # await status_result
 
                 progress_data = json.loads(open('status.json').read())
                 progress = progress_data['progress']
