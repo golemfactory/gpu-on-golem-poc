@@ -1,33 +1,40 @@
 import { useEffect, useState } from 'react';
 import useWebSocket from 'react-use-websocket';
 import { Api } from 'enums/api';
+import { Status } from 'enums/status';
+import { useStatusState } from 'utils/hooks';
 import url from 'utils/url';
 
 export function useResult(state: State, dispatch: (action: Action) => void) {
+  const { forState } = useStatusState(state);
+
   const [socketUrl, setSocketUrl] = useState<string | null>(null);
-  const { lastMessage, readyState } = useWebSocket(socketUrl);
+  const { lastMessage, readyState, getWebSocket } = useWebSocket(socketUrl);
   const [data, setData] = useState<Data | undefined>(undefined);
 
   useEffect(() => {
     if (state.job_id) {
       setSocketUrl(url(Api.txt2img, true, state.job_id));
     }
-
-    return () => {
-      setSocketUrl(null);
-    };
-  }, [state]);
+  }, [state.job_id]);
 
   useEffect(() => {
     if (lastMessage) {
       const { status, ...data } = JSON.parse(lastMessage.data);
 
-      setData(data);
-      dispatch({ type: status });
+      if (forState([Status.Queued, Status.Processing])) {
+        setData(data);
+        dispatch({ type: status, payload: state.job_id });
+      } else if (forState([Status.Finished])) {
+        getWebSocket()?.close();
+      }
     }
-  }, [readyState, lastMessage, dispatch]);
+  }, [readyState, lastMessage, dispatch, state.job_id, forState, getWebSocket]);
 
-  const handleReset = () => setData(undefined);
+  const handleReset = () => {
+    setData(undefined);
+    setSocketUrl(null);
+  };
 
   return { data, onReset: handleReset };
 }
