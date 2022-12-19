@@ -71,7 +71,7 @@ function Main() {
         </p>
       )}
       {forState([Status.Queued]) && <Queue {...queue} />}
-      {forState([Status.Processing]) && <Process status={state.status} />}
+      {forState([Status.Processing]) && <Process status={state.status} data={data} />}
       {forState([Status.Finished]) && <Result data={data} value={value} onReset={handleReset} />}
       {forState([Status.Error]) && (
         <div className="mt-[20rem]">
