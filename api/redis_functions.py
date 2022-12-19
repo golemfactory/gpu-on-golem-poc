@@ -10,8 +10,14 @@ job_publisher = aioredis.Redis.from_url("redis://localhost", decode_responses=Tr
 redis = aioredis.Redis.from_url("redis://localhost", max_connections=10, decode_responses=True)
 
 
-async def publish_job_status(job_id: str, status: str) -> None:
-    await job_publisher.publish(get_job_channel(job_id), status)
+async def publish_job_status(job_id: str, status: str, progress: int = 0, images: list = None) -> None:
+    message = {
+        'status': status,
+        'progress': progress,
+        'intermediary_images': [] if images is None else images
+    }
+    message_str = json.dumps(message)
+    await job_publisher.publish(get_job_channel(job_id), message_str)
 
 
 async def subscribe_to_job_status(job_id: str, reader_func: Callable[[aioredis.client.PubSub], Awaitable[None]]) -> None:

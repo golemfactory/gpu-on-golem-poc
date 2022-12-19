@@ -47,13 +47,11 @@ def latents_to_pil(latents):
 
 
 def latents_callback(i, t, latents):
-    # TODO: just call update_status
-
     progress = int(i / (STABLE_DIFFUSION_ITERATIONS_NUMBER - 1) * 100)
-    # Do not save 100% progress while in callback. We want to do this when all is over.
-    if progress < 100:
-        progress_info['progress'] = progress
+    # Do not save 100% progress in callback. We want to do this when all is over.
+    progress = progress if progress < 100 else None
 
+    intermediary_img_path = None
     if intermediary_images_number > 0:
         iterations_to_generate = set(
             list(
@@ -67,24 +65,28 @@ def latents_callback(i, t, latents):
             rgb_img = image[0].convert('RGB').resize((256, 256))
             intermediary_img_path = f"output/iteration_{i}.jpg"
             rgb_img.save(intermediary_img_path, optimize=True, quality=50)
-            if 'images' not in progress_info:
-                progress_info['images'] = []
-            progress_info['images'].append(intermediary_img_path)
+
+    update_status(progress=progress, new_image_path=intermediary_img_path)
 
 
-
-def update_status(progress: int, new_image: str):
+def update_status(progress: int = None, new_image_path: str = None):
     try:
-        status_file = open(f'output/status.json', 'r')
+        status_file = open('output/status.json', 'r')
     except FileNotFoundError:
-        progress_info = {}
+        progress_info = {'progress': 0, 'images': []}
     else:
         progress_info = json.loads(status_file.read())
         status_file.close()
 
-    # TODO: finish handling update
+    if progress is not None:
+        progress_info['progress'] = progress
 
-    with open(f'output/status.json', 'w') as f:
+    if new_image_path is not None:
+        if 'images' not in progress_info:
+            progress_info['images'] = []
+        progress_info['images'].append(new_image_path)
+
+    with open('output/status.json', 'w') as f:
         f.write(json.dumps(progress_info))
 
 
@@ -101,9 +103,7 @@ async def main():
                     image.save("./output/img.png")
                     logger.info('Output file saved. Clearing phrase.txt file.')
                     f.truncate(0)
-
-                    #     TODO: call update_status with progress=100
-
+                    update_status(progress=100)
                 else:
                     logger.info('No phrase in file. Ignoring.')
         except FileNotFoundError:
