@@ -13,7 +13,7 @@ from yapapi.services import Service, ServiceState, Cluster
 from redis_functions import publish_job_status, update_job_data, set_service_data
 
 
-CLUSTER_INSTANCES_NUMBER = 1
+CLUSTER_INSTANCES_NUMBER = 2
 CLUSTER_SUBNET_TAG = 'sd-test'
 CLUSTER_BUDGET = 10.0
 CLUSTER_EXPIRATION_TIME = datetime.timedelta(days=365)
