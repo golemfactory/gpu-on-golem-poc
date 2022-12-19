@@ -1,4 +1,5 @@
 import asyncio
+import bisect
 import datetime
 import logging
 from typing import Optional
@@ -16,6 +17,7 @@ CLUSTER_INSTANCES_NUMBER = 2
 CLUSTER_SUBNET_TAG = 'sd-test'
 CLUSTER_BUDGET = 10.0
 CLUSTER_EXPIRATION_TIME = datetime.timedelta(days=365)
+INTERMEDIARY_IMAGES_NUMBER = 5
 
 enable_default_logger(log_file="sd-golem-service.log")
 logger = logging.getLogger('yapapi')
@@ -32,16 +34,15 @@ class GenerateImageService(Service):
     @staticmethod
     async def get_payload():
         return await vm.repo(
-            # VM image placed at private server.
-            image_hash='7b4c3af105db6b00b78b57752a0808919755c1f00ae6a78b9b85ffed',
-            image_url='http://116.203.41.115:8000/docker-diffusers-golem-latest-3fdf198f2f.gvmi',
+            image_hash='2b974c2d48fccd52c4b0d3413b628af30851cd7d2af57eea251b4ef8',
+            image_url='http://storage.googleapis.com/sd-golem-images/docker-diffusers-golem-latest-3b13fd1916.gvmi',
         )
 
     async def start(self):
         async for script in super().start():
             yield script
         script = self._ctx.new_script()
-        script.run("run_service.sh")
+        script.run("run_service.sh", str(INTERMEDIARY_IMAGES_NUMBER))
         yield script
 
     async def run(self):
@@ -58,25 +59,55 @@ class GenerateImageService(Service):
             await publish_job_status(job["job_id"], "processing")
 
             logger.info(f'{self.name}: running job for: {job["prompt"]}')
-            script = self._ctx.new_script()
-            run_result = script.run('generate.sh', job["prompt"])
-            yield script
-            await run_result
+
+            generate_script = self._ctx.new_script()
+            generate_script.run('generate.sh', job["prompt"])
+            yield generate_script
+
+            progress = 0
+            downloaded_images = set()
+            images_to_download = set()
+            intermediary_images = []
+
+            async def update_progress_data(progress_data: dict):
+                nonlocal progress, images_to_download
+                progress = progress_data['progress']
+                if 'images' in progress_data and progress_data['images']:
+                    images_to_download = set(progress_data['images']) - downloaded_images
+
+            while progress < 100:
+                await asyncio.sleep(1)
+                status_script = self._ctx.new_script()
+                status_script.download_json('/usr/src/app/output/status.json', update_progress_data)
+                yield status_script
+                if images_to_download:
+                    download_script = self._ctx.new_script()
+                    for image in images_to_download:
+                        img_filename = image.split('/', 1)[1]
+                        img_iteration = img_filename.split('.', 1)[0].split('_', 1)[1]
+                        target_filename = f'images/{job["job_id"]}_{img_iteration}.jpg'
+                        download_script.download_file(f'/usr/src/app/output/{img_filename}', target_filename)
+                        bisect.insort(intermediary_images, target_filename)
+                    yield download_script
+                    downloaded_images.update(images_to_download)
+                    images_to_download.clear()
+                if progress < 100:
+                    await publish_job_status(job["job_id"], "processing", progress, intermediary_images)
 
             script = self._ctx.new_script()
-            img_path = f'images/{job["job_id"]}.png'
-            script.download_file('/usr/src/app/output/img.png', img_path)
+            final_img_path = f'images/{job["job_id"]}.png'
+            script.download_file('/usr/src/app/output/img.png', final_img_path)
             logger.info(f'{self.name}: finished job {job["job_id"]} ({job["prompt"]})')
-
             yield script
 
             job_data_update = {
                 "status": "finished",
                 "ended_at": datetime.datetime.now().isoformat(),
-                "img_url": img_path,
+                "img_url": final_img_path,
+                "intermediary_images": intermediary_images,
             }
             await update_job_data(job["job_id"], job_data_update)
-            await publish_job_status(job["job_id"], "finished")
+            await publish_job_status(job["job_id"], "finished", progress, intermediary_images)
 
 
 async def main(num_instances):

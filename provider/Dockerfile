@@ -7,9 +7,10 @@ COPY stable-diffusion-v1-5 ./stable-diffusion-v1-5
 COPY requirements.txt ./
 COPY worker.py ./
 COPY service.py ./
-COPY run.sh ./
+COPY run_task.sh ./
 COPY run_service.sh ./
 COPY generate.sh ./
+COPY generate_wait.sh ./
 
 RUN apt-get update && apt-get install -y python3-pip pciutils
 RUN pip install --no-cache-dir --upgrade pip wheel setuptools setuptools_rust

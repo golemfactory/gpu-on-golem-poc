@@ -1,4 +1,5 @@
 import asyncio
+import json
 import multiprocessing
 import os
 from pathlib import Path
@@ -118,7 +119,7 @@ async def job_detail(request: Request, job_id: str):
 @app.websocket("/txt2img/ws/{job_id}/")
 async def job_detail_ws(job_id: str, websocket: WebSocket):
     await websocket.accept()
-    img_path = f'images/{job_id}.png'
+    final_img_path = f'images/{job_id}.png'
 
     async def job_status_reader(channel: aioredis.client.PubSub):
         while True:
@@ -126,11 +127,13 @@ async def job_detail_ws(job_id: str, websocket: WebSocket):
                 async with async_timeout.timeout(70):
                     message = await channel.get_message(ignore_subscribe_messages=True, timeout=60)
                     if message is not None:
-                        img_exists = Path(img_path).exists()
+                        message_data = json.loads(message['data'])
+                        final_img_exists = Path(final_img_path).exists()
                         job_message = {
-                            "status": message['data'],
-                            "progress": 100 if message['data'] == 'finished' else 0,
-                            "img_url": img_path if img_exists else None,
+                            "status": message_data['status'],
+                            "progress": message_data['progress'],
+                            "img_url": final_img_path if final_img_exists else None,
+                            "intermediary_images": message_data['intermediary_images'],
                         }
                         await websocket.send_json(job_message)
                         if job_message['status'] == 'finished':

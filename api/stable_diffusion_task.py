@@ -13,7 +13,7 @@ enable_default_logger(log_file="sd-golem.log")
 async def _worker(context: WorkContext, tasks: AsyncIterable[Task]):
     script = context.new_script()
     async for task in tasks:
-        script.run("run.sh", "cuda", task.data['phrase'])
+        script.run("run_task.sh", "cuda", task.data['phrase'])
         future_result = script.download_file('/usr/src/app/output/img.png', f'images/{task.data["id"]}.png')
         yield script
         task.accept_result(result=await future_result)
@@ -22,7 +22,6 @@ async def _worker(context: WorkContext, tasks: AsyncIterable[Task]):
 async def _generate_on_golem(phrase, job_id):
     package = await vm.repo(
         image_hash="5080b041087e342f258955abfa2042cf1a162697b589b00964b923be",
-        # image_url='https://lukasz-glen.com/docker-diffusers-golem-latest-16ef828013.gvmi',
         image_url='http://116.203.41.115:8000/docker-diffusers-golem-latest-16ef828013.gvmi'
     )
 
