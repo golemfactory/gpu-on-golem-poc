@@ -1,12 +1,15 @@
 /** @type {import('next').NextConfig} */
 
-const isLukaszServer = process.env.APP_ENV === 'lukasz-biuro'
+const serverAssetPrefix = {
+  'lukasz-biuro': '/sd/static',
+  'gpu.dev-test.golem.network': '/static',
+}
 
 const nextConfig = {
   reactStrictMode: true,
   swcMinify: true,
   images: { domains: [process.env.NEXT_PUBLIC_HOSTNAME], unoptimized: true },
-  assetPrefix: isLukaszServer ? '/sd/static' : undefined,
+  assetPrefix: serverAssetPrefix[process.env.APP_ENV],
 };
 
 module.exports = nextConfig;
