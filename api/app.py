@@ -82,7 +82,7 @@ async def get_queue_length_ws(websocket: WebSocket):
 
 
 @app.post("/txt2img/")
-@limiter.limit("3/minute")
+@limiter.limit("5/minute")
 async def add_job_to_queue(request: Request, prompt: str = Form(...)):
     if not prompt:
         return JSONResponse({'error': 'Phrase cannot be empty.'}, status_code=status.HTTP_400_BAD_REQUEST)
