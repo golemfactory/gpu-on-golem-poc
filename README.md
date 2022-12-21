@@ -48,6 +48,7 @@ cd ..
 
 ### Backend preparations
 ```shell
+sudo apt install redis
 python3 -m venv venv
 source venv/bin/activate
 pip install --update pip
