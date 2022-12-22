@@ -27,7 +27,7 @@ async def _generate_on_golem(phrase, job_id):
 
     tasks = [Task(data={'phrase': phrase, 'id': job_id})]
 
-    async with Golem(budget=10.0, subnet_tag="sd-test") as golem:
+    async with Golem(budget=10.0, subnet_tag="cuda-support") as golem:
         async for _ in golem.execute_tasks(_worker, tasks, payload=package, timeout=timedelta(minutes=90),
                                            max_workers=1):
             pass
