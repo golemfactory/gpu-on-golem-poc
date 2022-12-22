@@ -88,6 +88,9 @@ async def add_job_to_queue(request: Request, prompt: str = Form(...)):
         return JSONResponse({'error': 'Phrase cannot be empty.'}, status_code=status.HTTP_400_BAD_REQUEST)
 
     job_id = str(uuid.uuid4())
+    with open('requests.log', 'a') as f:
+        f.write(f'{job_id} {prompt}\n')
+
     try:
         q.put({'prompt': prompt, 'job_id': job_id}, block=False)
     except queue.Full:
