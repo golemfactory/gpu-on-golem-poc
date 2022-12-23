@@ -15,6 +15,7 @@ from websockets import ConnectionClosed
 from api.redis_functions import publish_job_status, subscribe_to_job_status, update_job_data, get_job_data, jobs_queue
 
 
+api_dir = Path(__file__).parent.joinpath('..').absolute()
 router = APIRouter()
 limiter = Limiter(key_func=get_remote_address)
 
@@ -26,7 +27,7 @@ async def add_job_to_queue(request: Request, prompt: str = Form(...)):
         return JSONResponse({'error': 'Phrase cannot be empty.'}, status_code=status.HTTP_400_BAD_REQUEST)
 
     job_id = str(uuid.uuid4())
-    with open('../requests.log', 'a') as f:
+    with open(api_dir / 'requests.log', 'a') as f:
         f.write(f'{job_id} {prompt}\n')
 
     try:
@@ -44,8 +45,6 @@ async def add_job_to_queue(request: Request, prompt: str = Form(...)):
             'status': "queued",
             'job_detail_url': request.url_for("job_detail", job_id=job_id),
             'job_progress_feed': request.url_for("job_detail_ws", job_id=job_id),
-            # 'job_detail_url': f'{request.scope.get("root_path")}{app.url_path_for("job_detail", job_id=job_id)}',
-            # 'job_progress_feed': f'{request.scope.get("root_path")}{app.url_path_for("job_detail_ws", job_id=job_id)}',
         }
         return JSONResponse(return_data, status_code=status.HTTP_202_ACCEPTED)
 
@@ -71,8 +70,7 @@ async def job_detail_ws(job_id: str, websocket: WebSocket):
                     message = await channel.get_message(ignore_subscribe_messages=True, timeout=60)
                     if message is not None:
                         message_data = json.loads(message['data'])
-                        local_img_path = Path(__file__).parent.joinpath('..').joinpath(final_img_path)
-                        print(local_img_path)
+                        local_img_path = api_dir / final_img_path
                         final_img_exists = local_img_path.exists()
                         job_message = {
                             "status": message_data['status'],
