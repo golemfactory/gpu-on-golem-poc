@@ -55,10 +55,9 @@ pip install --update pip
 pip install -r api/requirements.txt
 ```
 
-### Api start (can be started in `screen` or monitored by supervisor/monit):
+### Api start (can be started in `screen` or monitored by supervisor/monit/systemd):
 ```shell
-cd api
-python app.py
+[...]/venv/bin/uvicorn api.app:app
 ```
 
 This will start server on port **8000** (You can change this in `app.py`). 

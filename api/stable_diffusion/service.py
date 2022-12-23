@@ -2,15 +2,15 @@ import asyncio
 import bisect
 import datetime
 import logging
+from pathlib import Path
 from typing import Optional
 
-from aioprocessing import AioQueue
 from yapapi import Golem
 from yapapi.log import enable_default_logger
 from yapapi.payload import vm
 from yapapi.services import Service, ServiceState, Cluster
 
-from redis_functions import publish_job_status, update_job_data, set_service_data
+from api.redis_functions import publish_job_status, update_job_data, set_service_data, jobs_queue
 
 
 CLUSTER_INSTANCES_NUMBER = 2
@@ -19,11 +19,11 @@ CLUSTER_BUDGET = 10.0
 CLUSTER_EXPIRATION_TIME = datetime.timedelta(days=365)
 INTERMEDIARY_IMAGES_NUMBER = 5
 
-enable_default_logger(log_file="sd-golem-service.log")
+api_dir = Path(__file__).parent.joinpath('..').absolute()
+enable_default_logger(log_file=str(api_dir / 'sd-golem-service.log'))
 logger = logging.getLogger('yapapi')
 
 cluster: Optional[Cluster] = None
-q: Optional[AioQueue] = None
 
 
 class GenerateImageService(Service):
@@ -48,7 +48,8 @@ class GenerateImageService(Service):
     async def run(self):
         while True:
             logger.info(f"{self.name}: waiting for next job")
-            job = await q.coro_get()
+            job = await jobs_queue.get()
+            await jobs_queue.notify_queued()
 
             job_data_update = {
                 "status": "processing",
@@ -85,7 +86,7 @@ class GenerateImageService(Service):
                     for image in images_to_download:
                         img_filename = image.split('/', 1)[1]
                         img_iteration = img_filename.split('.', 1)[0].split('_', 1)[1]
-                        target_filename = f'images/{job["job_id"]}_{img_iteration}.jpg'
+                        target_filename = str(api_dir / f'images/{job["job_id"]}_{img_iteration}.jpg')
                         download_script.download_file(f'/usr/src/app/output/{img_filename}', target_filename)
                         bisect.insort(intermediary_images, target_filename)
                     yield download_script
@@ -95,7 +96,7 @@ class GenerateImageService(Service):
                     await publish_job_status(job["job_id"], "processing", progress, intermediary_images)
 
             script = self._ctx.new_script()
-            final_img_path = f'images/{job["job_id"]}.png'
+            final_img_path = str(api_dir / f'images/{job["job_id"]}.png')
             script.download_file('/usr/src/app/output/img.png', final_img_path)
             logger.info(f'{self.name}: finished job {job["job_id"]} ({job["prompt"]})')
             yield script
@@ -177,9 +178,7 @@ def print_instances():
     logger.info(message)
 
 
-def run_sd_service(main_process_queue):
-    global q
-    q = main_process_queue
+def run_sd_service():
     try:
         asyncio.run(main(CLUSTER_INSTANCES_NUMBER))
     except KeyboardInterrupt:
@@ -187,3 +186,7 @@ def run_sd_service(main_process_queue):
     finally:
         logger.info('Stopping cluster')
         cluster.stop()
+
+
+if __name__ == "__main__":
+    run_sd_service()
