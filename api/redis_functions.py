@@ -93,6 +93,8 @@ class AsyncRedisQueue:
         return item
 
     async def notify_queued(self):
+        """Notify all queued jobs listeners that their job changed position in the queue."""
+
         elements = await self._db.lrange(self.key, 0, -1)
         if elements:
             for i, el in enumerate(elements):

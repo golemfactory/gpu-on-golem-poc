@@ -7,3 +7,4 @@ slowapi==0.1.7
 aioprocessing==2.0.1
 aioredis==2.0.1
 websockets==10.4
+PyYAML==6.0

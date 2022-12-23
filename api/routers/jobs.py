@@ -21,7 +21,7 @@ limiter = Limiter(key_func=get_remote_address)
 
 
 @router.post("/txt2img/")
-# @limiter.limit("5/minute")
+@limiter.limit("5/minute")
 async def add_job_to_queue(request: Request, prompt: str = Form(...)):
     if not prompt:
         return JSONResponse({'error': 'Phrase cannot be empty.'}, status_code=status.HTTP_400_BAD_REQUEST)

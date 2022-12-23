@@ -57,11 +57,10 @@ pip install -r api/requirements.txt
 
 ### Api start (can be started in `screen` or monitored by supervisor/monit/systemd):
 ```shell
-[...]/venv/bin/uvicorn api.app:app
+[...]/venv/bin/uvicorn api.app:app --log-config=api/log.yml
 ```
 
-This will start server on port **8000** (You can change this in `app.py`). 
+This will start server on port **8000**. 
 
 ### Env variables to control settings 
-- `ROOT_PATH` - passed to FastApi app as `root_path` param.
 - `APP_ENV` - taken into consideration by JS code while running `npm run static` 
