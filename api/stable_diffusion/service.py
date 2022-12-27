@@ -57,7 +57,7 @@ class GenerateImageService(Service):
                 'started_at': datetime.datetime.now().isoformat(),
             }
             await update_job_data(job["job_id"], job_data_update)
-            await publish_job_status(job["job_id"], "processing")
+            await publish_job_status(job["job_id"], "processing", provider=self.provider_name)
 
             logger.info(f'{self.name}: running job for: {job["prompt"]}')
 
@@ -94,7 +94,8 @@ class GenerateImageService(Service):
                     downloaded_images.update(images_to_download)
                     images_to_download.clear()
                 if progress < 100:
-                    await publish_job_status(job["job_id"], "processing", progress, intermediary_images)
+                    await publish_job_status(job["job_id"], "processing", progress, intermediary_images,
+                                             provider=self.provider_name)
 
             script = self._ctx.new_script()
             final_img_path = str(api_dir / f'images/{job["job_id"]}.png')
@@ -109,7 +110,8 @@ class GenerateImageService(Service):
                 "intermediary_images": intermediary_images,
             }
             await update_job_data(job["job_id"], job_data_update)
-            await publish_job_status(job["job_id"], "finished", progress, intermediary_images)
+            await publish_job_status(job["job_id"], "finished", progress, intermediary_images,
+                                     provider=self.provider_name)
 
 
 async def main(num_instances):

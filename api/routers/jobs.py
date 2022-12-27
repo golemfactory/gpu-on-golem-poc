@@ -75,6 +75,7 @@ async def job_detail_ws(job_id: str, websocket: WebSocket):
                         job_message = {
                             "status": message_data['status'],
                             "queue_position": message_data['queue_position'],
+                            "provider": message_data['provider'],
                             "progress": message_data['progress'],
                             "img_url": final_img_path if final_img_exists else None,
                             "intermediary_images": message_data['intermediary_images'],
