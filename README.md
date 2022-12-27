@@ -67,5 +67,8 @@ This will start server on port **8000**.
 [...]/venv/bin/python -m api.stable_diffusion.service
 ```
 
+### Systemd services
+Example files can be found in `api/systemd`.
+
 ### Env variables to control settings 
 - `APP_ENV` - taken into consideration by JS code while running `npm run static` 
