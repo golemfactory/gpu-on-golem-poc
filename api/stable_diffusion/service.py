@@ -1,16 +1,18 @@
 import asyncio
 import bisect
 import datetime
+import hashlib
 import logging
+from pathlib import Path
 from typing import Optional
 
-from aioprocessing import AioQueue
 from yapapi import Golem
 from yapapi.log import enable_default_logger
 from yapapi.payload import vm
 from yapapi.services import Service, ServiceState, Cluster
 
-from redis_functions import publish_job_status, update_job_data, set_service_data
+from api.choices import JobStatus
+from api.redis_functions import publish_job_status, update_job_data, set_service_data, jobs_queue
 
 
 CLUSTER_INSTANCES_NUMBER = 2
@@ -18,12 +20,14 @@ CLUSTER_SUBNET_TAG = 'cuda-support'
 CLUSTER_BUDGET = 10.0
 CLUSTER_EXPIRATION_TIME = datetime.timedelta(days=365)
 INTERMEDIARY_IMAGES_NUMBER = 5
+# MD5 hash of a black image provided by service when NSFW content is detected
+NSFW_IMAGE_HASH = '62640df3608f0287d980794d720bff31'
 
-enable_default_logger(log_file="sd-golem-service.log")
+api_dir = Path(__file__).parent.joinpath('..').absolute()
+enable_default_logger(log_file=str(api_dir / 'sd-golem-service.log'))
 logger = logging.getLogger('yapapi')
 
 cluster: Optional[Cluster] = None
-q: Optional[AioQueue] = None
 
 
 class GenerateImageService(Service):
@@ -48,15 +52,16 @@ class GenerateImageService(Service):
     async def run(self):
         while True:
             logger.info(f"{self.name}: waiting for next job")
-            job = await q.coro_get()
+            job = await jobs_queue.get()
+            await jobs_queue.notify_queued()
 
             job_data_update = {
-                "status": "processing",
+                "status": JobStatus.PROCESSING.value,
                 'provider_name': self.provider_name,
                 'started_at': datetime.datetime.now().isoformat(),
             }
             await update_job_data(job["job_id"], job_data_update)
-            await publish_job_status(job["job_id"], "processing")
+            await publish_job_status(job["job_id"], JobStatus.PROCESSING.value, provider=self.provider_name)
 
             logger.info(f'{self.name}: running job for: {job["prompt"]}')
 
@@ -86,28 +91,33 @@ class GenerateImageService(Service):
                         img_filename = image.split('/', 1)[1]
                         img_iteration = img_filename.split('.', 1)[0].split('_', 1)[1]
                         target_filename = f'images/{job["job_id"]}_{img_iteration}.jpg'
-                        download_script.download_file(f'/usr/src/app/output/{img_filename}', target_filename)
+                        target_path = str(api_dir / target_filename)
+                        download_script.download_file(f'/usr/src/app/output/{img_filename}', target_path)
                         bisect.insort(intermediary_images, target_filename)
                     yield download_script
                     downloaded_images.update(images_to_download)
                     images_to_download.clear()
                 if progress < 100:
-                    await publish_job_status(job["job_id"], "processing", progress, intermediary_images)
+                    await publish_job_status(job["job_id"], JobStatus.PROCESSING.value, progress, intermediary_images,
+                                             provider=self.provider_name)
 
             script = self._ctx.new_script()
-            final_img_path = f'images/{job["job_id"]}.png'
+            final_img_path = str(api_dir / f'images/{job["job_id"]}.png')
             script.download_file('/usr/src/app/output/img.png', final_img_path)
             logger.info(f'{self.name}: finished job {job["job_id"]} ({job["prompt"]})')
             yield script
 
+            image_blocked = hashlib.md5(open(final_img_path, 'rb').read()).hexdigest() == NSFW_IMAGE_HASH
+            final_status = JobStatus.BLOCKED if image_blocked else JobStatus.FINISHED
             job_data_update = {
-                "status": "finished",
+                "status": final_status.value,
                 "ended_at": datetime.datetime.now().isoformat(),
                 "img_url": final_img_path,
                 "intermediary_images": intermediary_images,
             }
             await update_job_data(job["job_id"], job_data_update)
-            await publish_job_status(job["job_id"], "finished", progress, intermediary_images)
+            await publish_job_status(job["job_id"], final_status.value, progress, intermediary_images,
+                                     provider=self.provider_name)
 
 
 async def main(num_instances):
@@ -177,9 +187,7 @@ def print_instances():
     logger.info(message)
 
 
-def run_sd_service(main_process_queue):
-    global q
-    q = main_process_queue
+def run_sd_service():
     try:
         asyncio.run(main(CLUSTER_INSTANCES_NUMBER))
     except KeyboardInterrupt:
@@ -187,3 +195,7 @@ def run_sd_service(main_process_queue):
     finally:
         logger.info('Stopping cluster')
         cluster.stop()
+
+
+if __name__ == "__main__":
+    run_sd_service()

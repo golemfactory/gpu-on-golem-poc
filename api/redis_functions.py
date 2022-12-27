@@ -1,20 +1,27 @@
 import json
+import queue
 from typing import Callable, Awaitable
 
 import aioredis
 
+from api.choices import JobStatus
 
+
+JOBS_QUEUE_MAX_SIZE = 30
 SERVICE_INFO_RETENCY_SECONDS = 60 * 20
 JOB_INFO_RETENCY_SECONDS = 60 * 60 * 24
 job_publisher = aioredis.Redis.from_url("redis://localhost", decode_responses=True)
 redis = aioredis.Redis.from_url("redis://localhost", max_connections=10, decode_responses=True)
 
 
-async def publish_job_status(job_id: str, status: str, progress: int = 0, images: list = None) -> None:
+async def publish_job_status(job_id: str, status: str, progress: int = 0, images: list = None, position: int = 0,
+                             provider: str = None):
     message = {
         'status': status,
         'progress': progress,
-        'intermediary_images': [] if images is None else images
+        'intermediary_images': [] if images is None else images,
+        'queue_position': position,
+        'provider': provider,
     }
     message_str = json.dumps(message)
     await job_publisher.publish(get_job_channel(job_id), message_str)
@@ -65,3 +72,38 @@ async def get_service_data() -> dict:
         return json.loads(raw_data)
     else:
         return {}
+
+
+class AsyncRedisQueue:
+    def __init__(self, name, namespace='queue', max_size=None):
+        self._db = redis
+        self.key = '%s:%s' % (namespace, name)
+        self.max_size = max_size
+
+    async def qsize(self):
+        return await self._db.llen(self.key)
+
+    async def put(self, item: dict):
+        if await self.qsize() >= self.max_size:
+            raise queue.Full
+        else:
+            item_serialized = json.dumps(item)
+            await self._db.rpush(self.key, item_serialized)
+
+    async def get(self, timeout=0):
+        item = await self._db.blpop(self.key, timeout=timeout)
+        if item:
+            item = json.loads(item[1])
+        return item
+
+    async def notify_queued(self):
+        """Notify all queued jobs listeners that their job changed position in the queue."""
+
+        elements = await self._db.lrange(self.key, 0, -1)
+        if elements:
+            for i, el in enumerate(elements):
+                job = json.loads(el)
+                await publish_job_status(job['job_id'], JobStatus.QUEUED.value, position=i+1)
+
+
+jobs_queue = AsyncRedisQueue('jobs', max_size=JOBS_QUEUE_MAX_SIZE)
