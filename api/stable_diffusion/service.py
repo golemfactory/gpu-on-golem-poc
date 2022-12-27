@@ -1,6 +1,7 @@
 import asyncio
 import bisect
 import datetime
+import hashlib
 import logging
 from pathlib import Path
 from typing import Optional
@@ -10,6 +11,7 @@ from yapapi.log import enable_default_logger
 from yapapi.payload import vm
 from yapapi.services import Service, ServiceState, Cluster
 
+from api.choices import JobStatus
 from api.redis_functions import publish_job_status, update_job_data, set_service_data, jobs_queue
 
 
@@ -18,6 +20,8 @@ CLUSTER_SUBNET_TAG = 'cuda-support'
 CLUSTER_BUDGET = 10.0
 CLUSTER_EXPIRATION_TIME = datetime.timedelta(days=365)
 INTERMEDIARY_IMAGES_NUMBER = 5
+# MD5 hash of a black image provided by service when NSFW content is detected
+NSFW_IMAGE_HASH = '62640df3608f0287d980794d720bff31'
 
 api_dir = Path(__file__).parent.joinpath('..').absolute()
 enable_default_logger(log_file=str(api_dir / 'sd-golem-service.log'))
@@ -52,12 +56,12 @@ class GenerateImageService(Service):
             await jobs_queue.notify_queued()
 
             job_data_update = {
-                "status": "processing",
+                "status": JobStatus.PROCESSING.value,
                 'provider_name': self.provider_name,
                 'started_at': datetime.datetime.now().isoformat(),
             }
             await update_job_data(job["job_id"], job_data_update)
-            await publish_job_status(job["job_id"], "processing", provider=self.provider_name)
+            await publish_job_status(job["job_id"], JobStatus.PROCESSING.value, provider=self.provider_name)
 
             logger.info(f'{self.name}: running job for: {job["prompt"]}')
 
@@ -94,7 +98,7 @@ class GenerateImageService(Service):
                     downloaded_images.update(images_to_download)
                     images_to_download.clear()
                 if progress < 100:
-                    await publish_job_status(job["job_id"], "processing", progress, intermediary_images,
+                    await publish_job_status(job["job_id"], JobStatus.PROCESSING.value, progress, intermediary_images,
                                              provider=self.provider_name)
 
             script = self._ctx.new_script()
@@ -103,14 +107,16 @@ class GenerateImageService(Service):
             logger.info(f'{self.name}: finished job {job["job_id"]} ({job["prompt"]})')
             yield script
 
+            image_blocked = hashlib.md5(open(final_img_path, 'rb').read()).hexdigest() == NSFW_IMAGE_HASH
+            final_status = JobStatus.BLOCKED if image_blocked else JobStatus.FINISHED
             job_data_update = {
-                "status": "finished",
+                "status": final_status.value,
                 "ended_at": datetime.datetime.now().isoformat(),
                 "img_url": final_img_path,
                 "intermediary_images": intermediary_images,
             }
             await update_job_data(job["job_id"], job_data_update)
-            await publish_job_status(job["job_id"], "finished", progress, intermediary_images,
+            await publish_job_status(job["job_id"], final_status.value, progress, intermediary_images,
                                      provider=self.provider_name)
 
 

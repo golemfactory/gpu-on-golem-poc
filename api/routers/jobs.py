@@ -12,6 +12,7 @@ from slowapi import Limiter
 from slowapi.util import get_remote_address
 from websockets import ConnectionClosed
 
+from api.choices import JobStatus
 from api.redis_functions import publish_job_status, subscribe_to_job_status, update_job_data, get_job_data, jobs_queue
 
 
@@ -37,12 +38,12 @@ async def add_job_to_queue(request: Request, prompt: str = Form(...)):
                             status_code=status.HTTP_429_TOO_MANY_REQUESTS)
     else:
         # Saving job's information
-        await update_job_data(job_id, {'job_id': job_id, 'status': 'queued'})
+        await update_job_data(job_id, {'job_id': job_id, 'status': JobStatus.QUEUED.value})
         # Publishing job's status
-        await publish_job_status(job_id, "queued")
+        await publish_job_status(job_id, JobStatus.QUEUED.value)
         return_data = {
             'job_id': job_id,
-            'status': "queued",
+            'status': JobStatus.QUEUED.value,
             'job_detail_url': request.url_for("job_detail", job_id=job_id),
             'job_progress_feed': request.url_for("job_detail_ws", job_id=job_id),
         }
@@ -81,7 +82,7 @@ async def job_detail_ws(job_id: str, websocket: WebSocket):
                             "intermediary_images": message_data['intermediary_images'],
                         }
                         await websocket.send_json(job_message)
-                        if job_message['status'] == 'finished':
+                        if job_message['status'] == JobStatus.FINISHED.value:
                             break
                     await asyncio.sleep(0.01)
             except ConnectionClosed:
@@ -91,7 +92,7 @@ async def job_detail_ws(job_id: str, websocket: WebSocket):
 
     job_data = await get_job_data(job_id)
     if job_data:
-        if job_data['status'] != 'finished':
+        if job_data['status'] != JobStatus.FINISHED.value:
             await subscribe_to_job_status(job_id, job_status_reader)
         await websocket.close(reason='Job finished.')
     else:

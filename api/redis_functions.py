@@ -4,6 +4,8 @@ from typing import Callable, Awaitable
 
 import aioredis
 
+from api.choices import JobStatus
+
 
 JOBS_QUEUE_MAX_SIZE = 30
 SERVICE_INFO_RETENCY_SECONDS = 60 * 20
@@ -101,7 +103,7 @@ class AsyncRedisQueue:
         if elements:
             for i, el in enumerate(elements):
                 job = json.loads(el)
-                await publish_job_status(job['job_id'], 'queued', position=i+1)
+                await publish_job_status(job['job_id'], JobStatus.QUEUED.value, position=i+1)
 
 
 jobs_queue = AsyncRedisQueue('jobs', max_size=JOBS_QUEUE_MAX_SIZE)
