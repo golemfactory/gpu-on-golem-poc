@@ -1,0 +1,20 @@
+[Unit]
+Description=Golem AI stable diffusion
+# Requires Golem requestor service. It's installed by https://github.com/norbibi/golem_cuda.git
+Requires=golem_requestor.service
+After=golem_requestor.service
+PartOf=golem-ai.target
+
+[Service]
+User=ubuntu
+Group=ubuntu
+Environment=PATH=/home/ubuntu/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/snap/bin
+Restart=on-failure
+# Restart each 12 hours
+WatchdogSec=720min
+WorkingDirectory=/home/ubuntu/gpu-on-golem-poc
+ExecStart=/home/ubuntu/gpu-on-golem-poc/venv/bin/python -m api.stable_diffusion.service
+Environment=YAGNA_APPKEY=ba92e433285d417a9039692f2846ec58
+
+[Install]
+WantedBy=golem-ai.target

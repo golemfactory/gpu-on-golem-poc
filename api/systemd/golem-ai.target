@@ -1,0 +1,8 @@
+[Unit]
+Description=Golem AI app
+Requires=multi-user.target
+After=multi-user.target
+AllowIsolate=yes
+
+[Install]
+WantedBy=multi-user.target

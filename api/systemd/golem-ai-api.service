@@ -1,0 +1,15 @@
+[Unit]
+Description=Golem AI API
+After=nginx.service
+PartOf=golem-ai.target
+
+[Service]
+User=ubuntu
+Group=ubuntu
+Environment=PATH=/home/ubuntu/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/snap/bin
+Restart=on-failure
+WorkingDirectory=/home/ubuntu/gpu-on-golem-poc
+ExecStart=/home/ubuntu/gpu-on-golem-poc/venv/bin/uvicorn api.app:app --log-config=api/log.yml
+
+[Install]
+WantedBy=golem-ai.target
