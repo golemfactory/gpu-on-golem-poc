@@ -158,13 +158,15 @@ async def main(num_instances):
 def prepare_service_data(current_cluster: Cluster, golem: Golem) -> dict:
     return {
         'golem': {
-            'operative': golem.operative, 'payment_driver': golem.payment_driver,
+            'operative': golem.operative,
+            'payment_driver': golem.payment_driver,
             'payment_network': golem.payment_network,
         },
         'cluster': {
             'expiration': current_cluster.expiration.isoformat(timespec='seconds'),
             'payload': {
-                'image_hash': current_cluster.payload.image_hash, 'image_url': current_cluster.payload.image_url,
+                'image_hash': current_cluster.payload.image_hash,
+                'image_url': current_cluster.payload.image_url,
             },
             'instances': [
                 {
@@ -175,7 +177,8 @@ def prepare_service_data(current_cluster: Cluster, golem: Golem) -> dict:
                 }
                 for i in current_cluster.instances
             ]
-        }
+        },
+        'last_update': datetime.datetime.now().isoformat(),
     }
 
 
