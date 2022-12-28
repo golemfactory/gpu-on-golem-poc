@@ -6,7 +6,7 @@ export { default as Form, useForm } from './Form';
 export { default as Header } from './Header';
 export { default as Layout } from './Layout';
 export { default as Loader } from './Loader';
-export { default as Process } from './Process';
+export { default as Process, useNodes } from './Process';
 export { default as Progress } from './Progress';
 export { default as Queue, useQueue } from './Queue';
 export { default as Result, useResult } from './Result';

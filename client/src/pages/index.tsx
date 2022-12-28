@@ -1,6 +1,18 @@
 import { Reducer, useReducer } from 'react';
 import { Status } from 'enums/status';
-import { Background, Error, Form, Layout, Loader, Queue, Result, useForm, useQueue, useResult } from 'components';
+import {
+  Background,
+  Error,
+  Form,
+  Layout,
+  Loader,
+  Queue,
+  Result,
+  useForm,
+  useNodes,
+  useQueue,
+  useResult,
+} from 'components';
 import { useStatusState } from 'utils/hooks';
 
 function Main() {
@@ -29,6 +41,8 @@ function Main() {
   };
 
   const handleReload = () => window.location.reload();
+
+  const nodes = useNodes(state, dispatch);
 
   return (
     <Layout>
@@ -60,7 +74,7 @@ function Main() {
       )}
       {forState([Status.Queued]) && <Queue {...queue} />}
       {forState([Status.Processing, Status.Finished]) && (
-        <Result state={state} data={data} value={value} onReset={handleReset} />
+        <Result state={state} data={data} value={value} onReset={handleReset} nodes={nodes} />
       )}
       {forState([Status.Error]) && (
         <div className="mt-[20rem]">

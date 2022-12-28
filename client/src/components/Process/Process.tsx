@@ -1,13 +1,22 @@
-import { Status } from 'enums/status';
 import { Progress } from 'components';
 
-function Process({ status, data }: { status: Status; data?: Data }) {
+function Process({ data, nodes }: { data?: Data; nodes: NodeInstance[] }) {
   const progress = data?.progress ?? 0;
+  const instance: NodeInstance = nodes.find((node: NodeInstance) => node.provider_name === data?.provider) ?? {
+    name: '',
+    provider_id: '',
+    provider_name: '',
+  };
 
   return (
     <Progress width={progress}>
-      <span className="absolute top-[2rem] left-0 capitalize">{status}</span>
-      <span className="absolute top-[2rem] right-0">{progress}%</span>
+      {data?.provider && (
+        <span className="absolute top-[2rem] left-0 text-[9px]">
+          Computing by: {data?.provider} ({instance.provider_id})
+        </span>
+      )}
+      <span className="absolute top-[2rem] right-0 text-[9px]">| {nodes.length ?? '-'} nodes in the network</span>
+      <span className="absolute -top-[0.1rem] right-[0.4rem] text-[9px] text-black">{progress}%</span>
     </Progress>
   );
 }

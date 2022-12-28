@@ -1,10 +1,22 @@
 import { useEffect, useState } from 'react';
 import { Status } from 'enums/status';
-import { Copy, View } from 'components';
+import { Copy, Process, View } from 'components';
 import { useStatusState } from 'utils/hooks';
 import url from 'utils/url';
 
-function Result({ state, data, value, onReset }: { state: State; data?: Data; value: string; onReset: () => void }) {
+function Result({
+  state,
+  data,
+  value,
+  onReset,
+  nodes,
+}: {
+  state: State;
+  data?: Data;
+  value: string;
+  onReset: () => void;
+  nodes: NodeInstance[];
+}) {
   const { forState } = useStatusState(state);
 
   const [src, setSrc] = useState('');
@@ -22,12 +34,15 @@ function Result({ state, data, value, onReset }: { state: State; data?: Data; va
       <h3 className="my-[1.2rem] text-12 text-stone">{value}</h3>
       <Copy value={value} />
       {forState([Status.Processing]) && (
-        <>
+        <div className="mx-auto w-[85%] md:w-[75%]">
           {!!data?.intermediary_images?.at(-1) ? (
             <View src={src} value={value} />
           ) : (
             <div className="mx-auto h-[36.2rem] w-[36.2rem] bg-black" />
           )}
+          <br />
+          <br />
+          <Process data={data} nodes={nodes} />
           <p className="mt-[5.7rem] mb-[2.4rem] text-14">
             Fun facts:
             <br />
@@ -35,15 +50,15 @@ function Result({ state, data, value, onReset }: { state: State; data?: Data; va
             Golem aims to be the first real decentralized marketplace for computing. And it seems that its doing its job
             right now, as real nodes are computing your task!
           </p>
-        </>
+        </div>
       )}
       {forState([Status.Finished]) && (
-        <>
+        <div className="mx-auto w-[85%] md:w-[75%]">
           <View src={src} value={value} />
           <p className="mt-[5.7rem] mb-[2.4rem] text-14">
             We hope you enjoy your results! Drop us a line on our Discord chat and share your experience :)
           </p>
-        </>
+        </div>
       )}
       <div className="mb-[1.8rem]">
         <button className="button bg-white text-black" onClick={onReset}>
