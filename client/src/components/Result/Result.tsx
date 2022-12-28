@@ -23,7 +23,7 @@ function Result({
 
   useEffect(() => {
     forState([Status.Processing]) && setSrc(url(data?.intermediary_images?.at(-1) ?? '', false));
-    forState([Status.Finished]) && setSrc(url(data?.img_url ?? '', false));
+    forState([Status.Finished, Status.Blocked]) && setSrc(url(data?.img_url ?? '', false));
   }, [data?.img_url, data?.intermediary_images, forState]);
 
   const handleOpen = () => window.open('https://chat.golem.network/');
@@ -58,6 +58,12 @@ function Result({
           <p className="mt-[5.7rem] mb-[2.4rem] text-14">
             We hope you enjoy your results! Drop us a line on our Discord chat and share your experience :)
           </p>
+        </div>
+      )}
+      {forState([Status.Blocked]) && (
+        <div className="mx-auto w-[85%] md:w-[75%]">
+          <View src={src} value={value} blocked />
+          <p className="mt-[5.7rem] mb-[2.4rem] text-14">Sorry, this image violates our NSFW filters :(</p>
         </div>
       )}
       <div className="mb-[1.8rem]">

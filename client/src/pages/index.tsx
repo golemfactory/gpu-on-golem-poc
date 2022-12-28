@@ -46,9 +46,9 @@ function Main() {
 
   return (
     <Layout>
-      {notForState([Status.Processing, Status.Finished]) && <Background />}
+      {notForState([Status.Processing, Status.Finished, Status.Blocked]) && <Background />}
       <Loader state={state} />
-      {notForState([Status.Processing, Status.Finished, Status.Error]) && (
+      {notForState([Status.Processing, Status.Finished, Status.Blocked, Status.Error]) && (
         <div className="mt-[20rem]">
           <h1 className="mb-[5.7rem] text-34">
             AI image generator supported by the computing power of the{' '}
@@ -73,7 +73,7 @@ function Main() {
         </p>
       )}
       {forState([Status.Queued]) && <Queue {...queue} />}
-      {forState([Status.Processing, Status.Finished]) && (
+      {forState([Status.Processing, Status.Finished, Status.Blocked]) && (
         <Result state={state} data={data} value={value} onReset={handleReset} nodes={nodes} />
       )}
       {forState([Status.Error]) && (
