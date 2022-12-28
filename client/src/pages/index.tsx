@@ -1,18 +1,6 @@
 import { Reducer, useReducer } from 'react';
 import { Status } from 'enums/status';
-import {
-  Background,
-  Error,
-  Form,
-  Layout,
-  Loader,
-  Process,
-  Queue,
-  Result,
-  useForm,
-  useQueue,
-  useResult,
-} from 'components';
+import { Background, Error, Form, Layout, Loader, Queue, Result, useForm, useQueue, useResult } from 'components';
 import { useStatusState } from 'utils/hooks';
 
 function Main() {
@@ -44,9 +32,9 @@ function Main() {
 
   return (
     <Layout>
-      {notForState([Status.Finished]) && <Background />}
+      {notForState([Status.Processing, Status.Finished]) && <Background />}
       <Loader state={state} />
-      {notForState([Status.Finished, Status.Error]) && (
+      {notForState([Status.Processing, Status.Finished, Status.Error]) && (
         <div className="mt-[20rem]">
           <h1 className="mb-[5.7rem] text-34">
             AI image generator supported by the computing power of the{' '}
@@ -71,8 +59,9 @@ function Main() {
         </p>
       )}
       {forState([Status.Queued]) && <Queue {...queue} />}
-      {forState([Status.Processing]) && <Process status={state.status} data={data} />}
-      {forState([Status.Finished]) && <Result data={data} value={value} onReset={handleReset} />}
+      {forState([Status.Processing, Status.Finished]) && (
+        <Result state={state} data={data} value={value} onReset={handleReset} />
+      )}
       {forState([Status.Error]) && (
         <div className="mt-[20rem]">
           <Error label="Refresh site" onClick={handleReload} />

@@ -1,13 +1,18 @@
-import Image from 'next/image';
-import { saveAs } from 'file-saver';
-import { renderIcon } from 'assets/utils';
-import { Copy } from 'components';
+import { useEffect, useState } from 'react';
+import { Status } from 'enums/status';
+import { Copy, View } from 'components';
+import { useStatusState } from 'utils/hooks';
 import url from 'utils/url';
 
-function Result({ data, value, onReset }: { data?: Data; value: string; onReset: () => void }) {
-  const src = url(data?.img_url ?? '', false);
+function Result({ state, data, value, onReset }: { state: State; data?: Data; value: string; onReset: () => void }) {
+  const { forState } = useStatusState(state);
 
-  const handleSave = () => saveAs(src, `${value}.png`);
+  const [src, setSrc] = useState('');
+
+  useEffect(() => {
+    forState([Status.Processing]) && setSrc(url(data?.intermediary_images?.at(-1) ?? '', false));
+    forState([Status.Finished]) && setSrc(url(data?.img_url ?? '', false));
+  }, [data?.img_url, data?.intermediary_images, forState]);
 
   const handleOpen = () => window.open('https://chat.golem.network/');
 
@@ -16,17 +21,30 @@ function Result({ data, value, onReset }: { data?: Data; value: string; onReset:
       <h2 className="text-36">Result for:</h2>
       <h3 className="my-[1.2rem] text-12 text-stone">{value}</h3>
       <Copy value={value} />
-      <div className="relative mx-auto w-[36.2rem]">
-        <Image className="mx-auto" src={src} alt={value} width={362} height={362} />
-        <button
-          className="absolute bottom-[1rem] right-[1rem] h-[2rem] w-[1.8rem] bg-black bg-center bg-no-repeat"
-          style={{ backgroundImage: `url(${renderIcon('download')})` }}
-          onClick={handleSave}
-        />
-      </div>
-      <p className="mt-[5.7rem] mb-[2.4rem] text-14">
-        We hope you enjoy your results! Drop us a line on our Discord chat and share your experience :)
-      </p>
+      {forState([Status.Processing]) && (
+        <>
+          {!!data?.intermediary_images?.at(-1) ? (
+            <View src={src} value={value} />
+          ) : (
+            <div className="mx-auto h-[36.2rem] w-[36.2rem] bg-black" />
+          )}
+          <p className="mt-[5.7rem] mb-[2.4rem] text-14">
+            Fun facts:
+            <br />
+            <br />
+            Golem aims to be the first real decentralized marketplace for computing. And it seems that its doing its job
+            right now, as real nodes are computing your task!
+          </p>
+        </>
+      )}
+      {forState([Status.Finished]) && (
+        <>
+          <View src={src} value={value} />
+          <p className="mt-[5.7rem] mb-[2.4rem] text-14">
+            We hope you enjoy your results! Drop us a line on our Discord chat and share your experience :)
+          </p>
+        </>
+      )}
       <div className="mb-[1.8rem]">
         <button className="button bg-white text-black" onClick={onReset}>
           Start over
