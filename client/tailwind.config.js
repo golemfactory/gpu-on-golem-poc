@@ -7,12 +7,21 @@ module.exports = {
       blue: '#007dff',
       black: '#000000',
       grey: '#c3c3c3',
+      stone: '#9c9c9c',
     },
     fontFamily: {
       sans: ['Inter', 'sans'],
       mono: ['Roboto Mono', 'mono'],
     },
     fontSize: {
+      9: [
+        '0.9rem',
+        {
+          lineHeight: '2.4rem',
+          letterSpacing: '0.028rem',
+          fontWeight: '500',
+        },
+      ],
       10: [
         '1rem',
         {

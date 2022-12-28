@@ -1,6 +1,7 @@
 import Image from 'next/image';
 import { saveAs } from 'file-saver';
 import { renderIcon } from 'assets/utils';
+import { Copy } from 'components';
 import url from 'utils/url';
 
 function Result({ data, value, onReset }: { data?: Data; value: string; onReset: () => void }) {
@@ -11,9 +12,10 @@ function Result({ data, value, onReset }: { data?: Data; value: string; onReset:
   const handleOpen = () => window.open('https://chat.golem.network/');
 
   return (
-    <div className="mt-[12rem] mb-[8rem] lg:mt-[5rem]">
+    <div className="mt-[12rem] mb-[8rem]">
       <h2 className="text-36">Result for:</h2>
-      <h3 className="mt-[1.2rem] mb-[2.4rem] text-12 text-[#9c9c9c]">{value}</h3>
+      <h3 className="my-[1.2rem] text-12 text-stone">{value}</h3>
+      <Copy value={value} />
       <div className="relative mx-auto w-[36.2rem]">
         <Image className="mx-auto" src={src} alt={value} width={362} height={362} />
         <button

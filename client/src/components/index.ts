@@ -1,4 +1,5 @@
 export { default as Background } from './Background';
+export { default as Copy } from './Copy';
 export { default as Error } from './Error';
 export { default as Footer } from './Footer';
 export { default as Form, useForm } from './Form';
