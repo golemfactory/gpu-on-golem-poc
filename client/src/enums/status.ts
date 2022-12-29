@@ -5,6 +5,7 @@ export enum Status {
   Queued = 'queued',
   Processing = 'processing',
   Finished = 'finished',
+  Blocked = 'blocked',
   Error = 'error',
 }
 
@@ -15,5 +16,6 @@ export const Statuses = [
   Status.Queued,
   Status.Processing,
   Status.Finished,
+  Status.Blocked,
   Status.Error,
 ];

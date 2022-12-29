@@ -26,7 +26,7 @@ function Form({ state, value, onChange, error, onSubmit, onExample }: { state: S
         Type:
       </label>
       <input
-        className="w-full rounded-[0] bg-[#f9f9f9] px-[1.2rem] py-[1.7rem] focus:outline-none focus:ring disabled:bg-[#f9f9f9] disabled:text-[#9c9c9c]"
+        className="w-full rounded-[0] bg-[#f9f9f9] px-[1.2rem] py-[1.7rem] focus:outline-none focus:ring disabled:bg-[#f9f9f9] disabled:text-stone"
         id="phrase"
         name="phrase"
         type="text"

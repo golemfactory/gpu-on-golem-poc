@@ -6,10 +6,10 @@ import {
   Form,
   Layout,
   Loader,
-  Process,
   Queue,
   Result,
   useForm,
+  useNodes,
   useQueue,
   useResult,
 } from 'components';
@@ -42,11 +42,13 @@ function Main() {
 
   const handleReload = () => window.location.reload();
 
+  const nodes = useNodes(state, dispatch);
+
   return (
     <Layout>
-      {notForState([Status.Finished]) && <Background />}
+      {notForState([Status.Processing, Status.Finished, Status.Blocked]) && <Background />}
       <Loader state={state} />
-      {notForState([Status.Finished, Status.Error]) && (
+      {notForState([Status.Processing, Status.Finished, Status.Blocked, Status.Error]) && (
         <div className="mt-[20rem]">
           <h1 className="mb-[5.7rem] text-34">
             AI image generator supported by the computing power of the{' '}
@@ -71,8 +73,9 @@ function Main() {
         </p>
       )}
       {forState([Status.Queued]) && <Queue {...queue} />}
-      {forState([Status.Processing]) && <Process status={state.status} data={data} />}
-      {forState([Status.Finished]) && <Result data={data} value={value} onReset={handleReset} />}
+      {forState([Status.Processing, Status.Finished, Status.Blocked]) && (
+        <Result state={state} data={data} value={value} onReset={handleReset} nodes={nodes} />
+      )}
       {forState([Status.Error]) && (
         <div className="mt-[20rem]">
           <Error label="Refresh site" onClick={handleReload} />

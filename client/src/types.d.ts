@@ -9,6 +9,14 @@ type Action = {
 };
 
 type Data = {
-  progress: number;
   img_url: string;
+  intermediary_images: string[];
+  progress: number;
+  provider: string;
+};
+
+type NodeInstance = {
+  name: string;
+  provider_id: string;
+  provider_name: string;
 };

@@ -15,7 +15,7 @@ function Queue({ jobs_in_queue, max_queue_size }: { jobs_in_queue: number; max_q
   return (
     <>
       <Progress width={percent}>
-        <span className="absolute top-[2rem] left-0 capitalize">
+        <span className="absolute top-[2rem] left-0 text-[9px] capitalize">
           Queue {jobs_in_queue}/{max_queue_size}
         </span>
       </Progress>

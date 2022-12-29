@@ -1,12 +1,14 @@
 export { default as Background } from './Background';
+export { default as Copy } from './Copy';
 export { default as Error } from './Error';
 export { default as Footer } from './Footer';
 export { default as Form, useForm } from './Form';
 export { default as Header } from './Header';
 export { default as Layout } from './Layout';
 export { default as Loader } from './Loader';
-export { default as Process } from './Process';
+export { default as Process, useNodes } from './Process';
 export { default as Progress } from './Progress';
 export { default as Queue, useQueue } from './Queue';
 export { default as Result, useResult } from './Result';
 export { default as Tooltip } from './Tooltip';
+export { default as View } from './View';
