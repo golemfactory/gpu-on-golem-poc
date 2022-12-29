@@ -11,7 +11,7 @@ JOBS_QUEUE_MAX_SIZE = 30
 SERVICE_INFO_RETENCY_SECONDS = 60 * 20
 JOB_INFO_RETENCY_SECONDS = 60 * 60 * 24
 job_publisher = aioredis.Redis.from_url("redis://localhost", decode_responses=True)
-redis = aioredis.Redis.from_url("redis://localhost", max_connections=10, decode_responses=True)
+redis = aioredis.Redis.from_url("redis://localhost", decode_responses=True)
 
 
 async def publish_job_status(job_id: str, status: str, progress: int = 0, images: list = None, position: int = 0,
