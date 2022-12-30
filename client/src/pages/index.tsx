@@ -30,7 +30,7 @@ function Main() {
 
   const queue = useQueue(state, dispatch);
 
-  const { value, onExample, ...form } = useForm(dispatch);
+  const { value, onExample, ...form } = useForm(state, dispatch);
 
   const { data, onReset } = useResult(state, dispatch);
 
@@ -61,7 +61,7 @@ function Main() {
               golem.network
             </a>
           </h1>
-          <Form state={state} value={value} onExample={onExample} {...form} />
+          <Form value={value} onExample={onExample} {...form} />
         </div>
       )}
       {forState([Status.Ready]) && (

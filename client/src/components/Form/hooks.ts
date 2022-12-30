@@ -13,9 +13,11 @@ const example = () =>
     length: 5,
   });
 
-export function useForm(dispatch: (action: Action) => void): useFormType {
+export function useForm(state: State, dispatch: (action: Action) => void): useFormType {
   const [value, setValue] = useState<string>('');
   const [error, setError] = useState<string | undefined>(undefined);
+
+  const disabled = !!state.job_id;
 
   useEffect(() => {
     setValue(example());
@@ -27,6 +29,11 @@ export function useForm(dispatch: (action: Action) => void): useFormType {
 
   const handleExample = () => {
     setValue(example());
+    setError(undefined);
+  };
+
+  const handleClear = () => {
+    setValue('');
     setError(undefined);
   };
 
@@ -58,7 +65,9 @@ export function useForm(dispatch: (action: Action) => void): useFormType {
     value,
     onChange: handleChange,
     error,
+    disabled,
     onSubmit: handleSubmit,
     onExample: handleExample,
+    onClear: handleClear,
   };
 }

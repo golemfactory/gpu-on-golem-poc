@@ -1,4 +1,5 @@
 import checkmarkSVG from 'assets/checkmark.svg';
+import clearSVG from 'assets/clear.svg';
 import copySVG from 'assets/copy.svg';
 import discordSVG from 'assets/discord.svg';
 import downloadSVG from 'assets/download.svg';
@@ -12,6 +13,7 @@ import twitterSVG from 'assets/twitter.svg';
 export function renderIcon(name: string) {
   const icon: { [key: string]: { src: string } } = {
     checkmark: checkmarkSVG,
+    clear: clearSVG,
     copy: copySVG,
     discord: discordSVG,
     download: downloadSVG,

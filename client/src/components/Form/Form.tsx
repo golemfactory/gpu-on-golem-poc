@@ -1,14 +1,7 @@
-import { Status } from 'enums/status';
 import { renderIcon } from 'assets/utils';
 import { Tooltip } from 'components';
-import { useStatusState } from 'utils/hooks';
 
-function Form({ state, value, onChange, error, onSubmit, onExample }: { state: State } & useFormType) {
-  const { forState } = useStatusState(state);
-
-  const disabled = !!state.job_id;
-  const processing = forState([Status.Processing]);
-
+function Form({ value, onChange, error, disabled, onSubmit, onExample, onClear }: useFormType) {
   return (
     <form className="relative my-[2.6rem] flex justify-center text-12 text-black" onSubmit={onSubmit}>
       <Tooltip
@@ -26,7 +19,7 @@ function Form({ state, value, onChange, error, onSubmit, onExample }: { state: S
         Type:
       </label>
       <input
-        className="w-full rounded-[0] bg-[#f9f9f9] px-[1.2rem] py-[1.7rem] focus:outline-none focus:ring disabled:bg-[#f9f9f9] disabled:text-stone"
+        className="w-full rounded-[0] bg-[#f9f9f9] py-[1.7rem] pl-[1.2rem] pr-[2.4rem] focus:outline-none focus:ring disabled:bg-[#f9f9f9] disabled:text-stone"
         id="phrase"
         name="phrase"
         type="text"
@@ -36,12 +29,20 @@ function Form({ state, value, onChange, error, onSubmit, onExample }: { state: S
         placeholder="Type something or generate new example"
         disabled={disabled}
       />
+      {!!value && !disabled && (
+        <button
+          className="absolute top-[1.7rem] right-[15rem] h-[2rem] w-[2rem] bg-center bg-no-repeat"
+          type="button"
+          style={{ backgroundImage: `url(${renderIcon('clear')})` }}
+          onClick={onClear}
+        />
+      )}
       <button
         className="min-w-[14.4rem] rounded-r-full bg-[right_2rem_center] bg-no-repeat p-[1.7rem] text-left text-14 focus:outline-none focus:ring disabled:bg-[#6d6d6d]"
-        style={processing ? {} : { backgroundImage: `url(${renderIcon('play')})` }}
+        style={{ backgroundImage: `url(${renderIcon('play')})` }}
         disabled={disabled}
       >
-        {processing ? 'Generating...' : 'Generate'}
+        Generate
       </button>
       {!disabled && (
         <button
