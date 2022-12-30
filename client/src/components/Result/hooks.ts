@@ -5,7 +5,7 @@ import { Status } from 'enums/status';
 import { useStatusState } from 'utils/hooks';
 import url from 'utils/url';
 
-export function useResult(state: State, dispatch: (action: Action) => void) {
+export function useResult({ state, dispatch }: useReducerProps) {
   const { forState } = useStatusState(state);
 
   const [socketUrl, setSocketUrl] = useState<string | null>(null);

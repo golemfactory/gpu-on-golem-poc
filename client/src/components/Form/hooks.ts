@@ -13,7 +13,7 @@ const example = () =>
     length: 5,
   });
 
-export function useForm(state: State, dispatch: (action: Action) => void): useFormType {
+export function useForm({ state, dispatch }: useReducerProps): useFormType {
   const [value, setValue] = useState<string>('');
   const [error, setError] = useState<string | undefined>(undefined);
 

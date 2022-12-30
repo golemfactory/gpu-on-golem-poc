@@ -20,3 +20,8 @@ type NodeInstance = {
   provider_id: string;
   provider_name: string;
 };
+
+type useReducerProps = {
+  state: State;
+  dispatch: (action: Action) => void;
+};

@@ -5,7 +5,7 @@ import { Status } from 'enums/status';
 import { useFetch, useStatusState } from 'utils/hooks';
 import url from 'utils/url';
 
-export function useQueue(state: State, dispatch: (action: Action) => void) {
+export function useQueue({ state, dispatch }: useReducerProps) {
   const { forState } = useStatusState(state);
 
   const [socketUrl, setSocketUrl] = useState<string | null>(null);
