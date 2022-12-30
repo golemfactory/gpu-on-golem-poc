@@ -28,11 +28,11 @@ function Main() {
 
   const { forState, notForState } = useStatusState(state);
 
-  const queue = useQueue(state, dispatch);
+  const queue = useQueue({ state, dispatch });
 
-  const { value, onExample, ...form } = useForm(dispatch);
+  const { value, onExample, ...form } = useForm({ state, dispatch });
 
-  const { data, onReset } = useResult(state, dispatch);
+  const { data, onReset } = useResult({ state, dispatch });
 
   const handleReset = () => {
     dispatch({ type: Status.Ready });
@@ -42,7 +42,7 @@ function Main() {
 
   const handleReload = () => window.location.reload();
 
-  const nodes = useNodes(state, dispatch);
+  const nodes = useNodes({ state, dispatch });
 
   return (
     <Layout>
@@ -61,7 +61,7 @@ function Main() {
               golem.network
             </a>
           </h1>
-          <Form state={state} value={value} onExample={onExample} {...form} />
+          <Form value={value} onExample={onExample} {...form} />
         </div>
       )}
       {forState([Status.Ready]) && (

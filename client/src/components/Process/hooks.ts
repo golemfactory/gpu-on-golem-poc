@@ -4,7 +4,7 @@ import { Status } from 'enums/status';
 import { useFetch, useStatusState } from 'utils/hooks';
 import url from 'utils/url';
 
-export function useNodes(state: State, dispatch: (action: Action) => void) {
+export function useNodes({ state, dispatch }: useReducerProps) {
   const { forState } = useStatusState(state);
 
   const [nodes, setNodes] = useState<NodeInstance[]>([]);

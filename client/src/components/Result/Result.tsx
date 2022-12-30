@@ -1,6 +1,6 @@
 import { ReactNode, useEffect, useState } from 'react';
 import { Status } from 'enums/status';
-import { Copy, Process, View } from 'components';
+import { Copy, Placeholder, Process, View } from 'components';
 import { useStatusState } from 'utils/hooks';
 import url from 'utils/url';
 
@@ -55,11 +55,7 @@ function Result({
       <Copy value={value} />
       {forState([Status.Processing]) && (
         <div className="mx-auto w-[85%] md:w-[75%]">
-          {!!data?.intermediary_images?.at(-1) ? (
-            <View src={src} value={value} />
-          ) : (
-            <div className="mx-auto h-[36.2rem] w-[36.2rem] bg-black" />
-          )}
+          {!!data?.intermediary_images?.at(-1) ? <View src={src} value={value} /> : <Placeholder />}
           <br />
           <br />
           <Process data={data} nodes={nodes} />
