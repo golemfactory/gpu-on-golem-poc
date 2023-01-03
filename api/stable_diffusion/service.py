@@ -40,6 +40,7 @@ class GenerateImageService(Service):
         return await vm.repo(
             image_hash='2b974c2d48fccd52c4b0d3413b628af30851cd7d2af57eea251b4ef8',
             image_url='http://gpu-on-golem.s3.eu-central-1.amazonaws.com/docker-diffusers-golem-latest-3b13fd1916.gvmi',
+            capabilities=['vpn', 'cuda*'],
         )
 
     async def start(self):
