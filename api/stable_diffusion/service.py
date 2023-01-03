@@ -16,7 +16,7 @@ from api.redis_functions import publish_job_status, update_job_data, set_service
 
 
 CLUSTER_INSTANCES_NUMBER = 2
-CLUSTER_SUBNET_TAG = 'cuda-support'
+CLUSTER_SUBNET_TAG = 'public'
 CLUSTER_BUDGET = 10.0
 CLUSTER_EXPIRATION_TIME = datetime.timedelta(days=365)
 INTERMEDIARY_IMAGES_NUMBER = 5
