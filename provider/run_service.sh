@@ -1,5 +1,4 @@
 #! /bin/bash
 
-cd /usr/src/app
-python3 service.py "$1" > out.txt 2>&1 &
-
+cd /usr/src/app/stable-diffusion-webui
+python3 launch.py > out.txt 2>&1 &
