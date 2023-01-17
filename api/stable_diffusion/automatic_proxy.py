@@ -2,11 +2,12 @@ import asyncio
 from datetime import datetime, timedelta, timezone
 import pathlib
 import sys
+from typing import Optional
 
 from yapapi import Golem
 from yapapi.contrib.service.http_proxy import HttpProxyService, LocalHttpProxy
 from yapapi.payload import vm
-from yapapi.services import ServiceState
+from yapapi.services import ServiceState, Cluster
 
 examples_dir = pathlib.Path(__file__).resolve().parent.parent
 sys.path.append(str(examples_dir))
@@ -20,14 +21,16 @@ STARTING_TIMEOUT = timedelta(minutes=4)
 # as providers typically won't take offers that expire sooner than 5 minutes in the future
 EXPIRATION_MARGIN = timedelta(minutes=5)
 
+cluster: Optional[Cluster] = None
+
 
 class AutomaticService(HttpProxyService):
     @staticmethod
     async def get_payload():
         return await vm.repo(
-            image_hash='2b974c2d48fccd52c4b0d3413b628af30851cd7d2af57eea251b4ef8',
-            image_url='http://gpu-on-golem.s3.eu-central-1.amazonaws.com/docker-diffusers-golem-latest-3b13fd1916.gvmi',
-            capabilities=[vm.VM_CAPS_VPN, 'cuda*'],
+            image_hash='17de6c863581d53355f7cdeb8ec5f6d7eb43604494ea958a9dfe3ef7',
+            image_url='http://gpu-on-golem.s3.eu-central-1.amazonaws.com/docker-automatic-golem-latest-7c4666b6aa.gvmi',
+            capabilities=['vpn', 'cuda*'],
         )
 
     async def start(self):
@@ -44,6 +47,8 @@ class AutomaticService(HttpProxyService):
 
 
 async def main(port):
+    global cluster
+
     async with Golem(
         budget=10.0,
         subnet_tag='public',
@@ -53,6 +58,7 @@ async def main(port):
         network = await golem.create_network("192.168.0.1/24")
         cluster = await golem.run_service(
             AutomaticService,
+            instance_params=[{"remote_port": port}],
             network=network,
             num_instances=1,
             expiration=datetime.now(timezone.utc) + timedelta(days=365)
@@ -105,8 +111,9 @@ async def main(port):
 
 if __name__ == "__main__":
     try:
-        asyncio.run(main(8000))
+        asyncio.run(main(7861))
     except KeyboardInterrupt:
         print('Interruption')
     finally:
         print('Stopping cluster')
+        cluster.stop()
