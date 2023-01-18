@@ -68,7 +68,7 @@ class AutomaticService(HttpProxyService):
             yield script
 
         script = self._ctx.new_script()
-        script.run("/usr/src/app/run_service_alt.sh", "192.168.0.2", "8000")
+        script.run("/usr/src/app/run_service_alt.sh", "127.0.0.1", "80")
         yield script
 
 
@@ -85,7 +85,7 @@ async def main(port):
 
                 cluster = await golem.run_service(
                     AutomaticService,
-                    instance_params=[{"remote_port": port}],
+                    instance_params=[{"remote_port": 80}],
                     network=network,
                     expiration=datetime.datetime.now() + CLUSTER_EXPIRATION_TIME
                 )
