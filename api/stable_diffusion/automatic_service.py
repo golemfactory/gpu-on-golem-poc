@@ -26,22 +26,49 @@ logger = logging.getLogger('yapapi')
 cluster: Optional[Cluster] = None
 
 
+class NginxService(HttpProxyService):
+    @staticmethod
+    async def get_payload():
+        return await vm.repo(
+            image_hash="16ad039c00f60a48c76d0644c96ccba63b13296d140477c736512127",
+            capabilities=[vm.VM_CAPS_VPN, 'cuda*'],
+        )
+
+    async def start(self):
+        # perform the initialization of the Service
+        # (which includes sending the network details within the `deploy` command)
+        async for script in super().start():
+            yield script
+
+        # start the remote HTTP server and give it some content to serve in the `index.html`
+        script = self._ctx.new_script()
+        script.run("/docker-entrypoint.sh")
+        script.run("/bin/chmod", "a+x", "/")
+        msg = "Hello"
+        script.run(
+            "/bin/sh",
+            "-c",
+            f"echo {msg} > /usr/share/nginx/html/index.html",
+        )
+        script.run("/usr/sbin/nginx"),
+        yield script
+
+
 class AutomaticService(HttpProxyService):
     @staticmethod
     async def get_payload():
         return await vm.repo(
-            # image_hash='2b974c2d48fccd52c4b0d3413b628af30851cd7d2af57eea251b4ef8',
-            # image_url='http://gpu-on-golem.s3.eu-central-1.amazonaws.com/docker-diffusers-golem-latest-3b13fd1916.gvmi',
-            image_hash='17de6c863581d53355f7cdeb8ec5f6d7eb43604494ea958a9dfe3ef7',
-            image_url='http://gpu-on-golem.s3.eu-central-1.amazonaws.com/docker-automatic-golem-latest-7c4666b6aa.gvmi',
-            capabilities=['vpn', 'cuda*'],
+            image_hash='22b64436d8f5b357e90acdcd70e8f3696ddd76d048cdcf850d5dc5d8',
+            image_url='http://gpu-on-golem.s3.eu-central-1.amazonaws.com/automatic-golem-22b64436d8f5b357e90acdcd70e8f3696ddd76d048cdcf850d5dc5d8.gvmi',
+            capabilities=[vm.VM_CAPS_VPN, 'cuda*'],
         )
 
     async def start(self):
         async for script in super().start():
             yield script
+
         script = self._ctx.new_script()
-        script.run("run_service.sh")
+        script.run("/usr/src/app/run_service_alt.sh", "192.168.0.2", "8000")
         yield script
 
 
@@ -54,13 +81,19 @@ async def main(port):
     while True:
         try:
             async with Golem(budget=CLUSTER_BUDGET, subnet_tag=CLUSTER_SUBNET_TAG) as golem:
-                # network = await golem.create_network("192.168.0.1/24")
+                network = await golem.create_network("192.168.0.1/24")
+
                 cluster = await golem.run_service(
                     AutomaticService,
                     instance_params=[{"remote_port": port}],
-                    # network=network,
+                    network=network,
                     expiration=datetime.datetime.now() + CLUSTER_EXPIRATION_TIME
                 )
+                # cluster = await golem.run_service(
+                #     NginxService,
+                #     network=network,
+                #     expiration=datetime.datetime.now() + CLUSTER_EXPIRATION_TIME
+                # )
 
                 def still_starting():
                     return any(i.state in (ServiceState.pending, ServiceState.starting) for i in cluster.instances)
@@ -69,9 +102,9 @@ async def main(port):
                     print_instances()
                     await asyncio.sleep(5)
 
-                # proxy = LocalHttpProxy(cluster, port)
-                # await proxy.run()
-                # print(f"Local HTTP server listening on:\nhttp://localhost:{port}")
+                proxy = LocalHttpProxy(cluster, port)
+                await proxy.run()
+                print(f"Local HTTP server listening on:\nhttp://localhost:{port}")
 
                 while True:
                     await asyncio.sleep(60 * 3)
@@ -84,10 +117,10 @@ async def main(port):
         except ClusterNeedsRestart:
             cluster.stop()
         except Exception as e:
-            # await proxy.stop()
+            await proxy.stop()
             print(f"HTTP server stopped")
             cluster.stop()
-            # await network.remove()
+            await network.remove()
 
 
 def print_instances():
@@ -100,7 +133,7 @@ def print_instances():
 
 def run_sd_service():
     try:
-        asyncio.run(main(7861))
+        asyncio.run(main(8000))
     except KeyboardInterrupt:
         logger.info('Interruption')
     finally:

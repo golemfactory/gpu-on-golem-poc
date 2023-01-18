@@ -49,10 +49,7 @@ class AutomaticService(HttpProxyService):
 async def main(port):
     global cluster
 
-    async with Golem(
-        budget=10.0,
-        subnet_tag='public',
-    ) as golem:
+    async with Golem(budget=10.0, subnet_tag='public') as golem:
         commissioning_time = datetime.now()
 
         network = await golem.create_network("192.168.0.1/24")

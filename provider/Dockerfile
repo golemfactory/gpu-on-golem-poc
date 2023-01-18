@@ -5,6 +5,7 @@ VOLUME /usr/src/app/output
 
 COPY service.py ./
 COPY run_service.sh ./
+COPY run_service_alt.sh ./
 COPY generate.sh ./
 COPY generate_wait.sh ./
 
