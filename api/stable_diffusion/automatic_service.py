@@ -58,8 +58,8 @@ class AutomaticService(HttpProxyService):
     @staticmethod
     async def get_payload():
         return await vm.repo(
-            image_hash='22b64436d8f5b357e90acdcd70e8f3696ddd76d048cdcf850d5dc5d8',
-            image_url='http://gpu-on-golem.s3.eu-central-1.amazonaws.com/automatic-golem-22b64436d8f5b357e90acdcd70e8f3696ddd76d048cdcf850d5dc5d8.gvmi',
+            image_hash='39600d3ef4f1cd87e4f3f70cd7b91a6dca55ceea9c897c50de76d4d3',
+            image_url='http://gpu-on-golem.s3.eu-central-1.amazonaws.com/docker-automatic-golem-test-39600d3ef4f1cd87e4f3f70cd7b91a6dca55ceea9c897c50de76d4d3.gvmi',
             capabilities=[vm.VM_CAPS_VPN, 'cuda*'],
         )
 
@@ -68,8 +68,18 @@ class AutomaticService(HttpProxyService):
             yield script
 
         script = self._ctx.new_script()
-        script.run("/usr/src/app/run_service_alt.sh", "127.0.0.1", "80")
+        script.upload_file('/home/dev/gpu-on-golem-poc/provider/automatic.conf', '/usr/src/app/output/automatic.conf')
+        script.run("/usr/bin/cp", "/usr/src/app/output/automatic.conf", "/etc/nginx/conf.d/"),
         yield script
+
+        script = self._ctx.new_script()
+        script.run("/usr/src/app/run_service_alt.sh", "127.0.0.1", "8000")
+        yield script
+
+        script = self._ctx.new_script()
+        script.run("/usr/sbin/nginx")
+        yield script
+
 
 
 async def main(port):
@@ -85,7 +95,7 @@ async def main(port):
 
                 cluster = await golem.run_service(
                     AutomaticService,
-                    instance_params=[{"remote_port": 80}],
+                    # instance_params=[{"remote_port": 8000}],
                     network=network,
                     expiration=datetime.datetime.now() + CLUSTER_EXPIRATION_TIME
                 )
