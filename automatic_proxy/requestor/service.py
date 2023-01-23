@@ -29,19 +29,14 @@ class AutomaticService(HttpProxyService):
     @staticmethod
     async def get_payload():
         return await vm.repo(
-            image_hash='c2d8813c712f8f34a1cd14ae94f7b89cd83004c822bc6e248c98f395',
-            image_url='http://storage.googleapis.com/sd-golem-images/docker-automatic-golem-latest-c020a5ca05.gvmi',
+            image_hash='2e0c2ebf653707ba1c6cc1ae2beff0a35fe303b4d81b079eda776d34',
+            image_url='http://storage.googleapis.com/sd-golem-images/docker-automatic-golem-latest-9aafc23d77.gvmi',
             capabilities=[vm.VM_CAPS_VPN, 'cuda*'],
         )
 
     async def start(self):
         async for script in super().start():
             yield script
-
-        # script = self._ctx.new_script()
-        # script.upload_file('/home/dev/gpu-on-golem-poc/provider/proxy.conf', '/usr/src/app/output/proxy.conf')
-        # script.run("/usr/bin/cp", "/usr/src/app/output/proxy.conf", "/etc/nginx/conf.d/"),
-        # yield script
 
         script = self._ctx.new_script()
         script.run("/usr/src/app/run_service.sh", "127.0.0.1", "8000")
