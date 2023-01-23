@@ -1,9 +1,7 @@
 venv
 .idea
-provider/provider_venv/
 provider/output/img.png
-provider/stable-diffusion-v1-5/*
-provider/stable-diffusion-v1-5.zip
+*/provider/stable-diffusion-v1-5
 api/images/*
 api/sd-golem-service.log
 dump.rdb
