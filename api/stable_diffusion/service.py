@@ -42,9 +42,11 @@ class GenerateImageService(Service):
             # Stable diffusion 2.1
             image_hash='efad0714a2a76eed7a6f250163b73423c5cbe073a8a25f2bbb418e09',
             image_url='http://gpu-on-golem.s3.eu-central-1.amazonaws.com/docker-diffusers-golem-latest-6cbbba62e8.gvmi',
+
             # Stable diffusion 1.5
             # image_hash='2b974c2d48fccd52c4b0d3413b628af30851cd7d2af57eea251b4ef8',
             # image_url='http://gpu-on-golem.s3.eu-central-1.amazonaws.com/docker-diffusers-golem-latest-3b13fd1916.gvmi',
+
             capabilities=['vpn', 'cuda*'],
         )
 

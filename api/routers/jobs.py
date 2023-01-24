@@ -5,6 +5,7 @@ from pathlib import Path
 import queue
 import uuid
 from statistics import fmean
+from typing import Optional
 
 import aioredis
 import async_timeout
@@ -103,11 +104,15 @@ async def job_detail_ws(job_id: str, websocket: WebSocket):
         await websocket.close(reason='Not found.')
 
 
-async def calculate_job_eta(job_queue_position: int, progress: int) -> float:
+async def calculate_job_eta(job_queue_position: int, progress: int) -> Optional[float]:
     DEFAULT_MEAN_PROCESSING_TIME = 15.0
 
     providers_times = await get_providers_processing_times()
     active_providers_number = len(providers_times)
+    if active_providers_number == 0:
+        # Undetermined when no active providers
+        return None
+
     try:
         mean_processing_time = fmean((entry['processing_time'] for entry in providers_times))
     except statistics.StatisticsError:
