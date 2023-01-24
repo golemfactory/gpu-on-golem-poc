@@ -1,8 +1,10 @@
 import asyncio
 import json
+import statistics
 from pathlib import Path
 import queue
 import uuid
+from statistics import fmean
 
 import aioredis
 import async_timeout
@@ -13,7 +15,8 @@ from slowapi.util import get_remote_address
 from websockets import ConnectionClosed
 
 from api.choices import JobStatus
-from api.redis_functions import publish_job_status, subscribe_to_job_status, update_job_data, get_job_data, jobs_queue
+from api.redis_functions import (publish_job_status, subscribe_to_job_status, update_job_data, get_job_data, jobs_queue,
+                                 get_providers_processing_times)
 
 
 api_dir = Path(__file__).parent.joinpath('..').absolute()
@@ -40,7 +43,7 @@ async def add_job_to_queue(request: Request, prompt: str = Form(...)):
         # Saving job's information
         await update_job_data(job_id, {'job_id': job_id, 'status': JobStatus.QUEUED.value})
         # Publishing job's status
-        await publish_job_status(job_id, JobStatus.QUEUED.value)
+        await publish_job_status(job_id, JobStatus.QUEUED.value, position=(await jobs_queue.qsize()) + 1)
         return_data = {
             'job_id': job_id,
             'status': JobStatus.QUEUED.value,
@@ -76,6 +79,7 @@ async def job_detail_ws(job_id: str, websocket: WebSocket):
                         job_message = {
                             "status": message_data['status'],
                             "queue_position": message_data['queue_position'],
+                            "eta": await calculate_job_eta(message_data['queue_position'], message_data['progress']),
                             "provider": message_data['provider'],
                             "progress": message_data['progress'],
                             "img_url": final_img_path if final_img_exists else None,
@@ -97,3 +101,19 @@ async def job_detail_ws(job_id: str, websocket: WebSocket):
         await websocket.close(reason='Job finished.')
     else:
         await websocket.close(reason='Not found.')
+
+
+async def calculate_job_eta(job_queue_position: int, progress: int) -> float:
+    DEFAULT_MEAN_PROCESSING_TIME = 15.0
+
+    providers_times = await get_providers_processing_times()
+    active_providers_number = len(providers_times)
+    try:
+        mean_processing_time = fmean((entry['processing_time'] for entry in providers_times))
+    except statistics.StatisticsError:
+        mean_processing_time = DEFAULT_MEAN_PROCESSING_TIME
+
+    job_estimated_time = mean_processing_time * (1 - progress / 100)
+    other_jobs_estimated_time = mean_processing_time * job_queue_position / active_providers_number
+
+    return round(job_estimated_time + other_jobs_estimated_time, 2)

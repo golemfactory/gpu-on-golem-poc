@@ -3,6 +3,7 @@ import queue
 from typing import Callable, Awaitable
 
 import aioredis
+from yapapi.services import ServiceState
 
 from api.choices import JobStatus
 
@@ -72,6 +73,19 @@ async def get_service_data() -> dict:
         return json.loads(raw_data)
     else:
         return {}
+
+
+async def set_provider_processing_time(provider_name: str, time: float) -> None:
+    await redis.hset('providers-times', provider_name, time)
+
+
+async def get_providers_processing_times() -> list:
+    service_data = await get_service_data()
+    active_providers = {instance['provider_name']
+                        for instance in service_data['cluster']['instances']
+                        if instance['state'] == ServiceState.running.name}
+    data = await redis.hgetall('providers-times')
+    return [{'provider_name': k, 'processing_time': float(v)} for k, v in data.items() if k in active_providers]
 
 
 class AsyncRedisQueue:

@@ -12,7 +12,8 @@ from yapapi.payload import vm
 from yapapi.services import Service, ServiceState, Cluster
 
 from api.choices import JobStatus
-from api.redis_functions import publish_job_status, update_job_data, set_service_data, jobs_queue
+from api.redis_functions import (publish_job_status, update_job_data, set_service_data, jobs_queue,
+                                 set_provider_processing_time)
 
 
 CLUSTER_INSTANCES_NUMBER = 2
@@ -38,8 +39,12 @@ class GenerateImageService(Service):
     @staticmethod
     async def get_payload():
         return await vm.repo(
-            image_hash='2b974c2d48fccd52c4b0d3413b628af30851cd7d2af57eea251b4ef8',
-            image_url='http://gpu-on-golem.s3.eu-central-1.amazonaws.com/docker-diffusers-golem-latest-3b13fd1916.gvmi',
+            # Stable diffusion 2.1
+            image_hash='efad0714a2a76eed7a6f250163b73423c5cbe073a8a25f2bbb418e09',
+            image_url='http://gpu-on-golem.s3.eu-central-1.amazonaws.com/docker-diffusers-golem-latest-6cbbba62e8.gvmi',
+            # Stable diffusion 1.5
+            # image_hash='2b974c2d48fccd52c4b0d3413b628af30851cd7d2af57eea251b4ef8',
+            # image_url='http://gpu-on-golem.s3.eu-central-1.amazonaws.com/docker-diffusers-golem-latest-3b13fd1916.gvmi',
             capabilities=['vpn', 'cuda*'],
         )
 
@@ -56,10 +61,11 @@ class GenerateImageService(Service):
             job = await jobs_queue.get()
             await jobs_queue.notify_queued()
 
+            job_started_at = datetime.datetime.now()
             job_data_update = {
-                "status": JobStatus.PROCESSING.value,
+                'status': JobStatus.PROCESSING.value,
                 'provider_name': self.provider_name,
-                'started_at': datetime.datetime.now().isoformat(),
+                'started_at': job_started_at.isoformat(),
             }
             await update_job_data(job["job_id"], job_data_update)
             await publish_job_status(job["job_id"], JobStatus.PROCESSING.value, provider=self.provider_name)
@@ -113,12 +119,14 @@ class GenerateImageService(Service):
             job_data_update = {
                 "status": final_status.value,
                 "ended_at": datetime.datetime.now().isoformat(),
+                "processing_time": (datetime.datetime.now() - job_started_at).total_seconds(),
                 "img_url": final_img_path,
                 "intermediary_images": intermediary_images,
             }
             await update_job_data(job["job_id"], job_data_update)
             await publish_job_status(job["job_id"], final_status.value, progress, intermediary_images,
                                      provider=self.provider_name)
+            await set_provider_processing_time(self.provider_name, job_data_update['processing_time'])
 
 
 async def main(num_instances):
@@ -144,9 +152,9 @@ async def main(num_instances):
                     await asyncio.sleep(5)
 
                 while True:
-                    await asyncio.sleep(60 * 3)
                     print_instances()
                     await set_service_data(prepare_service_data(cluster, golem))
+                    await asyncio.sleep(60 * 3)
                     instance_to_reset = next((i for i in cluster.instances if i.state == ServiceState.terminated), None)
                     if instance_to_reset is not None:
                         # We must restart cluster. Should not happen often.
