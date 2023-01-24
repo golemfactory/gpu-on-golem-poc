@@ -1,3 +1,5 @@
+# Warning: Automatic proxy is working but parts of the functionality is returning errors (interrogate image). These errors are probably to fix, but it needs more time to debug and test the rest of functionality.
+
 # Automatic1111 proxy on Golem
 Lets you use run stable diffusion webui from Automatic1111 on Golem provider via LocalProxy.
 
