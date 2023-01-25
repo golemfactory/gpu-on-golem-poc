@@ -47,7 +47,7 @@ function Form({ value, onChange, error, disabled, onSubmit, onExample, onClear }
         </button>
       )}
       {!!error?.length && (
-        <span className="absolute top-[5.8rem] right-0 max-w-[50%] text-right text-[#ff0000]">{error}</span>
+        <span className="absolute top-[5.8rem] right-0 text-right text-[#ff0000] md:max-w-[50%]">{error}</span>
       )}
     </form>
   );

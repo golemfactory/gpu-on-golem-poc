@@ -44,7 +44,7 @@ function Main() {
   const handleReload = () => window.location.reload();
 
   const nodes = useNodes({ state, dispatch });
-
+  console.log(state);
   return (
     <Layout>
       {notForState([Status.Processing, Status.Finished, Status.Blocked]) && <Background />}
