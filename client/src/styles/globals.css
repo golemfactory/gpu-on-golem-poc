@@ -26,6 +26,16 @@
 }
 
 @layer components {
+  .container {
+    width: 90%;
+  }
+
+  @media (min-width: 728px) {
+    .container {
+      width: 100%;
+    }
+  }
+
   @media (min-width: 1024px) {
     .background {
       @apply min-h-[100%] bg-contain bg-no-repeat;

@@ -4,6 +4,7 @@ import {
   Background,
   Error,
   Form,
+  Hero,
   Layout,
   Loader,
   Queue,
@@ -49,27 +50,21 @@ function Main() {
       {notForState([Status.Processing, Status.Finished, Status.Blocked]) && <Background />}
       <Loader state={state} />
       {notForState([Status.Processing, Status.Finished, Status.Blocked, Status.Error]) && (
-        <div className="mt-[20rem]">
-          <h1 className="mb-[5.7rem] text-34">
-            AI image generator supported by the computing power of the{' '}
-            <a
-              className="text-blue underline hover:opacity-80"
-              href="https://www.golem.network/"
-              target="_blank"
-              rel="noreferrer"
-            >
-              golem.network
-            </a>
-          </h1>
+        <Hero>
           <Form value={value} onExample={onExample} {...form} />
-        </div>
+        </Hero>
       )}
       {forState([Status.Ready]) && (
         <p className="mt-[5.7rem] text-12">
-          We have integrated open-source AI image generator <span className="underline">Stable Diffusion</span> with
-          decentralized <span className="underline">golem.network</span> as&nbsp;a&nbsp;backend to showcase its
-          computation possibilities with GPU. It is still an early POC rather than full fledged product, but you can
-          play around with it and let us know what you think.
+          We have integrated the AI Stable Diffusion image generator with the decentralized Golem Network to showcase
+          its computation possibilities with a GPU.
+          <br />
+          <br />
+          We are currently using limited resources - 2 computers with a GPU, therefore, you may encounter difficulties
+          using the application.
+          <br />
+          <br />
+          Want to give us feedback? Go to our Discord and get involved!
         </p>
       )}
       {forState([Status.Queued]) && <Queue {...queue} />}

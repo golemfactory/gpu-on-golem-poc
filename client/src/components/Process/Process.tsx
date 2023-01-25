@@ -24,7 +24,9 @@ function Process({ data, nodes }: { data?: Data; nodes: NodeInstance[] }) {
           )
         </span>
       )}
-      <span className="absolute top-[2rem] right-0 text-[9px]">| {nodes.length ?? '-'} nodes in the network</span>
+      <span className="absolute top-[2rem] right-0 text-[9px]">
+        | {nodes.length ?? '-'} {nodes.length === 1 ? 'node' : 'nodes'} connected
+      </span>
       <span className="absolute -top-[0.1rem] right-[0.4rem] text-[9px] text-black">{progress}%</span>
     </Progress>
   );

@@ -13,12 +13,8 @@ const renderLink = (name: string, href: string) => (
 function Footer() {
   return (
     <footer className="container absolute inset-x-0 bottom-0 flex min-h-[9rem] max-w-prose flex-col p-[1.5rem]">
-      <span className="mb-[1.6rem] text-[1.2rem]">Stay in touch:</span>
-      <div className="columns-3 text-[1rem]">
-        {renderLink('discord', 'https://chat.golem.network/')}
-        {renderLink('github', 'https://github.com/golemfactory/')}
-        {renderLink('twitter', 'https://twitter.com/golemproject/')}
-      </div>
+      <span className="mb-[1.6rem] text-[1.2rem]">Want to check our code?</span>
+      <div className="text-[1rem]">{renderLink('github', 'https://github.com/golemfactory/gpu-on-golem-poc')}</div>
     </footer>
   );
 }

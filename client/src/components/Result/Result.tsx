@@ -26,7 +26,7 @@ function Result({
     forState([Status.Finished, Status.Blocked]) && setSrc(url(data?.img_url ?? '', false));
   }, [data?.img_url, data?.intermediary_images, forState]);
 
-  const handleOpen = () => window.open('https://chat.golem.network/');
+  const handleOpen = () => window.open('https://discord.com/channels/684703559954333727/849965303055384597');
 
   const facts = [
     'Golem aims to be the first real decentralized marketplace for computing. And it seems that its doing its job right now, as real nodes are computing your task!',
@@ -49,56 +49,51 @@ function Result({
   );
 
   return (
-    <div className="mt-[12rem] mb-[8rem]">
-      <h2 className="text-36">Result for:</h2>
+    <div className="mt-[20rem] mb-[8rem] xl:mt-[12rem]">
+      <h2 className="text-24">
+        Your artwork generated based <br />
+        on the following keywords:
+      </h2>
       <h3 className="my-[1.2rem] text-12 text-stone">{value}</h3>
       <Copy value={value} />
       {forState([Status.Processing]) && (
-        <div className="mx-auto w-[85%] md:w-[75%]">
+        <div className="mx-auto md:w-[75%]">
           {!!data?.intermediary_images?.at(-1) ? <View src={src} value={value} /> : <Placeholder />}
           <br />
           <br />
           <Process data={data} nodes={nodes} />
           {renderText(
-            <>
+            <span className="mt-[8rem] md:mt-0">
               Fun facts:
               <br />
               <br />
               {facts[index]}
-            </>,
+            </span>,
           )}
         </div>
       )}
       {forState([Status.Finished]) && (
-        <div className="mx-auto w-[85%] md:w-[75%]">
+        <div className="mx-auto md:w-[75%]">
           <View src={src} value={value} />
           {renderText(
-            'We hope you enjoy your results! Drop us a line on our Discord chat and share your experience :)',
+            'Want to give us feedback? Go to our Discord, find the channel GPU PoC - AI Image Generator and get involved!',
           )}
         </div>
       )}
       {forState([Status.Blocked]) && (
-        <div className="mx-auto w-[85%] md:w-[75%]">
+        <div className="mx-auto md:w-[75%]">
           <View src={src} value={value} blocked />
           {renderText('Sorry, this image violates our NSFW filters :(')}
         </div>
       )}
-      <div className="mb-[1.8rem]">
-        <button className="button bg-white text-black" onClick={onReset}>
+      <div className="mb-[1.8rem] flex justify-center">
+        <button className="button mx-[0.5rem] bg-white text-black md:mx-[1.8rem]" onClick={onReset}>
           Start over
         </button>
-        <button className="button" onClick={handleOpen}>
-          Chat with us!
+        <button className="button mx-[0.5rem] md:mx-[1.8rem]" onClick={handleOpen}>
+          Go to Discord
         </button>
       </div>
-      <a
-        className="font-sans font-light uppercase text-grey underline hover:text-white"
-        href="https://handbook.golem.network/"
-        target="_blank"
-        rel="noreferrer"
-      >
-        Check our sdk
-      </a>
     </div>
   );
 }
