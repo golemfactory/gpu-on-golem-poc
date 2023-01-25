@@ -9,6 +9,7 @@ type Action = {
 };
 
 type Data = {
+  eta: number;
   img_url: string;
   intermediary_images: string[];
   progress: number;
