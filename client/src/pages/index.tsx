@@ -19,19 +19,21 @@ import { useStatusState } from 'utils/hooks';
 function Main() {
   const reducer = (state: State, action: Action) => ({
     status: action.type,
-    job_id: action.payload,
+    job_id: action.payload?.job_id,
+    queue_position: action.payload?.queue_position,
     error: action.error,
   });
 
   const [state, dispatch] = useReducer<Reducer<State, Action>>(reducer, {
     status: Status.Loading,
     job_id: undefined,
+    queue_position: undefined,
     error: undefined,
   });
 
   const { forState, notForState } = useStatusState(state);
 
-  const queue = useQueue({ state, dispatch });
+  const { jobs_in_queue } = useQueue({ state, dispatch });
 
   const { value, onExample, ...form } = useForm({ state, dispatch });
 
@@ -69,7 +71,7 @@ function Main() {
           Want to give us feedback? Go to our Discord and get involved!
         </p>
       )}
-      {forState([Status.Queued]) && <Queue {...queue} />}
+      {forState([Status.Queued]) && <Queue jobs_in_queue={jobs_in_queue} queue_position={state.queue_position} />}
       {forState([Status.Processing, Status.Finished, Status.Blocked]) && (
         <Result state={state} data={data} value={value} onReset={handleReset} nodes={nodes} />
       )}

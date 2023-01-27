@@ -20,11 +20,11 @@ export function useResult({ state, dispatch }: useReducerProps) {
 
   useEffect(() => {
     if (lastMessage) {
-      const { status, ...data } = JSON.parse(lastMessage.data);
+      const { status, queue_position, ...data } = JSON.parse(lastMessage.data);
 
       if (forState([Status.Queued, Status.Processing])) {
         setData(data);
-        dispatch({ type: status, payload: state.job_id });
+        dispatch({ type: status, payload: { job_id: state.job_id, queue_position } });
       } else if (forState([Status.Finished])) {
         getWebSocket()?.close();
       }
