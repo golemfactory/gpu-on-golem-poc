@@ -6,6 +6,7 @@ import logging
 from pathlib import Path
 from typing import Optional
 
+import sentry_sdk
 from yapapi import Golem
 from yapapi.log import enable_default_logger
 from yapapi.payload import vm
@@ -23,6 +24,11 @@ CLUSTER_EXPIRATION_TIME = datetime.timedelta(days=365)
 INTERMEDIARY_IMAGES_NUMBER = 5
 # MD5 hash of a black image provided by service when NSFW content is detected
 NSFW_IMAGE_HASH = '62640df3608f0287d980794d720bff31'
+
+sentry_sdk.init(
+    dsn="https://a4afb671aa2045cfba7b867b85988642@o4504570888388608.ingest.sentry.io/4504575523225600",
+    traces_sample_rate=1.0
+)
 
 api_dir = Path(__file__).parent.joinpath('..').absolute()
 enable_default_logger(log_file=str(api_dir / 'sd-golem-service.log'))
