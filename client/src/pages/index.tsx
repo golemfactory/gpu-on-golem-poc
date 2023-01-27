@@ -17,14 +17,16 @@ import {
 import { useStatusState } from 'utils/hooks';
 
 function Main() {
-  const reducer = (state: State, action: { type: Status; payload?: string }) => ({
+  const reducer = (state: State, action: Action) => ({
     status: action.type,
     job_id: action.payload,
+    error: action.error,
   });
 
   const [state, dispatch] = useReducer<Reducer<State, Action>>(reducer, {
     status: Status.Loading,
     job_id: undefined,
+    error: undefined,
   });
 
   const { forState, notForState } = useStatusState(state);
@@ -44,7 +46,7 @@ function Main() {
   const handleReload = () => window.location.reload();
 
   const nodes = useNodes({ state, dispatch });
-  console.log(state);
+
   return (
     <Layout>
       {notForState([Status.Processing, Status.Finished, Status.Blocked]) && <Background />}
@@ -72,9 +74,10 @@ function Main() {
         <Result state={state} data={data} value={value} onReset={handleReset} nodes={nodes} />
       )}
       {forState([Status.Error]) && (
-        <div className="mt-[20rem]">
-          <Error label="Refresh site" onClick={handleReload} />
-        </div>
+        <Error
+          {...(state.error === 429 && { heading: 'Too many requests.', text: 'Please try again in few minutes.' })}
+          button={{ label: 'Refresh site', onClick: handleReload }}
+        />
       )}
     </Layout>
   );
