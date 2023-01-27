@@ -102,7 +102,7 @@ class AsyncRedisQueue:
             raise queue.Full
         else:
             item_serialized = json.dumps(item)
-            await self._db.rpush(self.key, item_serialized)
+            return await self._db.rpush(self.key, item_serialized)
 
     async def get(self, timeout=0):
         item = await self._db.blpop(self.key, timeout=timeout)

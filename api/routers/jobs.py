@@ -36,7 +36,7 @@ async def add_job_to_queue(request: Request, prompt: str = Form(...)):
         f.write(f'{job_id} {prompt}\n')
 
     try:
-        await jobs_queue.put({'prompt': prompt, 'job_id': job_id})
+        queue_position = await jobs_queue.put({'prompt': prompt, 'job_id': job_id})
     except queue.Full:
         return JSONResponse({'error': 'Service busy. Try again later.'},
                             status_code=status.HTTP_503_SERVICE_UNAVAILABLE)
@@ -44,7 +44,6 @@ async def add_job_to_queue(request: Request, prompt: str = Form(...)):
         # Saving job's information
         await update_job_data(job_id, {'job_id': job_id, 'status': JobStatus.QUEUED.value})
         # Publishing job's status
-        queue_position = (await jobs_queue.qsize()) + 1
         await publish_job_status(job_id, JobStatus.QUEUED.value, position=queue_position)
         return_data = {
             'job_id': job_id,
