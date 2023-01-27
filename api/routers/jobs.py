@@ -44,10 +44,12 @@ async def add_job_to_queue(request: Request, prompt: str = Form(...)):
         # Saving job's information
         await update_job_data(job_id, {'job_id': job_id, 'status': JobStatus.QUEUED.value})
         # Publishing job's status
-        await publish_job_status(job_id, JobStatus.QUEUED.value, position=(await jobs_queue.qsize()) + 1)
+        queue_position = (await jobs_queue.qsize()) + 1
+        await publish_job_status(job_id, JobStatus.QUEUED.value, position=queue_position)
         return_data = {
             'job_id': job_id,
             'status': JobStatus.QUEUED.value,
+            'queue_position': queue_position,
             'job_detail_url': request.url_for("job_detail", job_id=job_id),
             'job_progress_feed': request.url_for("job_detail_ws", job_id=job_id),
         }
