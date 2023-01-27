@@ -4,12 +4,18 @@ from fastapi import FastAPI, Request, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, HTMLResponse
 from fastapi.staticfiles import StaticFiles
+import sentry_sdk
 from slowapi.errors import RateLimitExceeded
 from slowapi import Limiter
 from slowapi.util import get_remote_address
 
 from api.routers import jobs, monitoring
 
+
+sentry_sdk.init(
+    dsn="https://a4afb671aa2045cfba7b867b85988642@o4504570888388608.ingest.sentry.io/4504575523225600",
+    traces_sample_rate=1.0
+)
 
 async def throttling_exception_handler(request: Request, exc: RateLimitExceeded):
     return JSONResponse({'error': 'Too many requests.'}, status_code=status.HTTP_429_TOO_MANY_REQUESTS)
