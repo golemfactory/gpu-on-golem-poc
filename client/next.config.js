@@ -1,9 +1,11 @@
+const { withSentryConfig } = require('@sentry/nextjs');
+
 /** @type {import('next').NextConfig} */
 
 const serverAssetPrefix = {
   'lukasz-biuro': '/sd/static',
   'gpu.dev-test.golem.network': '/static',
-}
+};
 
 const nextConfig = {
   reactStrictMode: true,
@@ -13,3 +15,5 @@ const nextConfig = {
 };
 
 module.exports = nextConfig;
+
+module.exports = withSentryConfig(module.exports, { silent: true }, { hideSourcemaps: true });

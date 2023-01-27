@@ -1,4 +1,5 @@
 import { useCallback } from 'react';
+import * as Sentry from '@sentry/nextjs';
 import { Status, Statuses } from 'enums/status';
 
 export function useStatusState(state: State) {
@@ -18,11 +19,13 @@ export function useFetch(dispatch: (action: Action) => void) {
       try {
         const response = await fetch(path, options);
 
+        if (!response.ok) Sentry.captureMessage(response.status.toString());
+
         if (response.status === 404) return dispatch({ type: Status.Error });
         else if (response.status === 429) return dispatch({ type: Status.Error, error: response.status });
-
-        return await response.json();
+        else return await response.json();
       } catch (e) {
+        Sentry.captureException(e);
         dispatch({ type: Status.Error });
       }
     },
