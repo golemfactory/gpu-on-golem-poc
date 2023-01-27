@@ -39,7 +39,7 @@ async def add_job_to_queue(request: Request, prompt: str = Form(...)):
         await jobs_queue.put({'prompt': prompt, 'job_id': job_id})
     except queue.Full:
         return JSONResponse({'error': 'Service busy. Try again later.'},
-                            status_code=status.HTTP_429_TOO_MANY_REQUESTS)
+                            status_code=status.HTTP_503_SERVICE_UNAVAILABLE)
     else:
         # Saving job's information
         await update_job_data(job_id, {'job_id': job_id, 'status': JobStatus.QUEUED.value})
