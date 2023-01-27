@@ -62,6 +62,14 @@ module.exports = {
           fontWeight: '500',
         },
       ],
+      24: [
+        '2.4rem',
+        {
+          lineHeight: '3.1rem',
+          letterSpacing: '0.025rem',
+          fontWeight: '700',
+        },
+      ],
       34: [
         '3.4rem',
         {

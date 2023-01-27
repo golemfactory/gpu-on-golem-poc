@@ -19,6 +19,7 @@ export function useFetch(dispatch: (action: Action) => void) {
         const response = await fetch(path, options);
 
         if (response.status === 404) return dispatch({ type: Status.Error });
+        else if (response.status === 429) return dispatch({ type: Status.Error, error: response.status });
 
         return await response.json();
       } catch (e) {

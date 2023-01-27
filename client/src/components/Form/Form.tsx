@@ -1,15 +1,8 @@
 import { renderIcon } from 'assets/utils';
-import { Tooltip } from 'components';
 
 function Form({ value, onChange, error, disabled, onSubmit, onExample, onClear }: useFormType) {
   return (
     <form className="relative my-[2.6rem] flex justify-center text-12 text-black" onSubmit={onSubmit}>
-      <Tooltip
-        type="help"
-        text="The text you see is just an example. You can give your imagination a try and type whatever comes to your mind.
-        One word minimum, but we strongly encourage you to be expressive with your description, as this should get you
-        better results. Have fun!"
-      />
       <label
         className={`min-w-[8.4rem] rounded-l-full bg-[#e8e8e8] p-[1.7rem] text-right${
           disabled ? ' text-[#6d6d6d]' : ''
@@ -54,7 +47,7 @@ function Form({ value, onChange, error, disabled, onSubmit, onExample, onClear }
         </button>
       )}
       {!!error?.length && (
-        <span className="absolute top-[5.8rem] right-0 max-w-[50%] text-right text-[#ff0000]">{error}</span>
+        <span className="absolute top-[5.8rem] right-0 text-right text-[#ff0000] md:max-w-[50%]">{error}</span>
       )}
     </form>
   );

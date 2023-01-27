@@ -57,8 +57,16 @@ export function useForm({ state, dispatch }: useReducerProps): useFormType {
       method: 'POST',
     });
 
-    if (result.detail) return setError(result.detail[0].msg);
-    else return dispatch({ type: result.status, payload: result.job_id });
+    if (!result) return;
+    else if (result.detail) return setError(result.detail[0].msg);
+    else
+      return dispatch({
+        type: result.status,
+        payload: {
+          job_id: result.job_id,
+          queue_position: result.queue_position,
+        },
+      });
   };
 
   return {

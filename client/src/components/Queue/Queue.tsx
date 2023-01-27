@@ -1,22 +1,22 @@
 import { useEffect, useState } from 'react';
 import { Progress } from 'components';
 
-function Queue({ jobs_in_queue, max_queue_size }: { jobs_in_queue: number; max_queue_size: number }) {
+function Queue({ jobs_in_queue, queue_position }: { jobs_in_queue: number; queue_position?: number }) {
   const [percent, setPercent] = useState(0);
 
   useEffect(() => {
-    setPercent(Math.floor((jobs_in_queue * 100) / max_queue_size));
+    setPercent(Math.floor(((queue_position ?? 100) * 100) / jobs_in_queue));
 
     return () => {
       setPercent(0);
     };
-  }, [jobs_in_queue, max_queue_size]);
+  }, [jobs_in_queue, queue_position]);
 
   return (
     <>
       <Progress width={percent}>
         <span className="absolute top-[2rem] left-0 text-[9px] capitalize">
-          Queue {jobs_in_queue}/{max_queue_size}
+          Queue {queue_position ?? '-'}/{jobs_in_queue}
         </span>
       </Progress>
       <p className="mt-[5.7rem] mb-[2.4rem] text-14">Fun facts:</p>

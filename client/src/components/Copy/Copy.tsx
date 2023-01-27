@@ -20,7 +20,7 @@ function Copy({ value }: { value: string }) {
         className="mx-auto mb-[1.2rem] w-[14rem] cursor-pointer bg-left bg-no-repeat text-9 text-stone underline"
         style={{ backgroundImage: `url(${renderIcon('copy')})` }}
       >
-        Copy to clipboard
+        Copy your keywords
       </div>
     </CopyToClipboard>
   );

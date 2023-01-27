@@ -1,14 +1,14 @@
 import Image from 'next/image';
+import Link from 'next/link';
 import { renderIcon } from 'assets/utils';
-import { Tooltip } from 'components';
 
 function Header() {
   return (
-    <header className="absolute inset-x-0 top-[2rem] flex items-center justify-between px-[5rem] lg:top-[6rem]">
-      <Image className="mx-auto lg:mx-0" src={renderIcon('logo')} alt="logo" width={88} height={64} />
-      <div className="relative">
-        <Tooltip type="info" text="Some useful tip" bottom />
-      </div>
+    <header className="absolute inset-x-0 top-[2rem] flex flex-col items-center justify-between md:flex-row md:px-[3rem] lg:top-[6rem] lg:px-[5rem]">
+      <Link href="/">
+        <Image src={renderIcon('logo')} alt="logo" width={300} height={94} />
+      </Link>
+      <h2 className="mt-[2rem] font-mono text-12 md:mt-0">Golem GPU PoC with Stable Diffusion use case</h2>
     </header>
   );
 }

@@ -10,31 +10,42 @@ export function useQueue({ state, dispatch }: useReducerProps) {
 
   const [socketUrl, setSocketUrl] = useState<string | null>(null);
   const { lastMessage, readyState } = useWebSocket(socketUrl);
-  const [queue, setQueue] = useState({ jobs_in_queue: 0, max_queue_size: 30 });
+  const [queue, setQueue] = useState({ jobs_in_queue: 0, hold_off_user: false });
 
   const handleFetch = useFetch(dispatch);
 
   const handleQueue = useCallback(
-    (result: { jobs_in_queue: number; max_queue_size: number }) => {
+    (result: { jobs_in_queue: number; hold_off_user: boolean }) => {
       setQueue(result);
+      if (result?.hold_off_user) return dispatch({ type: Status.Waiting });
 
       if (result?.jobs_in_queue === 0) {
-        forState([Status.Loading, Status.Ready]) && dispatch({ type: Status.Ready, payload: state.job_id });
-        forState([Status.Queued]) && dispatch({ type: Status.Processing, payload: state.job_id });
-      } else if (result?.jobs_in_queue === result?.max_queue_size) {
-        forState([Status.Loading]) && dispatch({ type: Status.Waiting });
-      } else if (result?.jobs_in_queue <= result?.max_queue_size) {
-        dispatch({ type: Status.Queued, payload: state.job_id });
+        forState([Status.Loading, Status.Ready]) &&
+          dispatch({
+            type: Status.Ready,
+            payload: { job_id: state.job_id },
+          });
+        forState([Status.Queued]) &&
+          dispatch({
+            type: !!state.job_id ? Status.Processing : Status.Ready,
+            payload: { job_id: state.job_id },
+          });
+      } else {
+        forState([Status.Loading, Status.Ready]) &&
+          dispatch({
+            type: !!state.job_id ? Status.Queued : Status.Ready,
+            payload: { job_id: state.job_id },
+          });
       }
     },
-    [dispatch, forState, state.job_id],
+    [dispatch, forState, state],
   );
 
   useEffect(() => {
     if (forState([Status.Queued]) && state.job_id) {
       handleFetch(url(Api.jobsInQueue, false)).then(setQueue);
     }
-  }, [forState, handleFetch, handleQueue, state.job_id]);
+  }, [forState, handleFetch, state.job_id]);
 
   useEffect(() => {
     setSocketUrl(url(Api.jobsInQueue, true));
@@ -48,5 +59,5 @@ export function useQueue({ state, dispatch }: useReducerProps) {
     }
   }, [readyState, lastMessage, handleQueue, forState]);
 
-  return queue;
+  return { jobs_in_queue: queue.jobs_in_queue };
 }
