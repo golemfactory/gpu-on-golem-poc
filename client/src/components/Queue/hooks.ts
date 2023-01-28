@@ -59,5 +59,5 @@ export function useQueue({ state, dispatch }: useReducerProps) {
     }
   }, [readyState, lastMessage, handleQueue, forState]);
 
-  return { jobs_in_queue: queue.jobs_in_queue };
+  return queue;
 }

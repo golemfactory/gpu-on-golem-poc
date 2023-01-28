@@ -1,6 +1,4 @@
-import { useEffect, useRef } from 'react';
-import Countdown from 'react-countdown';
-import { Progress } from 'components';
+import { Countdown, Progress, useCountdown } from 'components';
 
 function Process({ data, nodes }: { data?: Data; nodes: NodeInstance[] }) {
   const progress = data?.progress ?? 0;
@@ -9,34 +7,8 @@ function Process({ data, nodes }: { data?: Data; nodes: NodeInstance[] }) {
     provider_id: '',
     provider_name: '',
   };
-  const countdown = useRef<number>();
 
-  useEffect(() => {
-    if (data?.progress === 0) {
-      countdown.current = Date.now() + data?.eta * 1000;
-    }
-  }, [data?.eta, data?.progress]);
-
-  const renderMs = (milliseconds: number) => milliseconds.toString().slice(0, -2);
-
-  const renderer = ({
-    completed,
-    seconds,
-    milliseconds,
-  }: {
-    completed: boolean;
-    seconds: number;
-    milliseconds: number;
-  }) => (
-    <div className="top-[2rem] right-[10rem] inline-flex min-w-[4.5rem] text-right before:absolute before:-left-[0.7rem] before:leading-[1.2rem] md:absolute md:before:content-['|']">
-      ETA{' '}
-      {completed
-        ? '--.-'
-        : (seconds < 10 ? '0' + seconds : seconds.toString()) +
-          '.' +
-          (milliseconds < 100 ? '0' + renderMs(milliseconds) : renderMs(milliseconds))}
-    </div>
-  );
+  const countdown = useCountdown(data);
 
   return (
     <Progress width={progress}>
@@ -55,9 +27,7 @@ function Process({ data, nodes }: { data?: Data; nodes: NodeInstance[] }) {
             )
           </span>
         )}
-        {!!countdown.current && (
-          <Countdown date={countdown.current} intervalDelay={0} precision={2} renderer={renderer} />
-        )}
+        <Countdown {...countdown} customStyles="top-[2rem] right-[10rem] before:hidden md:absolute md:before:block" />
         <span className="top-[2rem] right-0 before:absolute before:-left-[0.7rem] before:leading-[1.2rem] md:absolute md:before:content-['|']">
           {nodes.length ?? '-'} {nodes.length === 1 ? 'node' : 'nodes'} connected
         </span>
