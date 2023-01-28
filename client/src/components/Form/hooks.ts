@@ -1,6 +1,7 @@
-import { FormEvent, useEffect, useState } from 'react';
+import { FormEvent, useEffect, useRef, useState } from 'react';
 import { adjectives, animals, colors, uniqueNamesGenerator } from 'unique-names-generator';
 import { Api } from 'enums/api';
+import gaEvent from 'lib/ga';
 import { useFetch } from 'utils/hooks';
 import queryBuild from 'utils/query';
 import url from 'utils/url';
@@ -19,8 +20,17 @@ export function useForm({ state, dispatch }: useReducerProps): useFormType {
 
   const disabled = !!state.job_id;
 
+  const generated = useRef(value);
+
+  const handleGenerate = () => {
+    const prompt = example();
+
+    setValue(prompt);
+    generated.current = prompt;
+  };
+
   useEffect(() => {
-    setValue(example());
+    handleGenerate();
 
     return () => {
       setValue('');
@@ -28,7 +38,7 @@ export function useForm({ state, dispatch }: useReducerProps): useFormType {
   }, []);
 
   const handleExample = () => {
-    setValue(example());
+    handleGenerate();
     setError(undefined);
   };
 
@@ -55,6 +65,10 @@ export function useForm({ state, dispatch }: useReducerProps): useFormType {
       body: queryBuild({ prompt: value }),
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       method: 'POST',
+    });
+
+    gaEvent('txt2img_submit', {
+      generator_phrase: generated.current === value,
     });
 
     if (!result) return;

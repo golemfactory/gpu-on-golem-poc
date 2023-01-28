@@ -1,4 +1,4 @@
-import { Reducer, useReducer } from 'react';
+import { Reducer, useEffect, useReducer, useRef } from 'react';
 import { Status } from 'enums/status';
 import {
   Background,
@@ -14,6 +14,7 @@ import {
   useQueue,
   useResult,
 } from 'components';
+import gaEvent from 'lib/ga';
 import { useStatusState } from 'utils/hooks';
 
 function Main() {
@@ -38,6 +39,44 @@ function Main() {
   const { value, onExample, ...form } = useForm({ state, dispatch });
 
   const { data, onReset } = useResult({ state, dispatch });
+
+  const start_queued = useRef<number>();
+  const stop_queued = useRef<number>();
+
+  const start_processing = useRef<number>();
+  const stop_processing = useRef<number>();
+
+  useEffect(() => {
+    if (!!state.job_id && forState([Status.Queued])) {
+      start_queued.current = Date.now();
+    } else if (!!state.job_id && forState([Status.Processing])) {
+      stop_queued.current = Date.now();
+      start_processing.current = Date.now();
+    } else if (!!state.job_id && forState([Status.Finished, Status.Blocked])) {
+      stop_processing.current = Date.now();
+    } else {
+      start_queued.current = undefined;
+      stop_queued.current = undefined;
+      start_processing.current = undefined;
+      stop_processing.current = undefined;
+    }
+  }, [state.job_id, state.status]);
+
+  useEffect(() => {
+    if (forState([Status.Finished, Status.Blocked])) {
+      // @ts-ignore
+      const spent_in_queue = (stop_queued.current - start_queued.current) / 1000;
+      // @ts-ignore
+      const spent_generating = (stop_processing.current - start_processing.current) / 1000;
+
+      gaEvent('txt2img_generated', {
+        spent_in_queue,
+        spent_generating,
+        job_id: state.job_id,
+        is_blocked: !!Status.Blocked,
+      });
+    }
+  }, [forState, state.status]);
 
   const handleReset = () => {
     dispatch({ type: Status.Ready });
