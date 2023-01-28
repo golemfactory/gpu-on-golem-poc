@@ -49,8 +49,11 @@ function Result({
   );
 
   return (
-    <div className="mt-[20rem] mb-[8rem] xl:mt-[12rem]">
-      <h2 className="text-24">Your artwork based on the following keywords:</h2>
+    <div className="mt-[20rem] mb-[8rem] lg:mt-[15rem]">
+      <h2 className="text-24">
+        Your artwork based on <br />
+        the following keywords:
+      </h2>
       <h3 className="my-[1.2rem] text-12 text-stone">{value}</h3>
       <Copy value={value} />
       {forState([Status.Processing]) && (
