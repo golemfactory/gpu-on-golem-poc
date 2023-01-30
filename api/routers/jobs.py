@@ -76,6 +76,7 @@ async def job_detail_ws(job_id: str, websocket: WebSocket):
         return {
             "status": data['status'],
             "queue_position": data['queue_position'],
+            "jobs_in_queue": await jobs_queue.qsize(),
             "eta": await calculate_job_eta(data['queue_position'], data.get('progress', 0)),
             "provider": data.get('provider'),
             "progress": data.get('progress', 0),
