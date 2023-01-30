@@ -73,6 +73,8 @@ class GenerateImageService(Service):
                 'status': JobStatus.PROCESSING.value,
                 'provider_name': self.provider_name,
                 'started_at': job_started_at.isoformat(),
+                'queue_position': 0,
+                'jobs_in_queue': await jobs_queue.qsize(),
             }
             await update_job_data(job["job_id"], job_data_update)
 
@@ -115,6 +117,7 @@ class GenerateImageService(Service):
                         "status": JobStatus.PROCESSING.value,
                         "progress": progress,
                         "intermediary_images": intermediary_images,
+                        "jobs_in_queue": await jobs_queue.qsize(),
                     }
                     await update_job_data(job["job_id"], job_data_update)
 
@@ -133,6 +136,7 @@ class GenerateImageService(Service):
                 "processing_time": (datetime.datetime.now() - job_started_at).total_seconds(),
                 "img_url": final_img_path,
                 "intermediary_images": intermediary_images,
+                "jobs_in_queue": await jobs_queue.qsize(),
             }
             await update_job_data(job["job_id"], job_data_update)
             await set_provider_processing_time(self.provider_name, job_data_update['processing_time'])
