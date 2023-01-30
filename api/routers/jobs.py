@@ -16,7 +16,7 @@ from slowapi.util import get_remote_address
 from websockets import ConnectionClosed
 
 from api.choices import JobStatus
-from api.redis_functions import (publish_job_status, subscribe_to_job_status, update_job_data, get_job_data, jobs_queue,
+from api.redis_functions import (subscribe_to_job_status, update_job_data, get_job_data, jobs_queue,
                                  get_providers_processing_times)
 
 
@@ -43,9 +43,7 @@ async def add_job_to_queue(request: Request, prompt: str = Form(...)):
     else:
         # Saving job's information
         await update_job_data(job_id, {'job_id': job_id, 'status': JobStatus.QUEUED.value,
-                                       'queue_position': queue_position})
-        # Publishing job's status
-        await publish_job_status(job_id, JobStatus.QUEUED.value, position=queue_position)
+                                       'queue_position': queue_position, 'jobs_in_queue': queue_position})
         return_data = {
             'job_id': job_id,
             'status': JobStatus.QUEUED.value,
@@ -76,7 +74,7 @@ async def job_detail_ws(job_id: str, websocket: WebSocket):
         return {
             "status": data['status'],
             "queue_position": data['queue_position'],
-            "jobs_in_queue": await jobs_queue.qsize(),
+            "jobs_in_queue": data['jobs_in_queue'],
             "eta": await calculate_job_eta(data['queue_position'], data.get('progress', 0)),
             "provider": data.get('provider'),
             "progress": data.get('progress', 0),

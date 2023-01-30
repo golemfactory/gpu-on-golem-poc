@@ -13,8 +13,7 @@ from yapapi.payload import vm
 from yapapi.services import Service, ServiceState, Cluster
 
 from api.choices import JobStatus
-from api.redis_functions import (publish_job_status, update_job_data, set_service_data, jobs_queue,
-                                 set_provider_processing_time)
+from api.redis_functions import update_job_data, set_service_data, jobs_queue, set_provider_processing_time
 
 
 CLUSTER_INSTANCES_NUMBER = 2
@@ -76,7 +75,6 @@ class GenerateImageService(Service):
                 'started_at': job_started_at.isoformat(),
             }
             await update_job_data(job["job_id"], job_data_update)
-            await publish_job_status(job["job_id"], JobStatus.PROCESSING.value, provider=self.provider_name)
 
             logger.info(f'{self.name}: running job for: {job["prompt"]}')
 
@@ -113,8 +111,12 @@ class GenerateImageService(Service):
                     downloaded_images.update(images_to_download)
                     images_to_download.clear()
                 if progress < 100:
-                    await publish_job_status(job["job_id"], JobStatus.PROCESSING.value, progress, intermediary_images,
-                                             provider=self.provider_name)
+                    job_data_update = {
+                        "status": JobStatus.PROCESSING.value,
+                        "progress": progress,
+                        "intermediary_images": intermediary_images,
+                    }
+                    await update_job_data(job["job_id"], job_data_update)
 
             script = self._ctx.new_script()
             final_img_path = str(api_dir / f'images/{job["job_id"]}.png')
@@ -127,13 +129,12 @@ class GenerateImageService(Service):
             job_data_update = {
                 "status": final_status.value,
                 "ended_at": datetime.datetime.now().isoformat(),
+                "progress": progress,
                 "processing_time": (datetime.datetime.now() - job_started_at).total_seconds(),
                 "img_url": final_img_path,
                 "intermediary_images": intermediary_images,
             }
             await update_job_data(job["job_id"], job_data_update)
-            await publish_job_status(job["job_id"], final_status.value, progress, intermediary_images,
-                                     provider=self.provider_name)
             await set_provider_processing_time(self.provider_name, job_data_update['processing_time'])
 
 

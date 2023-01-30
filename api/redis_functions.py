@@ -15,19 +15,6 @@ job_publisher = aioredis.Redis.from_url("redis://localhost", decode_responses=Tr
 redis = aioredis.Redis.from_url("redis://localhost", decode_responses=True)
 
 
-async def publish_job_status(job_id: str, status: str, progress: int = 0, images: list = None, position: int = 0,
-                             provider: str = None):
-    message = {
-        'status': status,
-        'progress': progress,
-        'intermediary_images': [] if images is None else images,
-        'queue_position': position,
-        'provider': provider,
-    }
-    message_str = json.dumps(message)
-    await job_publisher.publish(get_job_channel(job_id), message_str)
-
-
 async def subscribe_to_job_status(job_id: str, reader_func: Callable[[aioredis.client.PubSub], Awaitable[None]]) -> None:
     psub = redis.pubsub()
     async with psub as p:
@@ -56,6 +43,12 @@ async def update_job_data(job_id: str, obj: dict) -> None:
         data = obj
     raw_data = json.dumps(data)
     await redis.set(get_job_data_key(job_id), raw_data, ex=JOB_INFO_RETENCY_SECONDS)
+    await _publish_job_status(data)
+
+
+async def _publish_job_status(job_data: dict):
+    message_str = json.dumps(job_data)
+    await job_publisher.publish(get_job_channel(job_data['job_id']), message_str)
 
 
 def get_job_data_key(job_id: str) -> str:
@@ -118,7 +111,12 @@ class AsyncRedisQueue:
         if elements:
             for i, el in enumerate(elements):
                 job = json.loads(el)
-                await publish_job_status(job['job_id'], JobStatus.QUEUED.value, position=i+1)
+                job_update_data = {
+                    'status': JobStatus.QUEUED.value,
+                    'queue_position': i+1,
+                    'jobs_in_queue': len(elements),
+                }
+                await update_job_data(job['job_id'], job_update_data)
 
 
 jobs_queue = AsyncRedisQueue('jobs', max_size=JOBS_QUEUE_MAX_SIZE)
