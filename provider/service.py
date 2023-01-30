@@ -16,6 +16,7 @@ logging.basicConfig(filename='output/debug.log',
 logger = logging.getLogger(__name__)
 
 STABLE_DIFFUSION_ITERATIONS_NUMBER = 51
+UPDATE_PROGRESS_EVERY_STEPS_NUMBER = 3
 intermediary_images_number: int = 0
 
 
@@ -66,7 +67,8 @@ def latents_callback(i, t, latents):
             intermediary_img_path = f"output/iteration_{i}.jpg"
             rgb_img.save(intermediary_img_path, optimize=True, quality=50)
 
-    update_status(progress=progress, new_image_path=intermediary_img_path)
+    if i % UPDATE_PROGRESS_EVERY_STEPS_NUMBER == 0:
+        update_status(progress=progress, new_image_path=intermediary_img_path)
 
 
 def update_status(progress: int = None, new_image_path: str = None):
@@ -92,7 +94,7 @@ def update_status(progress: int = None, new_image_path: str = None):
 
 async def main():
     while True:
-        await asyncio.sleep(2)
+        await asyncio.sleep(1)
         try:
             with open('phrase.txt', 'r+') as f:
                 phrase = f.readline()
@@ -104,8 +106,6 @@ async def main():
                     logger.info('Output file saved. Clearing phrase.txt file.')
                     f.truncate(0)
                     update_status(progress=100)
-                else:
-                    logger.info('No phrase in file. Ignoring.')
         except FileNotFoundError:
             open('phrase.txt', 'w').close()
 
