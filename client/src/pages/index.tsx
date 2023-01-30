@@ -99,15 +99,9 @@ function Main() {
       )}
       {forState([Status.Ready]) && (
         <p className="mt-[5.7rem] text-12">
-          We have integrated the AI Stable Diffusion image generator with the decentralized Golem Network to showcase
-          its computation possibilities with a GPU.
-          <br />
-          <br />
-          We are currently using limited resources - 2 computers with a GPU, therefore, you may encounter difficulties
-          using the application.
-          <br />
-          <br />
-          Want to give us feedback? Go to our Discord and get involved!
+          We have integrated the AI Stable Diffusion image generator with the Golem Network to showcase its computation
+          possibilities with a GPU. We are currently using limited resources - 2 computers with a GPU, therefore, you
+          may encounter difficulties using the application.
         </p>
       )}
       {forState([Status.Queued]) && <Queue {...queue} state={state} data={data} />}
