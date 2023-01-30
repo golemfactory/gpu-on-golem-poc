@@ -81,8 +81,9 @@ async def set_provider_processing_time(provider_name: str, time: float) -> None:
 
 async def get_providers_processing_times() -> list:
     service_data = await get_service_data()
+    instances = service_data['cluster']['instances'] if 'cluster' in service_data else []
     active_providers = {instance['provider_name']
-                        for instance in service_data['cluster']['instances']
+                        for instance in instances
                         if instance['state'] == ServiceState.running.name}
     data = await redis.hgetall('providers-times')
     return [{'provider_name': k, 'processing_time': float(v)} for k, v in data.items() if k in active_providers]

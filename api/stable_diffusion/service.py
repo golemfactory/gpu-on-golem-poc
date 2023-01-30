@@ -157,6 +157,7 @@ async def main(num_instances):
 
                 while still_starting():
                     print_instances()
+                    await set_service_data(prepare_service_data(cluster, golem))
                     await asyncio.sleep(5)
 
                 while True:
