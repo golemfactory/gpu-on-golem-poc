@@ -16,8 +16,49 @@
   }
 
   h1,
-  h2 {
+  h2,
+  ol {
     @apply font-sans;
+  }
+
+  ol {
+    counter-reset: item;
+    font-size: 1.4rem;
+    line-height: 1.9rem;
+  }
+
+  ol > li {
+    display: table;
+    counter-increment: item;
+    margin-bottom: 0.6rem;
+  }
+
+  ol > li:before {
+    content: counters(item, '.') '. ';
+    display: table-cell;
+    width: 2.8rem;
+    padding-right: 0.6rem;
+  }
+
+  li > ol {
+    margin-top: 0.6rem;
+  }
+
+  li ol > li {
+    margin: 0 0 0.6rem;
+  }
+
+  li ol > li:before {
+    content: counters(item, '.') ' ';
+  }
+
+  ul {
+    list-style: square;
+    padding-left: 4.2rem;
+  }
+
+  ul > li {
+    margin-bottom: 0.6rem;
   }
 
   footer {

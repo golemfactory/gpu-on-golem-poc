@@ -33,7 +33,7 @@ function Main() {
 
   const { forState, notForState } = useStatusState(state);
 
-  const { jobs_in_queue } = useQueue({ state, dispatch });
+  const queue = useQueue({ state, dispatch });
 
   const { value, onExample, ...form } = useForm({ state, dispatch });
 
@@ -71,7 +71,7 @@ function Main() {
           Want to give us feedback? Go to our Discord and get involved!
         </p>
       )}
-      {forState([Status.Queued]) && <Queue jobs_in_queue={jobs_in_queue} queue_position={state.queue_position} />}
+      {forState([Status.Queued]) && <Queue {...queue} state={state} data={data} />}
       {forState([Status.Processing, Status.Finished, Status.Blocked]) && (
         <Result state={state} data={data} value={value} onReset={handleReset} nodes={nodes} />
       )}

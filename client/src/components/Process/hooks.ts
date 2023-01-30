@@ -13,8 +13,8 @@ export function useNodes({ state, dispatch }: useReducerProps) {
 
   useEffect(() => {
     if (forState([Status.Processing]) && state.job_id) {
-      handleFetch(url(Api.cluster, false)).then(({ cluster }: { cluster: { instances: NodeInstance[] } }) =>
-        setNodes(cluster.instances),
+      handleFetch(url(Api.cluster, false)).then(
+        ({ cluster }: { cluster: { instances: NodeInstance[] } }) => !!cluster && setNodes(cluster.instances),
       );
     }
   }, [forState, handleFetch, state.job_id]);

@@ -20,7 +20,6 @@ type Data = {
   intermediary_images: string[];
   progress: number;
   provider: string;
-  queue_position: number;
 };
 
 type NodeInstance = {
