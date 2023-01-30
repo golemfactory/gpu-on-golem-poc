@@ -5,6 +5,7 @@ import sys
 
 from diffusers import StableDiffusionPipeline
 from PIL import Image
+import portalocker
 import torch
 
 
@@ -88,8 +89,9 @@ def update_status(progress: int = None, new_image_path: str = None):
             progress_info['images'] = []
         progress_info['images'].append(new_image_path)
 
-    with open('output/status.json', 'w') as f:
-        f.write(json.dumps(progress_info))
+    with portalocker.Lock('output/status.lock', timeout=2):
+        with open('output/status.json', 'w') as f:
+            f.write(json.dumps(progress_info))
 
 
 async def main():

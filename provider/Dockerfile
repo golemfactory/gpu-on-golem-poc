@@ -11,6 +11,7 @@ COPY run_task.sh ./
 COPY run_service.sh ./
 COPY generate.sh ./
 COPY generate_wait.sh ./
+COPY get_status.sh ./
 
 RUN apt-get update && apt-get install -y python3-pip pciutils
 RUN pip install --no-cache-dir --upgrade pip wheel setuptools setuptools_rust

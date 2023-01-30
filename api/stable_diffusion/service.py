@@ -2,6 +2,7 @@ import asyncio
 import bisect
 import datetime
 import hashlib
+import json
 import logging
 from pathlib import Path
 from typing import Optional
@@ -49,8 +50,8 @@ class GenerateImageService(Service):
             # image_url='http://gpu-on-golem.s3.eu-central-1.amazonaws.com/docker-diffusers-golem-latest-6cbbba62e8.gvmi',
 
             # Stable diffusion 1.5
-            image_hash='2cf98f247c796dc496a5c50f3aea7f9e95ac15e923c894351eb9ff7a',
-            image_url='http://storage.googleapis.com/sd-golem-images/txt2img-golem-latest-e796432308.gvmi',
+            image_hash='4f7e11f03dba744afc05f8df4a942317e60cef57d362a99efd52d2b0',
+            image_url='http://storage.googleapis.com/sd-golem-images/txt2img-golem-latest-d8d9e9863a.gvmi',
 
             capabilities=['vpn', 'cuda*'],
         )
@@ -89,17 +90,18 @@ class GenerateImageService(Service):
             images_to_download = set()
             intermediary_images = []
 
-            async def update_progress_data(progress_data: dict):
-                nonlocal progress, images_to_download
+            while progress < 100:
+                await asyncio.sleep(1)
+
+                status_script = self._ctx.new_script()
+                future_result = status_script.run("get_status.sh")
+                yield status_script
+                result = await future_result
+                progress_data = json.loads(result.stdout.strip())
                 progress = progress_data['progress']
                 if 'images' in progress_data and progress_data['images']:
                     images_to_download = set(progress_data['images']) - downloaded_images
 
-            while progress < 100:
-                await asyncio.sleep(1)
-                status_script = self._ctx.new_script()
-                status_script.download_json('/usr/src/app/output/status.json', update_progress_data)
-                yield status_script
                 if images_to_download:
                     download_script = self._ctx.new_script()
                     for image in images_to_download:
