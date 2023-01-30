@@ -43,12 +43,12 @@ async def update_job_data(job_id: str, obj: dict) -> None:
         data = obj
     raw_data = json.dumps(data)
     await redis.set(get_job_data_key(job_id), raw_data, ex=JOB_INFO_RETENCY_SECONDS)
-    await _publish_job_status(data)
+    await _publish_job_status(job_id, data)
 
 
-async def _publish_job_status(job_data: dict):
+async def _publish_job_status(job_id: str, job_data: dict):
     message_str = json.dumps(job_data)
-    await job_publisher.publish(get_job_channel(job_data['job_id']), message_str)
+    await job_publisher.publish(get_job_channel(job_id), message_str)
 
 
 def get_job_data_key(job_id: str) -> str:
