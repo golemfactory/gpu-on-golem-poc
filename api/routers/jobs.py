@@ -42,7 +42,8 @@ async def add_job_to_queue(request: Request, prompt: str = Form(...)):
                             status_code=status.HTTP_503_SERVICE_UNAVAILABLE)
     else:
         # Saving job's information
-        await update_job_data(job_id, {'job_id': job_id, 'status': JobStatus.QUEUED.value})
+        await update_job_data(job_id, {'job_id': job_id, 'status': JobStatus.QUEUED.value,
+                                       'queue_position': queue_position})
         # Publishing job's status
         await publish_job_status(job_id, JobStatus.QUEUED.value, position=queue_position)
         return_data = {
@@ -69,6 +70,19 @@ async def job_detail_ws(job_id: str, websocket: WebSocket):
     await websocket.accept()
     final_img_path = f'images/{job_id}.png'
 
+    async def prepare_job_message(data: dict):
+        local_img_path = api_dir / final_img_path
+        final_img_exists = local_img_path.exists()
+        return {
+            "status": data['status'],
+            "queue_position": data['queue_position'],
+            "eta": await calculate_job_eta(data['queue_position'], data.get('progress', 0)),
+            "provider": data.get('provider'),
+            "progress": data.get('progress', 0),
+            "img_url": final_img_path if final_img_exists else None,
+            "intermediary_images": data.get('intermediary_images', []),
+        }
+
     async def job_status_reader(channel: aioredis.client.PubSub):
         while True:
             try:
@@ -76,17 +90,7 @@ async def job_detail_ws(job_id: str, websocket: WebSocket):
                     message = await channel.get_message(ignore_subscribe_messages=True, timeout=60)
                     if message is not None:
                         message_data = json.loads(message['data'])
-                        local_img_path = api_dir / final_img_path
-                        final_img_exists = local_img_path.exists()
-                        job_message = {
-                            "status": message_data['status'],
-                            "queue_position": message_data['queue_position'],
-                            "eta": await calculate_job_eta(message_data['queue_position'], message_data['progress']),
-                            "provider": message_data['provider'],
-                            "progress": message_data['progress'],
-                            "img_url": final_img_path if final_img_exists else None,
-                            "intermediary_images": message_data['intermediary_images'],
-                        }
+                        job_message = await prepare_job_message(message_data)
                         await websocket.send_json(job_message)
                         if job_message['status'] == JobStatus.FINISHED.value:
                             break
@@ -99,6 +103,8 @@ async def job_detail_ws(job_id: str, websocket: WebSocket):
     job_data = await get_job_data(job_id)
     if job_data:
         if job_data['status'] != JobStatus.FINISHED.value:
+            initial_message = await prepare_job_message(job_data)
+            await websocket.send_json(initial_message)
             await subscribe_to_job_status(job_id, job_status_reader)
         await websocket.close(reason='Job finished.')
     else:

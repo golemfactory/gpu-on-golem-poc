@@ -50,8 +50,8 @@ class GenerateImageService(Service):
             # image_url='http://gpu-on-golem.s3.eu-central-1.amazonaws.com/docker-diffusers-golem-latest-6cbbba62e8.gvmi',
 
             # Stable diffusion 1.5
-            image_hash='2b974c2d48fccd52c4b0d3413b628af30851cd7d2af57eea251b4ef8',
-            image_url='http://gpu-on-golem.s3.eu-central-1.amazonaws.com/docker-diffusers-golem-latest-3b13fd1916.gvmi',
+            image_hash='2cf98f247c796dc496a5c50f3aea7f9e95ac15e923c894351eb9ff7a',
+            image_url='http://storage.googleapis.com/sd-golem-images/txt2img-golem-latest-e796432308.gvmi',
 
             capabilities=['vpn', 'cuda*'],
         )
