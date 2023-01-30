@@ -17,7 +17,6 @@ logging.basicConfig(filename='output/debug.log',
 logger = logging.getLogger(__name__)
 
 STABLE_DIFFUSION_ITERATIONS_NUMBER = 51
-UPDATE_PROGRESS_EVERY_STEPS_NUMBER = 3
 intermediary_images_number: int = 0
 
 
@@ -68,8 +67,7 @@ def latents_callback(i, t, latents):
             intermediary_img_path = f"output/iteration_{i}.jpg"
             rgb_img.save(intermediary_img_path, optimize=True, quality=50)
 
-    if i % UPDATE_PROGRESS_EVERY_STEPS_NUMBER == 0:
-        update_status(progress=progress, new_image_path=intermediary_img_path)
+    update_status(progress=progress, new_image_path=intermediary_img_path)
 
 
 def update_status(progress: int = None, new_image_path: str = None):
