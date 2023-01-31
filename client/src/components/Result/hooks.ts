@@ -1,11 +1,15 @@
 import { useEffect, useState } from 'react';
+import { useDispatch } from 'react-redux';
 import useWebSocket from 'react-use-websocket';
 import { Api } from 'enums/api';
 import { Status } from 'enums/status';
+import { setQueue } from 'slices/queue';
 import { useStatusState } from 'utils/hooks';
 import url from 'utils/url';
 
 export function useResult({ state, dispatch }: useReducerProps) {
+  const appDispatch = useDispatch();
+
   const { forState } = useStatusState(state);
 
   const [socketUrl, setSocketUrl] = useState<string | null>(null);
@@ -20,11 +24,12 @@ export function useResult({ state, dispatch }: useReducerProps) {
 
   useEffect(() => {
     if (lastMessage) {
-      const { status, queue_position, ...data } = JSON.parse(lastMessage.data);
+      const { status, jobs_in_queue, queue_position, ...data } = JSON.parse(lastMessage.data);
 
       if (forState([Status.Queued, Status.Processing])) {
         setData(data);
         dispatch({ type: status, payload: { job_id: state.job_id, queue_position } });
+        !!state.job_id && appDispatch(setQueue({ jobs_in_queue }));
       } else if (forState([Status.Finished])) {
         getWebSocket()?.close();
       }

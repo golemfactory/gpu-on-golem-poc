@@ -34,9 +34,9 @@ function Main() {
 
   const { forState, notForState } = useStatusState(state);
 
-  useNodes({ state, dispatch });
+  useQueue({ state, dispatch });
 
-  const queue = useQueue({ state, dispatch });
+  useNodes({ state, dispatch });
 
   const { value, onExample, ...form } = useForm({ state, dispatch });
 
@@ -104,7 +104,7 @@ function Main() {
           may encounter difficulties using the application.
         </p>
       )}
-      {forState([Status.Queued]) && <Queue {...queue} state={state} data={data} />}
+      {forState([Status.Queued]) && <Queue state={state} data={data} />}
       {forState([Status.Processing, Status.Finished, Status.Blocked]) && (
         <Result state={state} data={data} value={value} onReset={handleReset} />
       )}
