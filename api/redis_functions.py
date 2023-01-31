@@ -83,7 +83,10 @@ async def get_providers_processing_times() -> dict:
     service_data = await get_service_data()
     instances = service_data['cluster']['instances'] if 'cluster' in service_data else []
     return {
-        instance['provider_id']: await redis.lrange(get_provider_time_key(instance['provider_id']), 0, -1)
+        instance['provider_id']:
+            [
+                float(t) for t in await redis.lrange(get_provider_time_key(instance['provider_id']), 0, -1)
+            ]
         for instance in instances
         if instance['state'] == ServiceState.running.name
     }
