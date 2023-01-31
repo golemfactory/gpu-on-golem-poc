@@ -113,18 +113,25 @@ async def job_detail_ws(job_id: str, websocket: WebSocket):
 async def calculate_job_eta(job_queue_position: int, progress: int) -> Optional[float]:
     DEFAULT_MEAN_PROCESSING_TIME = 15.0
 
-    providers_times = await get_providers_processing_times()
-    active_providers_number = len(providers_times)
+    processing_times_per_provider = await get_providers_processing_times()
+    active_providers_number = len(processing_times_per_provider)
     if active_providers_number == 0:
         # Undetermined when no active providers
         return None
 
-    try:
-        mean_processing_time = fmean((entry['processing_time'] for entry in providers_times))
-    except statistics.StatisticsError:
-        mean_processing_time = DEFAULT_MEAN_PROCESSING_TIME
+    providers_mean_times = {}
+    for provider_id, times in processing_times_per_provider.items():
+        try:
+            providers_mean_times[provider_id] = fmean(times)
+        except statistics.StatisticsError:
+            providers_mean_times[provider_id] = DEFAULT_MEAN_PROCESSING_TIME
 
-    job_estimated_time = mean_processing_time * (1 - progress / 100)
-    other_jobs_estimated_time = mean_processing_time * job_queue_position / active_providers_number
+    try:
+        cluster_mean_processing_time = fmean(providers_mean_times.values())
+    except statistics.StatisticsError:
+        cluster_mean_processing_time = DEFAULT_MEAN_PROCESSING_TIME
+
+    job_estimated_time = cluster_mean_processing_time * (1 - progress / 100)
+    other_jobs_estimated_time = cluster_mean_processing_time * job_queue_position / active_providers_number
 
     return round(job_estimated_time + other_jobs_estimated_time, 2)

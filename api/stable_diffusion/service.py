@@ -136,7 +136,7 @@ class GenerateImageService(Service):
                 "jobs_in_queue": await jobs_queue.qsize(),
             }
             await update_job_data(job["job_id"], job_data_update)
-            await set_provider_processing_time(self.provider_name, job_data_update['processing_time'])
+            await set_provider_processing_time(self.provider_id, job_data_update['processing_time'])
 
 
 async def main(num_instances):

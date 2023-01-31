@@ -11,20 +11,9 @@ from api.choices import JobStatus
 JOBS_QUEUE_MAX_SIZE = 30
 SERVICE_INFO_RETENCY_SECONDS = 60 * 20
 JOB_INFO_RETENCY_SECONDS = 60 * 60 * 24
+PROVIDER_PROCESSING_TIME_MAX_RECORDS = 30
 job_publisher = aioredis.Redis.from_url("redis://localhost", decode_responses=True)
 redis = aioredis.Redis.from_url("redis://localhost", decode_responses=True)
-
-
-async def subscribe_to_job_status(job_id: str, reader_func: Callable[[aioredis.client.PubSub], Awaitable[None]]) -> None:
-    psub = redis.pubsub()
-    async with psub as p:
-        await p.subscribe(get_job_channel(job_id))
-        await reader_func(p)
-        await p.unsubscribe(get_job_channel(job_id))
-
-
-def get_job_channel(job_id: str) -> str:
-    return f'channel:{job_id}'
 
 
 async def get_job_data(job_id: str):
@@ -46,9 +35,21 @@ async def update_job_data(job_id: str, obj: dict) -> None:
     await _publish_job_status(job_id, data)
 
 
+async def subscribe_to_job_status(job_id: str, reader_func: Callable[[aioredis.client.PubSub], Awaitable[None]]) -> None:
+    psub = redis.pubsub()
+    async with psub as p:
+        await p.subscribe(get_job_channel(job_id))
+        await reader_func(p)
+        await p.unsubscribe(get_job_channel(job_id))
+
+
 async def _publish_job_status(job_id: str, job_data: dict):
     message_str = json.dumps(job_data)
     await job_publisher.publish(get_job_channel(job_id), message_str)
+
+
+def get_job_channel(job_id: str) -> str:
+    return f'channel:{job_id}'
 
 
 def get_job_data_key(job_id: str) -> str:
@@ -68,18 +69,24 @@ async def get_service_data() -> dict:
         return {}
 
 
-async def set_provider_processing_time(provider_name: str, time: float) -> None:
-    await redis.hset('providers-times', provider_name, time)
+def get_provider_time_key(provider_id: str):
+    return f'provider-times:{provider_id}'
 
 
-async def get_providers_processing_times() -> list:
+async def set_provider_processing_time(provider_id: str, time: float) -> None:
+    await redis.lpush(get_provider_time_key(provider_id), time)
+    # Keeping list length limited
+    await redis.ltrim(get_provider_time_key(provider_id), 0, PROVIDER_PROCESSING_TIME_MAX_RECORDS - 1)
+
+
+async def get_providers_processing_times() -> dict:
     service_data = await get_service_data()
     instances = service_data['cluster']['instances'] if 'cluster' in service_data else []
-    active_providers = {instance['provider_name']
-                        for instance in instances
-                        if instance['state'] == ServiceState.running.name}
-    data = await redis.hgetall('providers-times')
-    return [{'provider_name': k, 'processing_time': float(v)} for k, v in data.items() if k in active_providers]
+    return {
+        instance['provider_id']: await redis.lrange(get_provider_time_key(instance['provider_id']), 0, -1)
+        for instance in instances
+        if instance['state'] == ServiceState.running.name
+    }
 
 
 class AsyncRedisQueue:
