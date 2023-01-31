@@ -15,3 +15,7 @@ client/out
 client/npm-debug.log*
 client/*.tsbuildinfo
 client/next-env.d.ts
+
+client/.sentryclirc
+client/next.config.original.js
+client/next.config.wizardcopy.js

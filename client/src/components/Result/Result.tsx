@@ -1,23 +1,15 @@
 import { ReactNode, useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
 import { Status } from 'enums/status';
-import { Copy, Placeholder, Process, View } from 'components';
+import { Copy, Facts, Placeholder, Process, View } from 'components';
+import { selectData } from 'slices/data';
 import { useStatusState } from 'utils/hooks';
 import url from 'utils/url';
 
-function Result({
-  state,
-  data,
-  value,
-  onReset,
-  nodes,
-}: {
-  state: State;
-  data?: Data;
-  value: string;
-  onReset: () => void;
-  nodes: NodeInstance[];
-}) {
-  const { forState } = useStatusState(state);
+function Result({ value, onReset }: { value: string; onReset: () => void }) {
+  const data = useSelector(selectData);
+
+  const { forState } = useStatusState();
 
   const [src, setSrc] = useState('');
 
@@ -27,22 +19,6 @@ function Result({
   }, [data?.img_url, data?.intermediary_images, forState]);
 
   const handleOpen = () => window.open('https://discord.com/channels/684703559954333727/849965303055384597');
-
-  const facts = [
-    'Golem aims to be the first real decentralized marketplace for computing. And it seems that its doing its job right now, as real nodes are computing your task!',
-    'Did you know there are some special filters included? No funny pictures here!',
-    'Third fun fact placeholder is here. How fast can you read it?',
-  ];
-
-  const [index, setIndex] = useState(0);
-
-  useEffect(() => {
-    const interval = setInterval(() => setIndex((state: number) => (state !== facts.length - 1 ? state + 1 : 0)), 5000);
-
-    return () => {
-      clearInterval(interval);
-    };
-  }, [facts.length]);
 
   const renderText = (children: ReactNode) => (
     <p className="mt-[5.7rem] mb-[2.4rem] min-h-[9.5rem] text-14">{children}</p>
@@ -61,15 +37,8 @@ function Result({
           {!!data?.intermediary_images?.at(-1) ? <View src={src} value={value} /> : <Placeholder />}
           <br />
           <br />
-          <Process data={data} nodes={nodes} />
-          {renderText(
-            <span className="mt-[8rem] md:mt-0">
-              Fun facts:
-              <br />
-              <br />
-              {facts[index]}
-            </span>,
-          )}
+          <Process />
+          <Facts />
         </div>
       )}
       {forState([Status.Finished]) && (
