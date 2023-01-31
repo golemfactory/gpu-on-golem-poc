@@ -8,7 +8,7 @@ import { setStatus } from 'slices/status';
 import { useFetch } from 'utils/hooks';
 import url from 'utils/url';
 
-export function useNodes({ state, dispatch }: useReducerProps) {
+export function useNodes() {
   const appDispatch = useDispatch();
 
   const handleFetch = useFetch();
@@ -20,11 +20,6 @@ export function useNodes({ state, dispatch }: useReducerProps) {
         appDispatch(setError(503));
       } else {
         appDispatch(setNodes(cluster.instances));
-        dispatch({
-          payload: {
-            job_id: state.job_id,
-          },
-        });
       }
     });
   }, []);

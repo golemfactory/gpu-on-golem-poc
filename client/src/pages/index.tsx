@@ -1,4 +1,4 @@
-import { Reducer, useEffect, useReducer, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Status } from 'enums/status';
 import {
@@ -16,34 +16,25 @@ import {
   useResult,
 } from 'components';
 import gaEvent from 'lib/ga';
+import { selectJobId } from 'slices/data';
 import { selectError } from 'slices/error';
 import { resetQueue } from 'slices/queue';
 import { selectStatus, setStatus } from 'slices/status';
 import { useStatusState } from 'utils/hooks';
 
 function Main() {
-  const reducer = (state: State, action: Action) => ({
-    job_id: action.payload?.job_id,
-  });
-
-  const [state, dispatch] = useReducer<Reducer<State, Action>>(reducer, {
-    job_id: undefined,
-  });
-
   const appDispatch = useDispatch();
 
   const error = useSelector(selectError);
+  const job_id = useSelector(selectJobId);
   const status = useSelector(selectStatus);
 
   const { forState, notForState } = useStatusState();
 
-  useQueue({ state, dispatch });
-
-  useNodes({ state, dispatch });
-
-  const { value, onExample, ...form } = useForm({ state, dispatch });
-
-  const { onReset } = useResult({ state, dispatch });
+  useQueue();
+  useNodes();
+  const { value, onExample, ...form } = useForm();
+  const { onReset } = useResult();
 
   const start_queued = useRef<number>();
   const stop_queued = useRef<number>();
@@ -52,12 +43,12 @@ function Main() {
   const stop_processing = useRef<number>();
 
   useEffect(() => {
-    if (!!state.job_id && forState([Status.Queued])) {
+    if (!!job_id && forState([Status.Queued])) {
       start_queued.current = Date.now();
-    } else if (!!state.job_id && forState([Status.Processing])) {
+    } else if (!!job_id && forState([Status.Processing])) {
       stop_queued.current = Date.now();
       start_processing.current = Date.now();
-    } else if (!!state.job_id && forState([Status.Finished, Status.Blocked])) {
+    } else if (!!job_id && forState([Status.Finished, Status.Blocked])) {
       stop_processing.current = Date.now();
     } else {
       start_queued.current = undefined;
@@ -65,7 +56,7 @@ function Main() {
       start_processing.current = undefined;
       stop_processing.current = undefined;
     }
-  }, [state.job_id, status]);
+  }, [job_id, status]);
 
   useEffect(() => {
     if (forState([Status.Finished, Status.Blocked])) {
@@ -77,7 +68,7 @@ function Main() {
       gaEvent('txt2img_generated', {
         spent_in_queue,
         spent_generating,
-        job_id: state.job_id,
+        job_id,
         is_blocked: !!Status.Blocked,
       });
     }
@@ -86,11 +77,6 @@ function Main() {
   const handleReset = () => {
     appDispatch(setStatus(Status.Ready));
     appDispatch(resetQueue());
-    dispatch({
-      payload: {
-        job_id: undefined,
-      },
-    });
     onExample();
     onReset();
   };

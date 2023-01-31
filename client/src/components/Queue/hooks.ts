@@ -1,15 +1,17 @@
 import { useCallback, useEffect, useState } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import useWebSocket from 'react-use-websocket';
 import { Api } from 'enums/api';
 import { Status } from 'enums/status';
+import { selectJobId } from 'slices/data';
 import { setQueue } from 'slices/queue';
 import { setStatus } from 'slices/status';
 import { useStatusState } from 'utils/hooks';
 import url from 'utils/url';
 
-export function useQueue({ state, dispatch }: useReducerProps) {
+export function useQueue() {
   const appDispatch = useDispatch();
+  const job_id = useSelector(selectJobId);
 
   const { forState } = useStatusState();
 
@@ -23,16 +25,13 @@ export function useQueue({ state, dispatch }: useReducerProps) {
       if (hold_off_user) return appDispatch(setStatus(Status.Waiting));
 
       if (result?.jobs_in_queue === 0) {
-        forState([Status.Loading, Status.Ready]) && dispatch({ payload: { job_id: state.job_id } });
         forState([Status.Loading, Status.Ready]) && appDispatch(setStatus(Status.Ready));
-        forState([Status.Loading, Status.Ready]) && !state.job_id && appDispatch(setQueue(args));
+        forState([Status.Loading, Status.Ready]) && !job_id && appDispatch(setQueue(args));
       } else {
-        forState([Status.Loading, Status.Ready]) &&
-          appDispatch(setStatus(!!state.job_id ? Status.Queued : Status.Ready));
-        forState([Status.Loading, Status.Ready]) && dispatch({ payload: { job_id: state.job_id } });
+        forState([Status.Loading, Status.Ready]) && appDispatch(setStatus(!!job_id ? Status.Queued : Status.Ready));
       }
     },
-    [dispatch, forState, state],
+    [forState],
   );
 
   useEffect(() => {
