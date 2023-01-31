@@ -1,7 +1,9 @@
 import { FormEvent, useEffect, useRef, useState } from 'react';
+import { useDispatch } from 'react-redux';
 import { adjectives, animals, colors, uniqueNamesGenerator } from 'unique-names-generator';
 import { Api } from 'enums/api';
 import gaEvent from 'lib/ga';
+import { setStatus } from 'slices/status';
 import { useFetch } from 'utils/hooks';
 import queryBuild from 'utils/query';
 import url from 'utils/url';
@@ -15,6 +17,8 @@ const example = () =>
   });
 
 export function useForm({ state, dispatch }: useReducerProps): useFormType {
+  const appDispatch = useDispatch();
+
   const [value, setValue] = useState<string>('');
   const [error, setError] = useState<string | undefined>(undefined);
 
@@ -54,7 +58,7 @@ export function useForm({ state, dispatch }: useReducerProps): useFormType {
     setError(undefined);
   };
 
-  const handlePost = useFetch(dispatch);
+  const handlePost = useFetch();
 
   const handleSubmit = async (e: HTMLFormElement) => {
     e.preventDefault();
@@ -73,14 +77,15 @@ export function useForm({ state, dispatch }: useReducerProps): useFormType {
 
     if (!result) return;
     else if (result.detail) return setError(result.detail[0].msg);
-    else
-      return dispatch({
-        type: result.status,
+    else {
+      appDispatch(setStatus(result.status));
+      dispatch({
         payload: {
           job_id: result.job_id,
           queue_position: result.queue_position,
         },
       });
+    }
   };
 
   return {

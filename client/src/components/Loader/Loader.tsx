@@ -2,8 +2,8 @@ import { useEffect, useState } from 'react';
 import { Status } from 'enums/status';
 import { useStatusState } from 'utils/hooks';
 
-function Loader({ state }: { state: State }) {
-  const { forState } = useStatusState(state);
+function Loader() {
+  const { forState } = useStatusState();
 
   const [timer, setTimer] = useState(59);
 

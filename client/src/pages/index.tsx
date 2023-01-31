@@ -1,4 +1,5 @@
 import { Reducer, useEffect, useReducer, useRef } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { Status } from 'enums/status';
 import {
   Background,
@@ -15,24 +16,27 @@ import {
   useResult,
 } from 'components';
 import gaEvent from 'lib/ga';
+import { selectStatus, setStatus } from 'slices/status';
 import { useStatusState } from 'utils/hooks';
 
 function Main() {
   const reducer = (state: State, action: Action) => ({
-    status: action.type,
     job_id: action.payload?.job_id,
     queue_position: action.payload?.queue_position,
     error: action.error,
   });
 
   const [state, dispatch] = useReducer<Reducer<State, Action>>(reducer, {
-    status: Status.Loading,
     job_id: undefined,
     queue_position: undefined,
     error: undefined,
   });
 
-  const { forState, notForState } = useStatusState(state);
+  const appDispatch = useDispatch();
+
+  const status = useSelector(selectStatus);
+
+  const { forState, notForState } = useStatusState();
 
   useQueue({ state, dispatch });
 
@@ -62,7 +66,7 @@ function Main() {
       start_processing.current = undefined;
       stop_processing.current = undefined;
     }
-  }, [state.job_id, state.status]);
+  }, [state.job_id, status]);
 
   useEffect(() => {
     if (forState([Status.Finished, Status.Blocked])) {
@@ -78,10 +82,16 @@ function Main() {
         is_blocked: !!Status.Blocked,
       });
     }
-  }, [forState, state.status]);
+  }, [forState, status]);
 
   const handleReset = () => {
-    dispatch({ type: Status.Ready });
+    appDispatch(setStatus(Status.Ready));
+    dispatch({
+      payload: {
+        job_id: undefined,
+        queue_position: undefined,
+      },
+    });
     onExample();
     onReset();
   };
@@ -91,7 +101,7 @@ function Main() {
   return (
     <Layout>
       {notForState([Status.Processing, Status.Finished, Status.Blocked]) && <Background />}
-      <Loader state={state} />
+      <Loader />
       {notForState([Status.Processing, Status.Finished, Status.Blocked, Status.Error]) && (
         <Hero>
           <Form value={value} onExample={onExample} {...form} />
@@ -106,7 +116,7 @@ function Main() {
       )}
       {forState([Status.Queued]) && <Queue state={state} data={data} />}
       {forState([Status.Processing, Status.Finished, Status.Blocked]) && (
-        <Result state={state} data={data} value={value} onReset={handleReset} />
+        <Result data={data} value={value} onReset={handleReset} />
       )}
       {forState([Status.Error]) && (
         <Error

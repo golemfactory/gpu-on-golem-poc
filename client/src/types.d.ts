@@ -1,12 +1,10 @@
 type State = {
-  status: Status;
   job_id: string | undefined;
   queue_position: number | undefined;
   error: number | undefined;
 };
 
 type Action = {
-  type: Status;
   payload?: {
     job_id?: string;
     queue_position?: number;

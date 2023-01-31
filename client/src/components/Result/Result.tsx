@@ -4,8 +4,8 @@ import { Copy, Facts, Placeholder, Process, View } from 'components';
 import { useStatusState } from 'utils/hooks';
 import url from 'utils/url';
 
-function Result({ state, data, value, onReset }: { state: State; data?: Data; value: string; onReset: () => void }) {
-  const { forState } = useStatusState(state);
+function Result({ data, value, onReset }: { data?: Data; value: string; onReset: () => void }) {
+  const { forState } = useStatusState();
 
   const [src, setSrc] = useState('');
 
