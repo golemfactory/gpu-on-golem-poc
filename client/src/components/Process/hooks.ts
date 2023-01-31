@@ -22,7 +22,6 @@ export function useNodes({ state, dispatch }: useReducerProps) {
         dispatch({
           payload: {
             job_id: state.job_id,
-            queue_position: state.queue_position,
           },
         });
       }

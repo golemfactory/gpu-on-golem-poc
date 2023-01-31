@@ -5,6 +5,7 @@ import { RootState } from 'store';
 const initialState = {
   jobs_in_queue: 0,
   max_queue_size: 0,
+  queue_position: 0,
 };
 
 export const queueSlice = createSlice({
@@ -22,5 +23,6 @@ export const queueSlice = createSlice({
 export const { setQueue, resetQueue } = queueSlice.actions;
 
 export const selectJobsInQueue = (state: RootState) => state.queue.jobs_in_queue;
+export const selectQueuePosition = (state: RootState) => state.queue.queue_position;
 
 export default queueSlice;

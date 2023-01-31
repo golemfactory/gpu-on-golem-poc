@@ -1,13 +1,11 @@
 type State = {
   job_id: string | undefined;
-  queue_position: number | undefined;
   error: number | undefined;
 };
 
 type Action = {
   payload?: {
     job_id?: string;
-    queue_position?: number;
   };
   error?: number;
 };

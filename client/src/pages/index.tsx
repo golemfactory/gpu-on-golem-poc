@@ -16,19 +16,18 @@ import {
   useResult,
 } from 'components';
 import gaEvent from 'lib/ga';
+import { resetQueue } from 'slices/queue';
 import { selectStatus, setStatus } from 'slices/status';
 import { useStatusState } from 'utils/hooks';
 
 function Main() {
   const reducer = (state: State, action: Action) => ({
     job_id: action.payload?.job_id,
-    queue_position: action.payload?.queue_position,
     error: action.error,
   });
 
   const [state, dispatch] = useReducer<Reducer<State, Action>>(reducer, {
     job_id: undefined,
-    queue_position: undefined,
     error: undefined,
   });
 
@@ -86,10 +85,10 @@ function Main() {
 
   const handleReset = () => {
     appDispatch(setStatus(Status.Ready));
+    appDispatch(resetQueue());
     dispatch({
       payload: {
         job_id: undefined,
-        queue_position: undefined,
       },
     });
     onExample();
@@ -114,7 +113,7 @@ function Main() {
           may encounter difficulties using the application.
         </p>
       )}
-      {forState([Status.Queued]) && <Queue state={state} />}
+      {forState([Status.Queued]) && <Queue />}
       {forState([Status.Processing, Status.Finished, Status.Blocked]) && <Result value={value} onReset={handleReset} />}
       {forState([Status.Error]) && (
         <Error

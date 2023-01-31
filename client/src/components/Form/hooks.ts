@@ -3,6 +3,7 @@ import { useDispatch } from 'react-redux';
 import { adjectives, animals, colors, uniqueNamesGenerator } from 'unique-names-generator';
 import { Api } from 'enums/api';
 import gaEvent from 'lib/ga';
+import { setQueue } from 'slices/queue';
 import { setStatus } from 'slices/status';
 import { useFetch } from 'utils/hooks';
 import queryBuild from 'utils/query';
@@ -79,10 +80,10 @@ export function useForm({ state, dispatch }: useReducerProps): useFormType {
     else if (result.detail) return setError(result.detail[0].msg);
     else {
       appDispatch(setStatus(result.status));
+      appDispatch(setQueue(result.queue_position));
       dispatch({
         payload: {
           job_id: result.job_id,
-          queue_position: result.queue_position,
         },
       });
     }

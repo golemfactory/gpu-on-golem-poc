@@ -30,8 +30,8 @@ export function useResult({ state, dispatch }: useReducerProps) {
       if (forState([Status.Queued, Status.Processing])) {
         appDispatch(setData(data));
         appDispatch(setStatus(status));
-        dispatch({ payload: { job_id: state.job_id, queue_position } });
-        !!state.job_id && appDispatch(setQueue({ jobs_in_queue }));
+        dispatch({ payload: { job_id: state.job_id } });
+        !!state.job_id && appDispatch(setQueue({ jobs_in_queue, queue_position }));
       } else if (forState([Status.Finished])) {
         getWebSocket()?.close();
       }
