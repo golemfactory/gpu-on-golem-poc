@@ -46,8 +46,8 @@ class GenerateImageService(Service):
     async def get_payload():
         return await vm.repo(
             # Stable diffusion 1.5
-            image_hash='4f7e11f03dba744afc05f8df4a942317e60cef57d362a99efd52d2b0',
-            image_url='http://storage.googleapis.com/sd-golem-images/txt2img-golem-latest-d8d9e9863a.gvmi',
+            image_hash='b19fc7f5d4cb9852d352d1e72a3d28470c3dbe924868429a6a92d34e',
+            image_url='http://storage.googleapis.com/sd-golem-images/txt2img-golem-latest-4345c79b17.gvmi',
             capabilities=['vpn', 'cuda*'],
         )
 
