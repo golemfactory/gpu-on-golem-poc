@@ -1,9 +1,13 @@
 import type { AppProps } from 'next/app';
 import Head from 'next/head';
 import Script from 'next/script';
+import { Provider } from 'react-redux';
+import wrapper from 'store';
 import 'styles/globals.css';
 
-function App({ Component, pageProps }: AppProps) {
+function App({ Component, pageProps, ...rest }: AppProps) {
+  const { store } = wrapper.useWrappedStore(rest);
+
   return (
     <>
       <Head>
@@ -22,7 +26,9 @@ function App({ Component, pageProps }: AppProps) {
           gtag('config','${process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS}');
         `}
       </Script>
-      <Component {...pageProps} />
+      <Provider store={store}>
+        <Component {...pageProps} />
+      </Provider>
     </>
   );
 }

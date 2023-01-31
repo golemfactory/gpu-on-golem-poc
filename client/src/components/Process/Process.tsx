@@ -1,6 +1,12 @@
+import { useSelector } from 'react-redux';
 import { Countdown, Progress, useCountdown } from 'components';
+import { selectData } from 'slices/data';
+import { selectNodes } from 'slices/nodes';
 
-function Process({ data, nodes }: { data?: Data; nodes: NodeInstance[] }) {
+function Process() {
+  const data = useSelector(selectData);
+  const nodes = useSelector(selectNodes);
+
   const progress = data?.progress ?? 0;
   const instance: NodeInstance = nodes.find((node: NodeInstance) => node.provider_name === data?.provider) ?? {
     name: '',
@@ -8,7 +14,7 @@ function Process({ data, nodes }: { data?: Data; nodes: NodeInstance[] }) {
     provider_name: '',
   };
 
-  const countdown = useCountdown(data);
+  const countdown = useCountdown();
 
   return (
     <Progress width={progress}>

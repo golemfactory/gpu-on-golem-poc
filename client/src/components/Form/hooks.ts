@@ -1,7 +1,11 @@
 import { FormEvent, useEffect, useRef, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { adjectives, animals, colors, uniqueNamesGenerator } from 'unique-names-generator';
 import { Api } from 'enums/api';
 import gaEvent from 'lib/ga';
+import { selectJobId, setJobId } from 'slices/data';
+import { setQueue } from 'slices/queue';
+import { setStatus } from 'slices/status';
 import { useFetch } from 'utils/hooks';
 import queryBuild from 'utils/query';
 import url from 'utils/url';
@@ -14,11 +18,14 @@ const example = () =>
     length: 5,
   });
 
-export function useForm({ state, dispatch }: useReducerProps): useFormType {
+export function useForm(): useFormType {
+  const dispatch = useDispatch();
+  const job_id = useSelector(selectJobId);
+
   const [value, setValue] = useState<string>('');
   const [error, setError] = useState<string | undefined>(undefined);
 
-  const disabled = !!state.job_id;
+  const disabled = !!job_id;
 
   const generated = useRef(value);
 
@@ -54,7 +61,7 @@ export function useForm({ state, dispatch }: useReducerProps): useFormType {
     setError(undefined);
   };
 
-  const handlePost = useFetch(dispatch);
+  const handlePost = useFetch();
 
   const handleSubmit = async (e: HTMLFormElement) => {
     e.preventDefault();
@@ -73,14 +80,11 @@ export function useForm({ state, dispatch }: useReducerProps): useFormType {
 
     if (!result) return;
     else if (result.detail) return setError(result.detail[0].msg);
-    else
-      return dispatch({
-        type: result.status,
-        payload: {
-          job_id: result.job_id,
-          queue_position: result.queue_position,
-        },
-      });
+    else {
+      dispatch(setStatus(result.status));
+      dispatch(setQueue(result.queue_position));
+      dispatch(setJobId(result.job_id));
+    }
   };
 
   return {
