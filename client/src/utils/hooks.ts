@@ -2,6 +2,7 @@ import { useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import * as Sentry from '@sentry/nextjs';
 import { Status, Statuses } from 'enums/status';
+import { setError } from 'slices/error';
 import { selectStatus, setStatus } from 'slices/status';
 
 export function useStatusState() {
@@ -29,6 +30,7 @@ export function useFetch() {
       if (response.status === 404) return appDispatch(setStatus(Status.Error));
       else if (response.status === 429) {
         appDispatch(setStatus(Status.Error));
+        appDispatch(setError(429));
       } else return await response.json();
     } catch (e) {
       Sentry.captureException(e);

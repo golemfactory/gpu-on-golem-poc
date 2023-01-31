@@ -16,6 +16,7 @@ import {
   useResult,
 } from 'components';
 import gaEvent from 'lib/ga';
+import { selectError } from 'slices/error';
 import { resetQueue } from 'slices/queue';
 import { selectStatus, setStatus } from 'slices/status';
 import { useStatusState } from 'utils/hooks';
@@ -23,16 +24,15 @@ import { useStatusState } from 'utils/hooks';
 function Main() {
   const reducer = (state: State, action: Action) => ({
     job_id: action.payload?.job_id,
-    error: action.error,
   });
 
   const [state, dispatch] = useReducer<Reducer<State, Action>>(reducer, {
     job_id: undefined,
-    error: undefined,
   });
 
   const appDispatch = useDispatch();
 
+  const error = useSelector(selectError);
   const status = useSelector(selectStatus);
 
   const { forState, notForState } = useStatusState();
@@ -117,8 +117,8 @@ function Main() {
       {forState([Status.Processing, Status.Finished, Status.Blocked]) && <Result value={value} onReset={handleReset} />}
       {forState([Status.Error]) && (
         <Error
-          {...(state.error === 429 && { heading: 'Too many requests.', text: 'Please try again in few minutes.' })}
-          {...(state.error !== 503 && { heading: 'No available nodes.', text: 'Please try again in few minutes.' })}
+          {...(error === 429 && { heading: 'Too many requests.', text: 'Please try again in few minutes.' })}
+          {...(error === 503 && { heading: 'No available nodes.', text: 'Please try again in few minutes.' })}
           button={{ label: 'Refresh site', onClick: handleReload }}
         />
       )}
