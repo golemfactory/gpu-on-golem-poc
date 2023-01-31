@@ -10,7 +10,7 @@ import { useStatusState } from 'utils/hooks';
 import url from 'utils/url';
 
 export function useQueue() {
-  const appDispatch = useDispatch();
+  const dispatch = useDispatch();
   const job_id = useSelector(selectJobId);
 
   const { forState } = useStatusState();
@@ -22,13 +22,13 @@ export function useQueue() {
     (result: { jobs_in_queue: number; hold_off_user: boolean }) => {
       const { hold_off_user, ...args } = result;
 
-      if (hold_off_user) return appDispatch(setStatus(Status.Waiting));
+      if (hold_off_user) return dispatch(setStatus(Status.Waiting));
 
       if (result?.jobs_in_queue === 0) {
-        forState([Status.Loading, Status.Ready]) && appDispatch(setStatus(Status.Ready));
-        forState([Status.Loading, Status.Ready]) && !job_id && appDispatch(setQueue(args));
+        forState([Status.Loading, Status.Ready]) && dispatch(setStatus(Status.Ready));
+        forState([Status.Loading, Status.Ready]) && !job_id && dispatch(setQueue(args));
       } else {
-        forState([Status.Loading, Status.Ready]) && appDispatch(setStatus(!!job_id ? Status.Queued : Status.Ready));
+        forState([Status.Loading, Status.Ready]) && dispatch(setStatus(!!job_id ? Status.Queued : Status.Ready));
       }
     },
     [forState],

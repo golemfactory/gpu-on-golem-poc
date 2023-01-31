@@ -10,7 +10,7 @@ import { useStatusState } from 'utils/hooks';
 import url from 'utils/url';
 
 export function useResult() {
-  const appDispatch = useDispatch();
+  const dispatch = useDispatch();
   const job_id = useSelector(selectJobId);
 
   const { forState } = useStatusState();
@@ -27,9 +27,9 @@ export function useResult() {
       const { status, jobs_in_queue, queue_position, ...data } = JSON.parse(lastMessage.data);
 
       if (forState([Status.Queued, Status.Processing])) {
-        appDispatch(setData(data));
-        appDispatch(setStatus(status));
-        !!job_id && appDispatch(setQueue({ jobs_in_queue, queue_position }));
+        dispatch(setData(data));
+        dispatch(setStatus(status));
+        !!job_id && dispatch(setQueue({ jobs_in_queue, queue_position }));
       } else if (forState([Status.Finished])) {
         getWebSocket()?.close();
       }
@@ -37,7 +37,7 @@ export function useResult() {
   }, [readyState, lastMessage, job_id, forState, getWebSocket]);
 
   const handleReset = () => {
-    appDispatch(resetData());
+    dispatch(resetData());
     setSocketUrl(null);
   };
 

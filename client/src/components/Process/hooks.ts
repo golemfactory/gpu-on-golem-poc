@@ -9,17 +9,17 @@ import { useFetch } from 'utils/hooks';
 import url from 'utils/url';
 
 export function useNodes() {
-  const appDispatch = useDispatch();
+  const dispatch = useDispatch();
 
   const handleFetch = useFetch();
 
   useEffect(() => {
     handleFetch(url(Api.cluster, false)).then(({ cluster }: { cluster: { instances: NodeInstance[] } }) => {
       if (cluster?.instances.length === 0) {
-        appDispatch(setStatus(Status.Error));
-        appDispatch(setError(503));
+        dispatch(setStatus(Status.Error));
+        dispatch(setError(503));
       } else {
-        appDispatch(setNodes(cluster.instances));
+        dispatch(setNodes(cluster.instances));
       }
     });
   }, []);

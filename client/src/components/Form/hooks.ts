@@ -19,7 +19,7 @@ const example = () =>
   });
 
 export function useForm(): useFormType {
-  const appDispatch = useDispatch();
+  const dispatch = useDispatch();
   const job_id = useSelector(selectJobId);
 
   const [value, setValue] = useState<string>('');
@@ -81,9 +81,9 @@ export function useForm(): useFormType {
     if (!result) return;
     else if (result.detail) return setError(result.detail[0].msg);
     else {
-      appDispatch(setStatus(result.status));
-      appDispatch(setQueue(result.queue_position));
-      appDispatch(setJobId(result.job_id));
+      dispatch(setStatus(result.status));
+      dispatch(setQueue(result.queue_position));
+      dispatch(setJobId(result.job_id));
     }
   };
 

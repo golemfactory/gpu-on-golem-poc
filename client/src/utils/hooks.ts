@@ -19,7 +19,7 @@ export function useStatusState() {
 }
 
 export function useFetch() {
-  const appDispatch = useDispatch();
+  const dispatch = useDispatch();
 
   return useCallback(async (path: RequestInfo | URL, options?: RequestInit | undefined) => {
     try {
@@ -27,14 +27,14 @@ export function useFetch() {
 
       if (!response.ok) Sentry.captureMessage(response.status.toString());
 
-      if (response.status === 404) return appDispatch(setStatus(Status.Error));
+      if (response.status === 404) return dispatch(setStatus(Status.Error));
       else if (response.status === 429) {
-        appDispatch(setStatus(Status.Error));
-        appDispatch(setError(429));
+        dispatch(setStatus(Status.Error));
+        dispatch(setError(429));
       } else return await response.json();
     } catch (e) {
       Sentry.captureException(e);
-      appDispatch(setStatus(Status.Error));
+      dispatch(setStatus(Status.Error));
     }
   }, []);
 }

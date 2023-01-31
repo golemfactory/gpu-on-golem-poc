@@ -23,7 +23,7 @@ import { selectStatus, setStatus } from 'slices/status';
 import { useStatusState } from 'utils/hooks';
 
 function Main() {
-  const appDispatch = useDispatch();
+  const dispatch = useDispatch();
 
   const error = useSelector(selectError);
   const job_id = useSelector(selectJobId);
@@ -75,8 +75,8 @@ function Main() {
   }, [forState, status]);
 
   const handleReset = () => {
-    appDispatch(setStatus(Status.Ready));
-    appDispatch(resetQueue());
+    dispatch(setStatus(Status.Ready));
+    dispatch(resetQueue());
     onExample();
     onReset();
   };
