@@ -3,6 +3,7 @@ import { useDispatch } from 'react-redux';
 import useWebSocket from 'react-use-websocket';
 import { Api } from 'enums/api';
 import { Status } from 'enums/status';
+import { resetData, setData } from 'slices/data';
 import { setQueue } from 'slices/queue';
 import { setStatus } from 'slices/status';
 import { useStatusState } from 'utils/hooks';
@@ -15,7 +16,6 @@ export function useResult({ state, dispatch }: useReducerProps) {
 
   const [socketUrl, setSocketUrl] = useState<string | null>(null);
   const { lastMessage, readyState, getWebSocket } = useWebSocket(socketUrl);
-  const [data, setData] = useState<Data | undefined>(undefined);
 
   useEffect(() => {
     if (state.job_id) {
@@ -28,7 +28,7 @@ export function useResult({ state, dispatch }: useReducerProps) {
       const { status, jobs_in_queue, queue_position, ...data } = JSON.parse(lastMessage.data);
 
       if (forState([Status.Queued, Status.Processing])) {
-        setData(data);
+        appDispatch(setData(data));
         appDispatch(setStatus(status));
         dispatch({ payload: { job_id: state.job_id, queue_position } });
         !!state.job_id && appDispatch(setQueue({ jobs_in_queue }));
@@ -39,9 +39,9 @@ export function useResult({ state, dispatch }: useReducerProps) {
   }, [readyState, lastMessage, dispatch, state.job_id, forState, getWebSocket]);
 
   const handleReset = () => {
-    setData(undefined);
+    appDispatch(resetData());
     setSocketUrl(null);
   };
 
-  return { data, onReset: handleReset };
+  return { onReset: handleReset };
 }

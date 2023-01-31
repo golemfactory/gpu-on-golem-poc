@@ -1,10 +1,14 @@
 import { ReactNode, useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
 import { Status } from 'enums/status';
 import { Copy, Facts, Placeholder, Process, View } from 'components';
+import { selectData } from 'slices/data';
 import { useStatusState } from 'utils/hooks';
 import url from 'utils/url';
 
-function Result({ data, value, onReset }: { data?: Data; value: string; onReset: () => void }) {
+function Result({ value, onReset }: { value: string; onReset: () => void }) {
+  const data = useSelector(selectData);
+
   const { forState } = useStatusState();
 
   const [src, setSrc] = useState('');
@@ -33,7 +37,7 @@ function Result({ data, value, onReset }: { data?: Data; value: string; onReset:
           {!!data?.intermediary_images?.at(-1) ? <View src={src} value={value} /> : <Placeholder />}
           <br />
           <br />
-          <Process data={data} />
+          <Process />
           <Facts />
         </div>
       )}

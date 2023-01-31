@@ -44,7 +44,7 @@ function Main() {
 
   const { value, onExample, ...form } = useForm({ state, dispatch });
 
-  const { data, onReset } = useResult({ state, dispatch });
+  const { onReset } = useResult({ state, dispatch });
 
   const start_queued = useRef<number>();
   const stop_queued = useRef<number>();
@@ -114,10 +114,8 @@ function Main() {
           may encounter difficulties using the application.
         </p>
       )}
-      {forState([Status.Queued]) && <Queue state={state} data={data} />}
-      {forState([Status.Processing, Status.Finished, Status.Blocked]) && (
-        <Result data={data} value={value} onReset={handleReset} />
-      )}
+      {forState([Status.Queued]) && <Queue state={state} />}
+      {forState([Status.Processing, Status.Finished, Status.Blocked]) && <Result value={value} onReset={handleReset} />}
       {forState([Status.Error]) && (
         <Error
           {...(state.error === 429 && { heading: 'Too many requests.', text: 'Please try again in few minutes.' })}

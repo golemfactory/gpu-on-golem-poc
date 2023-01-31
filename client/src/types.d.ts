@@ -13,11 +13,11 @@ type Action = {
 };
 
 type Data = {
-  eta: number;
-  img_url: string;
-  intermediary_images: string[];
-  progress: number;
-  provider: string;
+  eta: number | undefined;
+  img_url: string | undefined;
+  intermediary_images: string[] | undefined;
+  progress: number | undefined;
+  provider: string | undefined;
 };
 
 type NodeInstance = {

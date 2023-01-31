@@ -2,10 +2,10 @@ import { useSelector } from 'react-redux';
 import { Countdown, Facts, useCountdown } from 'components';
 import { selectJobsInQueue } from 'slices/queue';
 
-function Queue({ state, data }: { state: State; data?: Data }) {
+function Queue({ state }: { state: State }) {
   const jobs_in_queue = useSelector(selectJobsInQueue);
 
-  const countdown = useCountdown(data);
+  const countdown = useCountdown();
 
   return (
     <>
