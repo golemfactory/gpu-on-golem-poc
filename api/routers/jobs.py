@@ -76,7 +76,7 @@ async def job_detail_ws(job_id: str, websocket: WebSocket):
             "queue_position": data['queue_position'],
             "jobs_in_queue": data['jobs_in_queue'],
             "eta": await calculate_job_eta(data['queue_position'], data.get('progress', 0)),
-            "provider": data.get('provider'),
+            "provider": data.get('provider_name'),
             "progress": data.get('progress', 0),
             "img_url": final_img_path if final_img_exists else None,
             "intermediary_images": data.get('intermediary_images', []),
