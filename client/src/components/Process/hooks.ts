@@ -1,23 +1,29 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
+import { useDispatch } from 'react-redux';
 import { Api } from 'enums/api';
 import { Status } from 'enums/status';
-import { useFetch, useStatusState } from 'utils/hooks';
+import { setNodes } from 'slices/nodes';
+import { useFetch } from 'utils/hooks';
 import url from 'utils/url';
 
 export function useNodes({ state, dispatch }: useReducerProps) {
-  const { forState } = useStatusState(state);
-
-  const [nodes, setNodes] = useState<NodeInstance[]>([]);
+  const appDispatch = useDispatch();
 
   const handleFetch = useFetch(dispatch);
 
   useEffect(() => {
-    if (forState([Status.Processing]) && state.job_id) {
-      handleFetch(url(Api.cluster, false)).then(
-        ({ cluster }: { cluster: { instances: NodeInstance[] } }) => !!cluster && setNodes(cluster.instances),
-      );
-    }
-  }, [forState, handleFetch, state.job_id]);
-
-  return nodes;
+    handleFetch(url(Api.cluster, false)).then(({ cluster }: { cluster: { instances: NodeInstance[] } }) => {
+      if (cluster?.instances.length === 0) return dispatch({ type: Status.Error, error: 503 });
+      else {
+        appDispatch(setNodes(cluster.instances));
+        dispatch({
+          type: state.status,
+          payload: {
+            job_id: state.job_id,
+            queue_position: state.queue_position,
+          },
+        });
+      }
+    });
+  }, []);
 }

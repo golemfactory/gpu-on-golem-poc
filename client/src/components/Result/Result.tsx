@@ -4,19 +4,7 @@ import { Copy, Facts, Placeholder, Process, View } from 'components';
 import { useStatusState } from 'utils/hooks';
 import url from 'utils/url';
 
-function Result({
-  state,
-  data,
-  value,
-  onReset,
-  nodes,
-}: {
-  state: State;
-  data?: Data;
-  value: string;
-  onReset: () => void;
-  nodes: NodeInstance[];
-}) {
+function Result({ state, data, value, onReset }: { state: State; data?: Data; value: string; onReset: () => void }) {
   const { forState } = useStatusState(state);
 
   const [src, setSrc] = useState('');
@@ -45,7 +33,7 @@ function Result({
           {!!data?.intermediary_images?.at(-1) ? <View src={src} value={value} /> : <Placeholder />}
           <br />
           <br />
-          <Process data={data} nodes={nodes} />
+          <Process data={data} />
           <Facts />
         </div>
       )}

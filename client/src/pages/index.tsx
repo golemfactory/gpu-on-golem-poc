@@ -34,6 +34,8 @@ function Main() {
 
   const { forState, notForState } = useStatusState(state);
 
+  useNodes({ state, dispatch });
+
   const queue = useQueue({ state, dispatch });
 
   const { value, onExample, ...form } = useForm({ state, dispatch });
@@ -86,8 +88,6 @@ function Main() {
 
   const handleReload = () => window.location.reload();
 
-  const nodes = useNodes({ state, dispatch });
-
   return (
     <Layout>
       {notForState([Status.Processing, Status.Finished, Status.Blocked]) && <Background />}
@@ -106,11 +106,12 @@ function Main() {
       )}
       {forState([Status.Queued]) && <Queue {...queue} state={state} data={data} />}
       {forState([Status.Processing, Status.Finished, Status.Blocked]) && (
-        <Result state={state} data={data} value={value} onReset={handleReset} nodes={nodes} />
+        <Result state={state} data={data} value={value} onReset={handleReset} />
       )}
       {forState([Status.Error]) && (
         <Error
           {...(state.error === 429 && { heading: 'Too many requests.', text: 'Please try again in few minutes.' })}
+          {...(state.error !== 503 && { heading: 'No available nodes.', text: 'Please try again in few minutes.' })}
           button={{ label: 'Refresh site', onClick: handleReload }}
         />
       )}
