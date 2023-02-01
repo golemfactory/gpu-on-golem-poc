@@ -1,27 +1,16 @@
-import { ReactNode, useEffect, useState } from 'react';
+import { ReactNode } from 'react';
 import { useSelector } from 'react-redux';
 import { Status } from 'enums/status';
 import { Copy, Facts, Placeholder, Process, View } from 'components';
 import { selectData } from 'slices/data';
 import { useStatusState } from 'utils/hooks';
-import url from 'utils/url';
 
 function Result({ value, onReset }: { value: string; onReset: () => void }) {
   const data = useSelector(selectData);
 
   const { forState } = useStatusState();
 
-  const [src, setSrc] = useState('');
-
   const [intermediary_image] = data?.intermediary_images ? data?.intermediary_images.slice(-1) : [];
-
-  useEffect(() => {
-    !!intermediary_image && forState([Status.Processing]) && setSrc(url(intermediary_image, false));
-  }, [intermediary_image, data?.intermediary_images, forState]);
-
-  useEffect(() => {
-    !!data?.img_url && forState([Status.Finished, Status.Blocked]) && setSrc(url(data?.img_url, false));
-  }, [data?.img_url, forState]);
 
   const handleOpen = () => window.open('https://discord.com/channels/684703559954333727/849965303055384597');
 
@@ -39,7 +28,7 @@ function Result({ value, onReset }: { value: string; onReset: () => void }) {
       <Copy value={value} />
       {forState([Status.Processing]) && (
         <div className="mx-auto md:w-[75%]">
-          {!!intermediary_image ? <View src={src} value={value} /> : <Placeholder />}
+          {!!intermediary_image ? <View intermediary_image={intermediary_image} value={value} /> : <Placeholder />}
           <br />
           <br />
           <Process />
@@ -48,7 +37,7 @@ function Result({ value, onReset }: { value: string; onReset: () => void }) {
       )}
       {forState([Status.Finished]) && (
         <div className="mx-auto md:w-[75%]">
-          <View src={src} value={value} />
+          <View value={value} />
           {renderText(
             'Want to give us feedback? Go to our Discord, find the channel GPU PoC - AI Image Generator and get involved!',
           )}
@@ -56,7 +45,7 @@ function Result({ value, onReset }: { value: string; onReset: () => void }) {
       )}
       {forState([Status.Blocked]) && (
         <div className="mx-auto md:w-[75%]">
-          <View src={src} value={value} blocked />
+          <View value={value} blocked />
           {renderText('Sorry, this image violates our NSFW filters :(')}
         </div>
       )}
