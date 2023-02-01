@@ -23,7 +23,7 @@ CLUSTER_BUDGET = 10.0
 CLUSTER_EXPIRATION_TIME = datetime.timedelta(days=365)
 INTERMEDIARY_IMAGES_NUMBER = 3
 # MD5 hash of a black image provided by service when NSFW content is detected
-NSFW_IMAGE_HASH = '62640df3608f0287d980794d720bff31'
+NSFW_IMAGE_HASH = '4518b9ae5041f25d03106e4bb7d019d1'
 
 sentry_sdk.init(
     dsn="https://a4afb671aa2045cfba7b867b85988642@o4504570888388608.ingest.sentry.io/4504575523225600",
