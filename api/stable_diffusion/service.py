@@ -68,6 +68,7 @@ class GenerateImageService(Service):
             job_data_update = {
                 'status': JobStatus.PROCESSING.value,
                 'provider_name': self.provider_name,
+                'provider_id': self.provider_id,
                 'started_at': job_started_at.isoformat(),
                 'queue_position': 0,
                 'jobs_in_queue': await jobs_queue.qsize(),

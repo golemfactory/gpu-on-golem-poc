@@ -75,7 +75,7 @@ async def job_detail_ws(job_id: str, websocket: WebSocket):
             "status": data['status'],
             "queue_position": data['queue_position'],
             "jobs_in_queue": data['jobs_in_queue'],
-            "eta": await calculate_job_eta(data['queue_position'], data.get('progress', 0)),
+            "eta": await calculate_job_eta(data['queue_position'], data.get('progress', 0), data.get('provider_id')),
             "provider": data.get('provider_name'),
             "progress": data.get('progress', 0),
             "img_url": final_img_path if final_img_exists else None,
@@ -110,7 +110,7 @@ async def job_detail_ws(job_id: str, websocket: WebSocket):
         await websocket.close(reason='Not found.')
 
 
-async def calculate_job_eta(job_queue_position: int, progress: int) -> Optional[float]:
+async def calculate_job_eta(job_queue_position: int, progress: int, provider_id: str = None) -> Optional[float]:
     DEFAULT_MEAN_PROCESSING_TIME = 15.0
 
     processing_times_per_provider = await get_providers_processing_times()
@@ -131,7 +131,8 @@ async def calculate_job_eta(job_queue_position: int, progress: int) -> Optional[
     except statistics.StatisticsError:
         cluster_mean_processing_time = DEFAULT_MEAN_PROCESSING_TIME
 
-    job_estimated_time = cluster_mean_processing_time * (1 - progress / 100)
+    provider_mean_processing_time = providers_mean_times.get(provider_id, cluster_mean_processing_time)
+    job_estimated_time = provider_mean_processing_time * (1 - progress / 100)
     other_jobs_estimated_time = cluster_mean_processing_time * job_queue_position / active_providers_number
 
     return round(job_estimated_time + other_jobs_estimated_time, 2)
