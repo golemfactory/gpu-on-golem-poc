@@ -3,7 +3,6 @@ import queue
 from typing import Callable, Awaitable
 
 import aioredis
-from aioredis_lock import RedisLock, LockTimeoutError
 from yapapi.services import ServiceState
 
 from api.choices import JobStatus
@@ -27,7 +26,7 @@ async def get_job_data(job_id: str):
 
 async def update_job_data(job_id: str, obj: dict) -> None:
     try:
-        async with RedisLock(redis, key=f"job_data_lock:{job_id}", timeout=2, wait_timeout=10):
+        async with redis.lock(f"job_data_lock:{job_id}", timeout=2, blocking_timeout=10):
             data = await get_job_data(job_id)
             if data:
                 data.update(obj)
@@ -35,7 +34,7 @@ async def update_job_data(job_id: str, obj: dict) -> None:
                 data = obj
             raw_data = json.dumps(data)
             await redis.set(get_job_data_key(job_id), raw_data, ex=JOB_INFO_RETENCY_SECONDS)
-    except LockTimeoutError:
+    except aioredis.exceptions.LockError:
         pass
     else:
         await _publish_job_status(job_id, data)
