@@ -31,7 +31,7 @@ export function useQueue() {
         forState([Status.Loading, Status.Ready]) && dispatch(setStatus(!!job_id ? Status.Queued : Status.Ready));
       }
     },
-    [forState],
+    [dispatch, forState, job_id],
   );
 
   useEffect(() => {
