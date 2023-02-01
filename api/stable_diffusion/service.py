@@ -174,6 +174,7 @@ async def main(num_instances):
                         raise ClusterNeedsRestart
         except ClusterNeedsRestart:
             cluster.stop()
+            await set_service_data({})
 
 
 def prepare_service_data(current_cluster: Cluster, golem: Golem) -> dict:
@@ -219,6 +220,7 @@ def run_sd_service():
     finally:
         logger.info('Stopping cluster')
         cluster.stop()
+        await set_service_data({})
 
 
 if __name__ == "__main__":
