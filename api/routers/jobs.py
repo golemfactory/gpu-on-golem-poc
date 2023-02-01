@@ -66,7 +66,7 @@ async def job_detail(request: Request, job_id: str):
 @router.websocket("/txt2img/ws/{job_id}/")
 async def job_detail_ws(job_id: str, websocket: WebSocket):
     await websocket.accept()
-    final_img_path = f'images/{job_id}.png'
+    final_img_path = f'images/{job_id}.jpg'
 
     async def prepare_job_message(data: dict):
         local_img_path = api_dir / final_img_path

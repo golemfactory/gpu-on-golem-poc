@@ -46,8 +46,8 @@ class GenerateImageService(Service):
     async def get_payload():
         return await vm.repo(
             # Stable diffusion 1.5
-            image_hash='b19fc7f5d4cb9852d352d1e72a3d28470c3dbe924868429a6a92d34e',
-            image_url='http://storage.googleapis.com/sd-golem-images/txt2img-golem-latest-4345c79b17.gvmi',
+            image_hash='2076c1bfe344fa5248c3c62567cf2484118561f9a48e73460bf7c477',
+            image_url='http://storage.googleapis.com/sd-golem-images/docker-txt2img-golem-latest-86465aabf7.gvmi',
             capabilities=['vpn', 'cuda*'],
         )
 
@@ -120,8 +120,8 @@ class GenerateImageService(Service):
                     await update_job_data(job["job_id"], job_data_update)
 
             script = self._ctx.new_script()
-            final_img_path = str(api_dir / f'images/{job["job_id"]}.png')
-            script.download_file('/usr/src/app/output/img.png', final_img_path)
+            final_img_path = str(api_dir / f'images/{job["job_id"]}.jpg')
+            script.download_file('/usr/src/app/output/img.jpg', final_img_path)
             logger.info(f'{self.name}: finished job {job["job_id"]} ({job["prompt"]})')
             yield script
 

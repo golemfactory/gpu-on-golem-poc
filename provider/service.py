@@ -102,7 +102,8 @@ async def main():
                     logger.info('Running generation')
                     image = pipe(phrase, callback=latents_callback, callback_steps=1).images[0]
                     logger.info('Saving image')
-                    image.save("./output/img.png")
+                    rgb_img = image.convert('RGB')
+                    rgb_img.save("./output/img.jpg", optimize=True, quality=80)
                     logger.info('Output file saved. Clearing phrase.txt file.')
                     f.truncate(0)
                     update_status(progress=100)
