@@ -13,10 +13,15 @@ function Result({ value, onReset }: { value: string; onReset: () => void }) {
 
   const [src, setSrc] = useState('');
 
+  const [intermediary_image] = data?.intermediary_images ? data?.intermediary_images.slice(-1) : [];
+
   useEffect(() => {
-    forState([Status.Processing]) && setSrc(url(data?.intermediary_images?.at(-1) ?? '', false));
-    forState([Status.Finished, Status.Blocked]) && setSrc(url(data?.img_url ?? '', false));
-  }, [data?.img_url, data?.intermediary_images, forState]);
+    !!intermediary_image && forState([Status.Processing]) && setSrc(url(intermediary_image, false));
+  }, [intermediary_image, data?.intermediary_images, forState]);
+
+  useEffect(() => {
+    !!data?.img_url && forState([Status.Finished, Status.Blocked]) && setSrc(url(data?.img_url, false));
+  }, [data?.img_url, forState]);
 
   const handleOpen = () => window.open('https://discord.com/channels/684703559954333727/849965303055384597');
 
@@ -34,7 +39,7 @@ function Result({ value, onReset }: { value: string; onReset: () => void }) {
       <Copy value={value} />
       {forState([Status.Processing]) && (
         <div className="mx-auto md:w-[75%]">
-          {!!data?.intermediary_images?.at(-1) ? <View src={src} value={value} /> : <Placeholder />}
+          {!!intermediary_image ? <View src={src} value={value} /> : <Placeholder />}
           <br />
           <br />
           <Process />
@@ -55,14 +60,16 @@ function Result({ value, onReset }: { value: string; onReset: () => void }) {
           {renderText('Sorry, this image violates our NSFW filters :(')}
         </div>
       )}
-      <div className="mb-[1.8rem] flex justify-center">
-        <button className="button mx-[0.5rem] bg-white text-black md:mx-[1.8rem]" onClick={onReset}>
-          Start over
-        </button>
-        <button className="button mx-[0.5rem] md:mx-[1.8rem]" onClick={handleOpen}>
-          Go to Discord
-        </button>
-      </div>
+      {forState([Status.Finished, Status.Blocked]) && (
+        <div className="mb-[1.8rem] flex justify-center">
+          <button className="button mx-[0.5rem] bg-white text-black md:mx-[1.8rem]" onClick={onReset}>
+            Start over
+          </button>
+          <button className="button mx-[0.5rem] md:mx-[1.8rem]" onClick={handleOpen}>
+            Go to Discord
+          </button>
+        </div>
+      )}
     </div>
   );
 }
