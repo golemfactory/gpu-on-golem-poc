@@ -34,8 +34,8 @@ async def update_job_data(job_id: str, obj: dict) -> None:
                 data = obj
             raw_data = json.dumps(data)
             await redis.set(get_job_data_key(job_id), raw_data, ex=JOB_INFO_RETENCY_SECONDS)
-    except aioredis.exceptions.LockError:
-        pass
+    except aioredis.exceptions.LockError as e:
+        print(f'LockError: {e}')
     else:
         await _publish_job_status(job_id, data)
 
