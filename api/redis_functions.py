@@ -27,7 +27,7 @@ async def get_job_data(job_id: str):
 
 async def update_job_data(job_id: str, obj: dict) -> None:
     try:
-        with RedisLock(redis, key=f"job_data_lock:{job_id}", timeout=2, wait_timeout=10):
+        async with RedisLock(redis, key=f"job_data_lock:{job_id}", timeout=2, wait_timeout=10):
             data = await get_job_data(job_id)
             if data:
                 data.update(obj)
