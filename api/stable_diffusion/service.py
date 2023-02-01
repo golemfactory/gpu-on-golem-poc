@@ -220,7 +220,7 @@ def run_sd_service():
     finally:
         logger.info('Stopping cluster')
         cluster.stop()
-        await set_service_data({})
+        asyncio.run(set_service_data({}))
 
 
 if __name__ == "__main__":
