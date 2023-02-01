@@ -4,7 +4,7 @@ import statistics
 from pathlib import Path
 import queue
 import uuid
-from statistics import fmean
+from statistics import fmean, median
 from typing import Optional
 
 import aioredis
@@ -122,7 +122,7 @@ async def calculate_job_eta(job_queue_position: int, progress: int, provider_id:
     providers_mean_times = {}
     for provider_id, times in processing_times_per_provider.items():
         try:
-            providers_mean_times[provider_id] = fmean(times)
+            providers_mean_times[provider_id] = median(times)
         except statistics.StatisticsError:
             providers_mean_times[provider_id] = DEFAULT_MEAN_PROCESSING_TIME
 
