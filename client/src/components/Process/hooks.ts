@@ -22,5 +22,5 @@ export function useNodes() {
         dispatch(setNodes(cluster.instances));
       }
     });
-  }, []);
+  }, [dispatch, handleFetch]);
 }

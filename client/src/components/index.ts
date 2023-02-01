@@ -1,6 +1,6 @@
 export { default as Background } from './Background';
 export { default as Copy } from './Copy';
-export { default as Countdown, useCountdown } from './Countdown';
+export { default as Countdown } from './Countdown';
 export { default as Error } from './Error';
 export { default as Facts } from './Facts';
 export { default as Footer } from './Footer';

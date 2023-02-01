@@ -1,5 +1,5 @@
 import { useSelector } from 'react-redux';
-import { Countdown, Progress, useCountdown } from 'components';
+import { Countdown, Progress } from 'components';
 import { selectData } from 'slices/data';
 import { selectNodes } from 'slices/nodes';
 
@@ -13,8 +13,6 @@ function Process() {
     provider_id: '',
     provider_name: '',
   };
-
-  const countdown = useCountdown();
 
   return (
     <Progress width={progress}>
@@ -33,7 +31,7 @@ function Process() {
             )
           </span>
         )}
-        <Countdown {...countdown} customStyles="top-[2rem] right-[10rem] before:hidden md:absolute md:before:block" />
+        <Countdown customStyles="top-[2rem] right-[10rem] before:hidden md:absolute md:before:block" />
         <span className="top-[2rem] right-0 before:absolute before:-left-[0.7rem] before:leading-[1.2rem] md:absolute md:before:content-['|']">
           {nodes.length ?? '-'} {nodes.length === 1 ? 'node' : 'nodes'} connected
         </span>

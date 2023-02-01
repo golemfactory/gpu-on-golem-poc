@@ -27,14 +27,14 @@ export function useResult() {
       const { status, jobs_in_queue, queue_position, ...data } = JSON.parse(lastMessage.data);
 
       if (forState([Status.Queued, Status.Processing])) {
-        dispatch(setData(data));
         dispatch(setStatus(status));
         !!job_id && dispatch(setQueue({ jobs_in_queue, queue_position }));
+        dispatch(setData(data));
       } else if (forState([Status.Finished])) {
         getWebSocket()?.close();
       }
     }
-  }, [readyState, lastMessage, job_id, forState, getWebSocket]);
+  }, [dispatch, readyState, lastMessage, job_id, forState, getWebSocket]);
 
   const handleReset = () => {
     dispatch(resetData());

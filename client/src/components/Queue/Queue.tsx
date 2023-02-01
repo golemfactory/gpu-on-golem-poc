@@ -1,22 +1,19 @@
 import { useSelector } from 'react-redux';
-import { Countdown, Facts, useCountdown } from 'components';
-import { selectJobsInQueue, selectQueuePosition } from 'slices/queue';
+import { Countdown } from 'components';
+import { selectQueuePosition } from 'slices/queue';
 
 function Queue() {
-  const jobs_in_queue = useSelector(selectJobsInQueue);
   const queue_position = useSelector(selectQueuePosition);
-
-  const countdown = useCountdown();
 
   return (
     <>
       <div className="inline-flex text-[9px]">
-        <span className="min-w-[6rem] capitalize">
-          Queue {queue_position ?? '-'}/{jobs_in_queue}
+        <span className="min-w-[6rem]">
+          Your request has been accepted and is awaiting processing. You are number {queue_position ?? '-'} in the
+          queue.
         </span>
-        <Countdown {...countdown} customStyles="relative ml-[1rem]" />
+        <Countdown customStyles="relative ml-[1rem]" />
       </div>
-      <Facts />
     </>
   );
 }

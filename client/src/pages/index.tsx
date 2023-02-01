@@ -56,7 +56,7 @@ function Main() {
       start_processing.current = undefined;
       stop_processing.current = undefined;
     }
-  }, [job_id, status]);
+  }, [forState, job_id, status]);
 
   useEffect(() => {
     if (forState([Status.Finished, Status.Blocked])) {
