@@ -1,13 +1,22 @@
 import ReactCountdown, { CountdownRenderProps } from 'react-countdown';
+import { useSelector } from 'react-redux';
+import { selectData } from 'slices/data';
 
-function Countdown({ current, customStyles }: { current?: number; customStyles: string }) {
+function Countdown({ customStyles }: { customStyles: string }) {
+  const data = useSelector(selectData);
+
   const sharedStyles =
     'inline-flex min-w-[4.5rem] text-right ' +
-    "before:absolute before:-left-[0.7rem] before:leading-[1.2rem] before:content-['|'] ";
+    "before:absolute before:-left-[0.8rem] before:leading-[1.2rem] before:content-['|'] ";
   const props = { className: sharedStyles + customStyles };
 
-  return !!current ? (
-    <ReactCountdown date={current} intervalDelay={0} precision={2} renderer={(args) => renderer(args, props)} />
+  return !!data.eta ? (
+    <ReactCountdown
+      date={Date.now() + data.eta * 1000}
+      intervalDelay={0}
+      precision={2}
+      renderer={(args) => renderer(args, props)}
+    />
   ) : (
     <div {...props}>ETA --.-</div>
   );
