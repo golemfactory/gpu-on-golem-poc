@@ -22,6 +22,7 @@ export const queueSlice = createSlice({
 
 export const { setQueue, resetQueue } = queueSlice.actions;
 
+export const selectQueue = (state: RootState) => state.queue;
 export const selectQueuePosition = (state: RootState) => state.queue.queue_position;
 
 export default queueSlice;
