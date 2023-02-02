@@ -9,7 +9,7 @@ function Queue() {
     <>
       <div className="flex flex-col text-[9px] md:flex-row">
         <div className="flex min-w-[6rem] flex-col text-left md:flex-row">
-          <span>Your request has been accepted and is awaiting processing.</span>
+          <span className="md:mr-[0.4rem]">Your request has been accepted and is awaiting processing.</span>
           <span>You are number {queue_position ?? '-'} in the queue.</span>
         </div>
         <Countdown customStyles="relative md:ml-[1rem] before:hidden md:before:block" />

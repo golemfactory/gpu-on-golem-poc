@@ -22,7 +22,7 @@ function Countdown({ customStyles }: { customStyles: string }) {
   return !!date.current ? (
     <ReactCountdown date={date.current} intervalDelay={0} precision={2} renderer={(args) => renderer(args, props)} />
   ) : (
-    <div {...props}>!ETA --.-</div>
+    <div {...props}>ETA --.-</div>
   );
 }
 
