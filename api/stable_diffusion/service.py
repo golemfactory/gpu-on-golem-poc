@@ -63,6 +63,7 @@ class GenerateImageService(Service):
             logger.info(f"{self.name}: waiting for next job")
             job = await jobs_queue.get()
             await jobs_queue.notify_queued()
+            await asyncio.sleep(0.3)
 
             job_started_at = datetime.datetime.now()
             job_data_update = {

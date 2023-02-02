@@ -120,11 +120,11 @@ async def calculate_job_eta(job_queue_position: int, progress: int, provider_id:
         return None
 
     providers_mean_times = {}
-    for provider_id, times in processing_times_per_provider.items():
+    for p_id, times in processing_times_per_provider.items():
         try:
-            providers_mean_times[provider_id] = median(times)
+            providers_mean_times[p_id] = median(times)
         except statistics.StatisticsError:
-            providers_mean_times[provider_id] = DEFAULT_MEAN_PROCESSING_TIME
+            providers_mean_times[p_id] = DEFAULT_MEAN_PROCESSING_TIME
 
     try:
         cluster_mean_processing_time = fmean(providers_mean_times.values())
