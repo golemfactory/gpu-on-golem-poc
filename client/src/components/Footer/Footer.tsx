@@ -13,7 +13,7 @@ const renderLink = (name: string, href: string) => (
 
 function Footer() {
   return (
-    <footer className="container absolute inset-x-0 bottom-0 flex min-h-[4rem] flex-col justify-between p-[1.5rem] sm:flex-row md:max-w-prose">
+    <footer className="container absolute inset-x-0 bottom-0 flex min-h-[4rem] flex-col items-center justify-between py-[1.5rem] sm:flex-row md:max-w-prose md:p-[1.5rem]">
       <div className="mb-[0.6rem] flex items-end">
         <span className="mr-[1rem] text-[1.2rem]">Want to check our code?</span>
         {renderLink('github', 'https://github.com/golemfactory/gpu-on-golem-poc')}

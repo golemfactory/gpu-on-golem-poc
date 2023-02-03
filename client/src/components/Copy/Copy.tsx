@@ -7,21 +7,13 @@ function Copy({ value }: { value: string }) {
 
   const handleCopy = () => setCopied(true);
 
+  const sharedStyles = 'absolute right-[0.4rem] md:-right-[1.2rem] top-0 h-[1.8rem] w-[1.8rem] bg-center bg-no-repeat';
+
   return copied ? (
-    <div
-      className="mx-auto mb-[1.2rem] w-[7.4rem] cursor-default bg-left bg-no-repeat text-9 text-stone"
-      style={{ backgroundImage: `url(${renderIcon('checkmark')})` }}
-    >
-      Copied
-    </div>
+    <div className={sharedStyles + ' cursor-default'} style={{ backgroundImage: `url(${renderIcon('checkmark')})` }} />
   ) : (
     <CopyToClipboard text={value} onCopy={handleCopy}>
-      <div
-        className="mx-auto mb-[1.2rem] w-[14rem] cursor-pointer bg-left bg-no-repeat text-9 text-stone underline"
-        style={{ backgroundImage: `url(${renderIcon('copy')})` }}
-      >
-        Copy your keywords
-      </div>
+      <div className={sharedStyles + ' cursor-pointer'} style={{ backgroundImage: `url(${renderIcon('copy')})` }} />
     </CopyToClipboard>
   );
 }

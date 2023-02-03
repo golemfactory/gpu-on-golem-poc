@@ -1,11 +1,10 @@
 import { ReactNode, useEffect, useState } from 'react';
 
 const facts = [
-  'Golem is a decentralized, open-source platform that allows users to rent out their computing power to others.',
-  "Golem's native cryptocurrency, GLM, is used as a form of payment for renting computing power on the network.",
-  'Golem runs various incentive programs. Join the community and build Golem together with other users from all over the world.',
-  "The Golem's main product is Yagna.",
-  'You can find the entire Golem code on our GitHub.',
+  'The Golem Network is a revolutionary open-source platform that harnesses the power of decentralization for accessing and sharing computer resources.',
+  'Golem runs various incentive programs. Join the community and build Golem with other users from all over the world.',
+  'Our mission is to create 𝙖𝙣 𝙤𝙥𝙚𝙣-𝙨𝙤𝙪𝙧𝙘𝙚 𝙥𝙡𝙖𝙩𝙛𝙤𝙧𝙢 that meets the challenges of the upcoming technology era. We believe that 𝙤𝙪𝙧 𝙧𝙚𝙨𝙚𝙖𝙧𝙘𝙝 𝙖𝙣𝙙 𝙙𝙚𝙫𝙚𝙡𝙤𝙥𝙢𝙚𝙣𝙩 activities will evolutionarily influence the shape of emerging new projects and allow many more to be built on top of our efforts.',
+  "Golem's new implementation is called Yagna.",
 ];
 
 function Facts() {

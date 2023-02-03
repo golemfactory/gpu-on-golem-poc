@@ -225,26 +225,6 @@ function Terms() {
                   to your use of the Services, you must promptly contact Golem and provide details of the vulnerability
                   or breach.
                 </>,
-                <>
-                  {underline('Processing of Personal Data.')} Golem underlines that Yours personal data (email
-                  addresses, IP address, […]) are only used within the framework of the Golem Image Generator as per
-                  applicable data protection regulations, in particular the Swiss Federal Act on Data Protection and, to
-                  the extent applicable, the EU General Data Protection Regulation, to comply with Golem's contractual
-                  obligations connected to these Terms. Golem also confirms that this data will not be forwarded to
-                  third parties or given to them for use and will be treated confidentially as per applicable data
-                  protection laws unless the You expresses consent to have the information transferred to partner
-                  companies. A withdrawal of consent via email to contact@golem.network is possible at any time. By
-                  using the Golem Image Generator, You acknowledge the storage of Yours email address and the defined
-                  personal data, and that the data can be used for the execution of the Services. Golem reserves the
-                  right to check the correctness of the data provided by You. You can request information about the data
-                  stored by Golem at any time by contacting: contact@golem.network. You can also exercise any of your
-                  other rights (e.g. right to erasure, right to correction, right to restriction and right to objection)
-                  via the same email address. Yours personal data will be deleted as soon as they are no longer required
-                  for the Services. However, it may be necessary for Golem to continue to store the Yours data until the
-                  expiration of the obligations and periods of retention specified by the legislator or supervisory
-                  authorities. For more information on how Golem processes personal data, please consult the privacy
-                  statement on {link('https://www.golem.network/privacy')}.
-                </>,
               ])}
               {renderList('General Terms and Updates', [
                 <>
