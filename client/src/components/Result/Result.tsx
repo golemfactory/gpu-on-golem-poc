@@ -15,17 +15,16 @@ function Result({ value, onReset }: { value: string; onReset: () => void }) {
   const handleOpen = () => window.open('https://discord.com/channels/684703559954333727/849965303055384597');
 
   const renderText = (children: ReactNode) => (
-    <p className="mt-[5.7rem] mb-[2.4rem] min-h-[9.5rem] text-14">{children}</p>
+    <p className="mt-[3.6rem] -mb-[3.2rem] min-h-[9.5rem] text-14">{children}</p>
   );
 
   return (
-    <div className="mt-[20rem] mb-[8rem] lg:mt-[15rem]">
-      <h2 className="text-24">
-        Your artwork based on <br />
-        the following keywords:
-      </h2>
-      <h3 className="my-[1.2rem] text-12 text-stone">{value}</h3>
-      <Copy value={value} />
+    <div className="mt-[18rem] mb-[2.4rem] md:mb-0 xl:mt-[12rem]">
+      <h2 className="text-24">Your artwork based on the following keywords:</h2>
+      <div className="relative mx-auto pr-[2rem] md:max-w-[50%] md:pr-0">
+        <h3 className="mt-[1.2rem] mb-[2.8rem] text-12 text-stone">{value}</h3>
+        <Copy value={value} />
+      </div>
       {forState([Status.Processing]) && (
         <div className="mx-auto md:w-[75%]">
           {!!intermediary_image ? <View intermediary_image={intermediary_image} value={value} /> : <Placeholder />}

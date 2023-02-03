@@ -14,10 +14,17 @@ function Process() {
     provider_name: '',
   };
 
+  const renderShortAddress = (address?: string | null, start: number = 6, stop: number = 4) => {
+    console.log(address);
+    return address
+      ? address.substring(0, start) + '...' + address.substring(address.length, address.length - stop)
+      : '';
+  };
+
   return (
     <Progress width={progress}>
-      <div className="mt-[1.2rem] flex flex-col text-left text-[9px]">
-        {data?.provider && (
+      <div className="mt-[1.2rem] flex flex-col md:text-12">
+        {instance.provider_id && (
           <span className="top-[2rem] left-0 md:absolute">
             Computing by: {data?.provider} (
             <a
@@ -26,17 +33,19 @@ function Process() {
               target="_blank"
               rel="noreferrer"
             >
-              {instance.provider_id}
+              {renderShortAddress(instance.provider_id, 8, 6)}
             </a>
             )
           </span>
         )}
-        <Countdown customStyles="top-[2rem] right-[10rem] before:hidden md:absolute md:before:block" />
-        <span className="top-[2rem] right-0 before:absolute before:-left-[0.7rem] before:leading-[1.2rem] md:absolute md:before:content-['|']">
-          {nodes.length ?? '-'} {nodes.length === 1 ? 'node' : 'nodes'} connected
-        </span>
+        <div className="top-[2rem] right-0 inline-flex justify-center md:absolute md:justify-end">
+          <Countdown customStyles="relative before:hidden md:before:block" />
+          <span className="relative ml-[1.4rem] inline-flex before:absolute before:-left-[0.8rem] before:leading-[1.2rem] before:content-['|']">
+            {nodes.length ?? '-'} {nodes.length === 1 ? 'node' : 'nodes'} connected
+          </span>
+        </div>
       </div>
-      <span className="absolute -top-[0.1rem] right-[0.4rem] text-[9px] text-black">{progress}%</span>
+      <span className="absolute -top-[0.1rem] right-[0.4rem] text-[0.9rem] text-black">{progress}%</span>
     </Progress>
   );
 }

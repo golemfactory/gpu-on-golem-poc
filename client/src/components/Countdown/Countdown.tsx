@@ -8,7 +8,7 @@ function Countdown({ customStyles }: { customStyles: string }) {
 
   const sharedStyles =
     'inline-flex min-w-[4.5rem] text-right ' +
-    "before:absolute before:-left-[0.8rem] before:leading-[1.2rem] before:content-['|'] ";
+    "before:absolute before:-left-[1rem] before:leading-[1.2rem] before:content-['|'] ";
   const props = { className: sharedStyles + customStyles };
 
   const date = useRef<number>();

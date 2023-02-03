@@ -39,7 +39,7 @@ function Form({ value, onChange, error, disabled, onSubmit, onExample, onClear }
       </button>
       {!disabled && (
         <button
-          className="absolute top-[5.8rem] left-0 ml-[8.4rem] text-10 uppercase underline"
+          className="absolute top-[6.2rem] left-[3.1rem] text-10 uppercase underline md:left-[9.6rem]"
           type="button"
           onClick={onExample}
         >
@@ -47,7 +47,9 @@ function Form({ value, onChange, error, disabled, onSubmit, onExample, onClear }
         </button>
       )}
       {!!error?.length && (
-        <span className="absolute top-[5.8rem] right-0 text-right text-[#ff0000] md:max-w-[50%]">{error}</span>
+        <span className="absolute top-[6.2rem] right-0 text-right text-10 text-[#ff0000] md:right-[14.4rem] md:max-w-[50%]">
+          {error}
+        </span>
       )}
     </form>
   );
