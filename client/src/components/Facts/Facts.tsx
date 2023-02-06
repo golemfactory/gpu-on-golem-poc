@@ -19,7 +19,7 @@ function Facts() {
   }, []);
 
   const renderText = (children: ReactNode) => (
-    <p className="mt-[5.7rem] mb-[2.4rem] min-h-[9.5rem] text-14">{children}</p>
+    <p className="mt-[5.7rem] mb-[2.4rem] min-h-[13.5rem] text-14">{children}</p>
   );
 
   return renderText(

@@ -23,7 +23,7 @@ function Process() {
 
   return (
     <Progress width={progress}>
-      <div className="mt-[1.2rem] flex flex-col md:text-12">
+      <div className="mt-[1.2rem] flex flex-col text-12">
         {instance.provider_id && (
           <span className="top-[2rem] left-0 md:absolute">
             Computing by: {data?.provider} (
@@ -39,7 +39,7 @@ function Process() {
           </span>
         )}
         <div className="top-[2rem] right-0 inline-flex justify-center md:absolute md:justify-end">
-          <Countdown customStyles="relative before:hidden md:before:block" />
+          <Countdown customStyles="relative before:hidden md:before:block text-12" />
           <span className="relative ml-[1.4rem] inline-flex before:absolute before:-left-[0.8rem] before:leading-[1.2rem] before:content-['|']">
             {nodes.length ?? '-'} {nodes.length === 1 ? 'node' : 'nodes'} connected
           </span>

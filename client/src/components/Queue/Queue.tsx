@@ -5,12 +5,17 @@ import { selectQueuePosition } from 'slices/queue';
 function Queue() {
   const queue_position = useSelector(selectQueuePosition);
 
+  const renderText = () =>
+    `There ${queue_position > 1 ? 'are' : 'is'} ${queue_position ?? '-'} request${
+      queue_position > 1 ? 's' : ''
+    } ahead of you.`;
+
   return queue_position > 0 ? (
-    <div className="min-w-[6rem] md:mt-[5.7rem] md:text-12">
-      <span className="mr-[0.4rem]">Your request has been accepted and is awaiting processing.</span>
+    <div className="mx-auto w-[75%] md:mt-[5.7rem]">
+      <span className="mr-[0.4rem] text-12">Your request has been accepted and is awaiting processing.</span>
       <div>
-        <span className="mr-[0.4rem]">There are {queue_position ?? '-'} requests ahead of you. </span>
-        <Countdown customStyles="relative before:hidden" />
+        <span className="mr-[0.4rem] text-12">{renderText()}</span>
+        <Countdown customStyles="relative before:hidden text-12" />
       </div>
     </div>
   ) : null;
