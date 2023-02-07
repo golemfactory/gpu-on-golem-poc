@@ -125,16 +125,6 @@ function Terms() {
                   Content.
                 </>,
                 <>
-                  {underline('Use of Content to Improve Services.')} One of the main benefits of machine learning models
-                  is that they can be improved over time. To help Golem provide and maintain the Services, you agree and
-                  instruct that we may use Content to develop and improve the Services. You can read more here about{' '}
-                  {link('how Content may be used to improve model performance', 'https://www.example.com')}. We
-                  understand that in some cases you may not want your Content used to improve Services. You can opt out
-                  of having Content used for improvement by contacting office@golem.network with your ID. Please note
-                  that in some cases this may limit the ability of our Services to better address your specific use
-                  case.
-                </>,
-                <>
                   {underline('Content Policy.')} You must comply with the Golem content policy and use based
                   restrictions set forth in Attachment B.
                 </>,
