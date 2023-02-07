@@ -1,7 +1,7 @@
 import { ReactNode } from 'react';
 import { useSelector } from 'react-redux';
 import { Status } from 'enums/status';
-import { Copy, Facts, Placeholder, Process, View } from 'components';
+import { Copy, Placeholder, Process, View } from 'components';
 import { selectData } from 'slices/data';
 import { useStatusState } from 'utils/hooks';
 
@@ -31,7 +31,6 @@ function Result({ value, onReset }: { value: string; onReset: () => void }) {
           <br />
           <br />
           <Process />
-          <Facts />
         </div>
       )}
       {forState([Status.Finished]) && (

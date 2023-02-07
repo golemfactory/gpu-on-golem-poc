@@ -14,12 +14,8 @@ function Process() {
     provider_name: '',
   };
 
-  const renderShortAddress = (address?: string | null, start: number = 6, stop: number = 4) => {
-    console.log(address);
-    return address
-      ? address.substring(0, start) + '...' + address.substring(address.length, address.length - stop)
-      : '';
-  };
+  const renderShortAddress = (address?: string | null, start: number = 6, stop: number = 4) =>
+    address ? address.substring(0, start) + '...' + address.substring(address.length, address.length - stop) : '';
 
   return (
     <Progress width={progress}>

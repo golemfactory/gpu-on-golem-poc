@@ -16,14 +16,14 @@
   background-color: #e7edf3;
   border-radius: 9999px;
 
-  margin: 1rem 0 8rem;
+  margin: 1rem 0 6rem;
 }
 
 @media (min-width: 728px) {
   .progressBar {
     max-width: calc(100% - 4rem);
 
-    margin: 1rem 2rem 8rem;
+    margin: 1rem 2rem 4rem;
   }
 }
 
