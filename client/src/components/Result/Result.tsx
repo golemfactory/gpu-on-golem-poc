@@ -12,7 +12,7 @@ function Result({ value, onReset }: { value: string; onReset: () => void }) {
 
   const [intermediary_image] = data?.intermediary_images ? data?.intermediary_images.slice(-1) : [];
 
-  const handleOpen = () => window.open('https://discord.com/channels/684703559954333727/849965303055384597');
+  const handleOpen = () => window.open('https://discord.com/channels/684703559954333727/1072529851346595840');
 
   const renderText = (children: ReactNode) => (
     <p className="mt-[3.6rem] -mb-[3.2rem] min-h-[9.5rem] text-14">{children}</p>
