@@ -13,10 +13,8 @@ from api.routers import jobs, monitoring
 from config import SENTRY_DSN
 
 
-sentry_sdk.init(
-    dsn=SENTRY_DSN,
-    traces_sample_rate=1.0
-)
+sentry_sdk.init(dsn=SENTRY_DSN, traces_sample_rate=1.0)
+
 
 async def throttling_exception_handler(request: Request, exc: RateLimitExceeded):
     return JSONResponse({'error': 'Too many requests.'}, status_code=status.HTTP_429_TOO_MANY_REQUESTS)

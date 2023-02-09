@@ -26,11 +26,7 @@ INTERMEDIARY_IMAGES_NUMBER = 3
 # MD5 hash of a black image provided by service when NSFW content is detected
 NSFW_IMAGE_HASH = '4518b9ae5041f25d03106e4bb7d019d1'
 
-sentry_sdk.init(
-    dsn=SENTRY_DSN,
-    traces_sample_rate=1.0
-)
-
+sentry_sdk.init(dsn=SENTRY_DSN, traces_sample_rate=1.0)
 api_dir = Path(__file__).parent.joinpath('../../api').absolute()
 enable_default_logger(log_file=str(api_dir / 'sd-golem-service.log'))
 logger = logging.getLogger('yapapi')
