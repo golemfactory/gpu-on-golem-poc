@@ -14,6 +14,7 @@ from yapapi.payload import vm
 from yapapi.services import Service, ServiceState, Cluster
 
 from api.choices import JobStatus
+from config import SENTRY_DSN
 from redis_db.functions import update_job_data, set_service_data, jobs_queue, set_provider_processing_time
 
 
@@ -26,7 +27,7 @@ INTERMEDIARY_IMAGES_NUMBER = 3
 NSFW_IMAGE_HASH = '4518b9ae5041f25d03106e4bb7d019d1'
 
 sentry_sdk.init(
-    dsn="https://a4afb671aa2045cfba7b867b85988642@o4504570888388608.ingest.sentry.io/4504575523225600",
+    dsn=SENTRY_DSN,
     traces_sample_rate=1.0
 )
 

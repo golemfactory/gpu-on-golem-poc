@@ -10,10 +10,11 @@ from slowapi import Limiter
 from slowapi.util import get_remote_address
 
 from api.routers import jobs, monitoring
+from config import SENTRY_DSN
 
 
 sentry_sdk.init(
-    dsn="https://a4afb671aa2045cfba7b867b85988642@o4504570888388608.ingest.sentry.io/4504575523225600",
+    dsn=SENTRY_DSN,
     traces_sample_rate=1.0
 )
 
