@@ -47,7 +47,7 @@ class GenerateImageService(Service):
         return await vm.repo(
             # Stable diffusion 1.5
             image_hash='2076c1bfe344fa5248c3c62567cf2484118561f9a48e73460bf7c477',
-            image_url='http://storage.googleapis.com/sd-golem-images/docker-txt2img-golem-latest-86465aabf7.gvmi',
+            image_url='http://gpu-on-golem.s3.eu-central-1.amazonaws.com/docker-txt2img-golem-latest-86465aabf7.gvmi',
             capabilities=['vpn', 'cuda*'],
         )
 
