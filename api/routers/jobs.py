@@ -16,8 +16,8 @@ from slowapi.util import get_remote_address
 from websockets import ConnectionClosed
 
 from api.choices import JobStatus
-from api.redis_functions import (subscribe_to_job_status, update_job_data, get_job_data, jobs_queue,
-                                 get_providers_processing_times)
+from redis_db.functions import (subscribe_to_job_status, update_job_data, get_job_data, jobs_queue,
+                                get_providers_processing_times)
 
 
 api_dir = Path(__file__).parent.joinpath('..').absolute()

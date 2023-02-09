@@ -4,7 +4,7 @@ from fastapi import APIRouter, Request, status, WebSocket
 from fastapi.responses import JSONResponse
 from websockets import ConnectionClosed
 
-from api.redis_functions import get_service_data, jobs_queue
+from redis_db.functions import get_service_data, jobs_queue
 
 QUEUE_STATE_WS_REFRESH_SECONDS = 5
 

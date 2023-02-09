@@ -13,7 +13,7 @@ Restart=on-failure
 # Restart each 12 hours
 WatchdogSec=720min
 WorkingDirectory=/home/ubuntu/gpu-on-golem-poc
-ExecStart=/home/ubuntu/gpu-on-golem-poc/venv/bin/python -m api.stable_diffusion.service
+ExecStart=/home/ubuntu/gpu-on-golem-poc/venv/bin/python -m diffusers.requestor.service
 Environment=YAGNA_APPKEY=ba92e433285d417a9039692f2846ec58
 
 [Install]

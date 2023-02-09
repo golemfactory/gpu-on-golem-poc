@@ -14,7 +14,7 @@ from yapapi.payload import vm
 from yapapi.services import Service, ServiceState, Cluster
 
 from api.choices import JobStatus
-from api.redis_functions import update_job_data, set_service_data, jobs_queue, set_provider_processing_time
+from redis_db.functions import update_job_data, set_service_data, jobs_queue, set_provider_processing_time
 
 
 CLUSTER_INSTANCES_NUMBER = 2
@@ -30,7 +30,7 @@ sentry_sdk.init(
     traces_sample_rate=1.0
 )
 
-api_dir = Path(__file__).parent.joinpath('..').absolute()
+api_dir = Path(__file__).parent.joinpath('../../api').absolute()
 enable_default_logger(log_file=str(api_dir / 'sd-golem-service.log'))
 logger = logging.getLogger('yapapi')
 

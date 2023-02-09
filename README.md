@@ -59,11 +59,11 @@ This will start server on port **8000**.
 
 ### Golem service start
 ```shell
-[...]/venv/bin/python -m api.stable_diffusion.service
+[...]/venv/bin/python -m diffusers.requestor.service
 ```
 
 ### Systemd services
-Example files can be found in `api/systemd`.
+Example files can be found in `config/systemd`.
 
 ### Env variables to control settings 
 - `APP_ENV` - taken into consideration by JS code while running `npm run static` 
