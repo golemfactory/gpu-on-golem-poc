@@ -17,14 +17,9 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 
 ## Golem requestor installation
 
-### Get the code
-`git clone https://github.com/norbibi/golem_cuda.git`
+### Installation of Golem daemon and requestor
+https://handbook.golem.network/requestor-tutorials/flash-tutorial-of-requestor-development
 
-### Installation of Golem daemon and requestor service
-```shell
-cd golem_cuda
-./golem_cuda.sh -i requestor
-```
 
 ### Configure env variable
 `export YAGNA_APPKEY=[yagna_key]`
