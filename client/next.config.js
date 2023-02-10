@@ -5,6 +5,7 @@ const { withSentryConfig } = require('@sentry/nextjs');
 const serverAssetPrefix = {
   'lukasz-biuro': '/sd/static',
   'gpu.dev-test.golem.network': '/static',
+  'image.golem.network': '/static',
 };
 
 const nextConfig = {
