@@ -71,7 +71,7 @@ async def main(provider_id: str, local_port: int):
     async with Golem(budget=1.0, subnet_tag='test', strategy=ConcreteProviderStrategy(provider_id)) as golem:
 
         network = await golem.create_network("192.168.0.1/24")
-        proxy = SocketProxy(ports=[local_port])
+        proxy = SocketProxy(address='0.0.0.0', ports=[local_port])
 
         async with network:
             cluster = await golem.run_service(
