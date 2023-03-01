@@ -20,6 +20,7 @@ async def list_offers(conf: Configuration, subnet_tag: str):
         dbuild = DemandBuilder()
         dbuild.add(yp.NodeInfo(name="Scanner node", subnet_tag=subnet_tag))
         dbuild.add(yp.Activity(expiration=datetime.now(timezone.utc)))
+        offers = set()
 
         async with market_api.subscribe(dbuild.properties, dbuild.constraints) as subscription:
             async for event in subscription.events():
@@ -28,10 +29,10 @@ async def list_offers(conf: Configuration, subnet_tag: str):
                                   for cap in capabilities
                                   if cap.startswith('cuda,')),
                                  None)
-                if cuda_card:
+                if cuda_card and event.issuer not in offers:
+                    offers.add(event.issuer)
                     print(f"Provider: {event.issuer}, Name: {event.props.get('golem.node.id.name')}, Card: {cuda_card}")
                     # print(f"props {json.dumps(event.props, indent=4)}")
-                    print("\n\n")
         print("done")
 
 
@@ -46,7 +47,7 @@ def main(subnet: str):
                     Configuration(),  # YAGNA_APPKEY will be loaded from env
                     subnet_tag=subnet,
                 ),
-                timeout=4,
+                timeout=5,
             )
         )
     except TimeoutError:

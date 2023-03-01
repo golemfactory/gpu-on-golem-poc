@@ -1,5 +1,5 @@
 import asyncio
-from datetime import datetime, timedelta
+from datetime import timedelta
 import pathlib
 import random
 import string
@@ -20,10 +20,6 @@ class ConcreteProviderStrategy(MarketStrategy):
         self.provider_id = provider_id
 
     async def score_offer(self, offer):
-        # print(f'Provider selected: {self.provider_id}. Type: {type(self.provider_id)}')
-        # print(f'Checking offer from: {offer.issuer}. Type: {type(offer.issuer)}')
-        # res = SCORE_TRUSTED if offer.issuer == self.provider_id else SCORE_REJECTED
-        # print(f'ACCEPTED?: {res}')
         return SCORE_TRUSTED if offer.issuer == self.provider_id else SCORE_REJECTED
 
 
@@ -37,10 +33,8 @@ class SshService(SocketProxyService):
     @staticmethod
     async def get_payload():
         return await vm.repo(
-            image_hash='f0399956776115ac0988fd96844c1da729e7415e75fef740f013adf7',
-            image_url='http://gpu-on-golem.s3.eu-central-1.amazonaws.com/golem_cuda_base-f0399956776115ac0988fd96844c1da729e7415e75fef740f013adf7.gvmi',
-            # image_hash = 'd9981476ceecb823bfc3b076f93c65eea608e19dce306b6dc1f6a0ff',
-            # image_url='http://gpu-on-golem.s3.eu-central-1.amazonaws.com/golem_cuda_base-d9981476ceecb823bfc3b076f93c65eea608e19dce306b6dc1f6a0ff.gvmi',
+            image_hash='856a5ed05eb3055e2b130a44e104d2f34f0a28fa8fa5ae7a958f9cea',
+            image_url='http://gpu-on-golem.s3.eu-central-1.amazonaws.com/rent_gpu-856a5ed05eb3055e2b130a44e104d2f34f0a28fa8fa5ae7a958f9cea.gvmi',
             capabilities=[vm.VM_CAPS_VPN],
         )
 
@@ -66,17 +60,18 @@ class SshService(SocketProxyService):
             f"-p {server.local_port} root@{server.local_address}"
         )
         print(f"password: {password}")
-        # TODO: test file transfer with SCP
 
 
-async def main(provider_id):
-    # By passing `event_consumer=log_summary()` we enable summary logging.
-    # See the documentation of the `yapapi.log` module on how to set
-    # the level of detail and format of the logged information.
+async def main(provider_id: str, local_port: int):
+    """
+    :param provider_id:
+    :param local_port: The port on requestor through which tunnel is opened to provider machine.
+    """
+
     async with Golem(budget=1.0, subnet_tag='test', strategy=ConcreteProviderStrategy(provider_id)) as golem:
 
         network = await golem.create_network("192.168.0.1/24")
-        proxy = SocketProxy(ports=[2222])
+        proxy = SocketProxy(ports=[local_port])
 
         async with network:
             cluster = await golem.run_service(
@@ -104,12 +99,12 @@ async def main(provider_id):
                 cnt += 1
 
 
-def run_sd_service():
+def rent_server():
     try:
-        asyncio.run(main(sys.argv[1]))
+        asyncio.run(main(sys.argv[1], int(sys.argv[2])))
     except KeyboardInterrupt:
         print('Interruption')
 
 
 if __name__ == "__main__":
-    run_sd_service()
+    rent_server()
