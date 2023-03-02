@@ -31,7 +31,7 @@ async def list_offers(conf: Configuration, subnet_tag: str):
                                  None)
                 if cuda_card and event.issuer not in offers:
                     offers.add(event.issuer)
-                    print(f"Provider: {event.issuer}, Name: {event.props.get('golem.node.id.name')}, Card: {cuda_card}")
+                    print(f"Provider: {event.issuer} , Name: {event.props.get('golem.node.id.name')}, Card: {cuda_card}")
                     # print(f"props {json.dumps(event.props, indent=4)}")
         print("done")
 
