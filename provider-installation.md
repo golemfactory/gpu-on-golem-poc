@@ -8,7 +8,7 @@
   * download testing image: http://gpu-on-golem.s3.eu-central-1.amazonaws.com/golem_cuda_base-d9981476ceecb823bfc3b076f93c65eea608e19dce306b6dc1f6a0ff.gvmi
   * set GPU_PCI environmental variable `export GPU_PCI=[value]`. You can check the `value` in the `/etc/systemd/system/golem_provider.service` file.
   * run debug runtime with: `ya-runtime-dbg --runtime /home/$USER/.local/lib/yagna/plugins/ya-runtime-vm/ya-runtime-vm --task-package golem_cuda_base-d9981476ceecb823bfc3b076f93c65eea608e19dce306b6dc1f6a0ff.gvmi --workdir /tmp/workdir`
-  * while in the runtime run `lspci -vnn` and look for your device or run nvidia-smi and check if you device is visible
+  * while in the runtime run `lspci -vnn` and look for your device or run nvidia-smi and check if your device is visible
 - Adjust service file `sudo nano /etc/systemd/system/golem_provider.service`:
   * set subnet
   * set payment network
