@@ -17,26 +17,8 @@
             </a>
         </header>
         <main>
-            <h2>Available machines</h2>
-            <p>Below is the list of available providers and their GPUs. Click <b>Start</b> to spin up your machine.</p>
-            <table class="table mt-5">
-                <thead>
-                    <tr>
-                        <th>Provider</th>
-                        <th>Card</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                {% for entry in offers %}
-                    <tr>
-                        <td>{{ entry.name }} ({{ entry.provider_id }})</td>
-                        <td>{{ entry.card }}</td>
-                        <td><button class="btn btn-primary px-4" data-provider-id="{{ entry.provider_id }}">Start</button></td>
-                    </tr>
-                {% endfor %}
-                </tbody>
-            </table>
+            {% block content %}
+            {% endblock %}
         </main>
     </div>
 

@@ -1,14 +1,16 @@
 import asyncio
 from asyncio import TimeoutError
 from datetime import datetime, timezone
-import json
 import pathlib
 import sys
 
+from sqlmodel import Session, select
 from yapapi import props as yp
 from yapapi.log import enable_default_logger
 from yapapi.props.builder import DemandBuilder
-from yapapi.rest import Activity, Configuration, Market, Payment  # noqa
+from yapapi.rest import Configuration, Market
+
+from rent_gpu.requestor.db import engine, Offer
 
 examples_dir = pathlib.Path(__file__).resolve().parent.parent
 sys.path.append(str(examples_dir))
@@ -33,6 +35,21 @@ async def list_offers(conf: Configuration, subnet_tag: str):
                     offers.add(event.issuer)
                     print(f"Provider: {event.issuer} , Name: {event.props.get('golem.node.id.name')}, Card: {cuda_card}")
                     # print(f"props {json.dumps(event.props, indent=4)}")
+                    with Session(engine) as session:
+                        existing_offer = session.exec(select(Offer).where(Offer.provider_id == event.issuer)).first()
+                        if existing_offer:
+                            existing_offer.name = event.props.get('golem.node.id.name')
+                            existing_offer.card = cuda_card
+                            session.add(existing_offer)
+                        else:
+                            session.add(
+                                Offer(
+                                    provider_id=event.issuer,
+                                    name=event.props.get('golem.node.id.name'),
+                                    card=cuda_card
+                                )
+                            )
+                        session.commit()
         print("done")
 
 

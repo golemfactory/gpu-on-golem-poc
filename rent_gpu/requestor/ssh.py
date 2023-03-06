@@ -5,10 +5,13 @@ import random
 import string
 import sys
 
+from sqlmodel import Session, select
 from yapapi import Golem
 from yapapi.contrib.service.socket_proxy import SocketProxy, SocketProxyService
 from yapapi.payload import vm
 from yapapi.strategy import SCORE_REJECTED, SCORE_TRUSTED, MarketStrategy
+
+from rent_gpu.requestor.db import engine, Offer, OfferStatus
 
 
 examples_dir = pathlib.Path(__file__).resolve().parent.parent
@@ -54,6 +57,13 @@ class SshService(SocketProxyService):
 
         server = await self.proxy.run_server(self, self.remote_port)
 
+        with Session(engine) as session:
+            offer = session.exec(select(Offer).where(Offer.provider_id == self.provider_id)).one()
+            offer.status = OfferStatus.READY
+            offer.password = password
+            session.add(offer)
+            session.commit()
+
         print(
             f"connect with:\n"
             f"ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no "
@@ -86,6 +96,10 @@ async def main(provider_id: str, local_port: int):
                 print(instances)
                 try:
                     await asyncio.sleep(5)
+                    with Session(engine) as session:
+                        offer = session.exec(select(Offer).where(Offer.provider_id == provider_id)).one()
+                        if offer.status == OfferStatus.TERMINATING:
+                            break
                 except (KeyboardInterrupt, asyncio.CancelledError):
                     break
 
@@ -98,13 +112,21 @@ async def main(provider_id: str, local_port: int):
                 await asyncio.sleep(5)
                 cnt += 1
 
+            with Session(engine) as session:
+                offer = session.exec(select(Offer).where(Offer.provider_id == provider_id)).one()
+                offer.status = OfferStatus.FREE
+                offer.port = None
+                offer.password = None
+                session.add(offer)
+                session.commit()
 
-def rent_server():
+
+def rent_server(provider_id: str, local_port: int):
     try:
-        asyncio.run(main(sys.argv[1], int(sys.argv[2])))
+        asyncio.run(main(provider_id, local_port))
     except KeyboardInterrupt:
         print('Interruption')
 
 
 if __name__ == "__main__":
-    rent_server()
+    rent_server(sys.argv[1], int(sys.argv[2]))

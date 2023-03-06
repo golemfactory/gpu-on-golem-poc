@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+
+{% block content %}
+<h2>Available machines</h2>
+<p>
+    Below is the list of available providers and their GPUs.
+    <br/>Click <b>Start</b> to spin up your machine.
+</p>
+<table class="table mt-5">
+    <thead>
+        <tr>
+            <th>Provider</th>
+            <th>Card</th>
+            <th>Status</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for entry in offers %}
+        <tr>
+            <td>{{ entry.name }} ({{ entry.provider_id }})</td>
+            <td>{{ entry.card }}</td>
+            <td>
+                {% if entry.status.value == 'free' %}
+                <b class="text-success">{{ entry.status.value }}</b>
+                {% else %}
+                <b class="text-danger">{{ entry.status.value }}</b>
+                {% endif %}
+            </td>
+            <td>
+                <a href="/machines/{{ entry.provider_id }}/" class="btn btn-primary">Details</a>
+                {% if entry.status.value == 'free' %}
+                <form action="/machines/{{ entry.provider_id }}/rent/" method="POST">
+                    <button class="btn btn-primary px-4" data-provider-id="{{ entry.provider_id }}" type="submit">Start</button>
+                </form>
+                {% endif %}
+            </td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
