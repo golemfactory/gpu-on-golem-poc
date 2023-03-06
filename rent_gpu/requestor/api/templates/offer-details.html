@@ -10,7 +10,7 @@
 </p>
 <p>
     Status: <b{% if offer.status.value == 'ready' %} class="text-success"{% endif %}>{{ offer.status.value }}</b>
-    {% if offer.status.value == 'reserved' %}(Refresh the page in few seconds){% endif %}<br/>
+    {% if offer.status.value == 'reserved' %}(The page will refresh in few seconds){% endif %}<br/>
 
     Port: <b>{{ offer.port }}</b><br/>
     Password: <b>{{ offer.password }}</b><br/><br/>
@@ -27,4 +27,14 @@
     </form>
     {% endif %}
 </p>
+
+{% if offer.status.value == 'reserved' %}
+<script type="text/javascript">
+    window.onload = function(){
+        setInterval(function(){
+            location.reload();
+        }, 5000)
+    }
+</script>
+{% endif %}
 {% endblock %}
