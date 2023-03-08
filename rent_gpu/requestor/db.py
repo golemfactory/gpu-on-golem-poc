@@ -19,6 +19,7 @@ class Offer(SQLModel, table=True):
     card: str
     status: Optional[OfferStatus] = OfferStatus.FREE
     job_id: Optional[int] = None
+    package: Optional[str] = None
     port: Optional[int] = None
     password: Optional[str] = None
 

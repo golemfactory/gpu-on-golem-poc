@@ -32,7 +32,12 @@
                 <a href="/machines/{{ entry.provider_id }}/" class="btn btn-primary">Details</a>
                 {% if entry.status.value == 'free' %}
                 <form action="/machines/{{ entry.provider_id }}/rent/" method="POST">
-                    <button class="btn btn-primary px-4" data-provider-id="{{ entry.provider_id }}" type="submit">Start</button>
+                    <input type="hidden" name="package" value="pytorch" />
+                    <button class="btn btn-primary px-4" data-provider-id="{{ entry.provider_id }}" type="submit">Start PyTorch</button>
+                </form>
+                <form action="/machines/{{ entry.provider_id }}/rent/" method="POST">
+                    <input type="hidden" name="package" value="automatic" />
+                    <button class="btn btn-primary px-4" data-provider-id="{{ entry.provider_id }}" type="submit">Start Automatic</button>
                 </form>
                 {% endif %}
             </td>

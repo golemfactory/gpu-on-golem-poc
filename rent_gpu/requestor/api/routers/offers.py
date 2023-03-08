@@ -2,7 +2,7 @@ from pathlib import Path
 import random
 
 import sqlalchemy.exc
-from fastapi import APIRouter, Request, status
+from fastapi import APIRouter, Request, status, Form
 from fastapi.responses import JSONResponse, RedirectResponse, HTMLResponse
 from fastapi.templating import Jinja2Templates
 from rq import Queue
@@ -11,7 +11,8 @@ from redis import Redis
 from sqlmodel import Session, select
 
 from rent_gpu.requestor.db import engine, Offer, OfferStatus
-from rent_gpu.requestor.ssh import rent_server
+from rent_gpu.requestor.ssh_proxy import rent_server as rent_server_pytorch_ssh
+from rent_gpu.requestor.automatic_proxy import rent_server as rent_server_automatic
 
 redis_conn = Redis()
 q = Queue(connection=redis_conn)
@@ -28,10 +29,11 @@ async def list_offers(request: Request):
 
 
 @router.post("/machines/{provider_id}/rent/")
-async def rent(provider_id: str):
+async def rent(provider_id: str, package: str = Form(...)):
     # Random port is good enough for PoC
     port = random.randint(2000, 2999)
-    job = Job.create(rent_server, (provider_id, port), connection=redis_conn, timeout='100d')
+    vm_run_function = rent_server_automatic if package == 'automatic' else rent_server_pytorch_ssh
+    job = Job.create(vm_run_function, (provider_id, port), connection=redis_conn, timeout='100d')
     with Session(engine) as session:
         try:
             offer = session.exec(
@@ -44,6 +46,7 @@ async def rent(provider_id: str):
         else:
             offer.status = OfferStatus.RESERVED
             offer.job_id = job.get_id()
+            offer.package = package
             offer.port = port
             session.add(offer)
             session.commit()
