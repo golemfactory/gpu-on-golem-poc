@@ -4,6 +4,7 @@ import datetime
 import hashlib
 import json
 import logging
+import os
 from pathlib import Path
 from typing import Optional
 
@@ -27,8 +28,8 @@ INTERMEDIARY_IMAGES_NUMBER = 3
 NSFW_IMAGE_HASH = '4518b9ae5041f25d03106e4bb7d019d1'
 
 sentry_sdk.init(dsn=SENTRY_DSN, traces_sample_rate=1.0)
-api_dir = Path(__file__).parent.joinpath('../../api').absolute()
-enable_default_logger(log_file=str(api_dir / 'sd-golem-service.log'))
+data_dir = Path(os.environ.get("GPUOG_DATA_DIR")) or Path(__file__).parent.joinpath('../../api').absolute()
+enable_default_logger(log_file=str(data_dir / 'sd-golem-service.log'))
 logger = logging.getLogger('yapapi')
 
 cluster: Optional[Cluster] = None
@@ -102,7 +103,7 @@ class GenerateImageService(Service):
                         img_filename = image.split('/', 1)[1]
                         img_iteration = img_filename.split('.', 1)[0].split('_', 1)[1]
                         target_filename = f'images/{job["job_id"]}_{img_iteration}.jpg'
-                        target_path = str(api_dir / target_filename)
+                        target_path = str(data_dir / target_filename)
                         download_script.download_file(f'/usr/src/app/output/{img_filename}', target_path)
                         bisect.insort(intermediary_images, target_filename)
                     yield download_script
@@ -119,7 +120,7 @@ class GenerateImageService(Service):
                     await update_job_data(job["job_id"], job_data_update)
 
             script = self._ctx.new_script()
-            final_img_path = str(api_dir / f'images/{job["job_id"]}.jpg')
+            final_img_path = str(data_dir / f'images/{job["job_id"]}.jpg')
             script.download_file('/usr/src/app/output/img.jpg', final_img_path)
             logger.info(f'{self.name}: finished job {job["job_id"]} ({job["prompt"]})')
             yield script
