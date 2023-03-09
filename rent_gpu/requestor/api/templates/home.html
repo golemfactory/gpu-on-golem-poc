@@ -12,6 +12,7 @@
         <tr>
             <th>Provider</th>
             <th>Card</th>
+            <th>Memory [GB]</th>
             <th>Status</th>
             <th>Actions</th>
         </tr>
@@ -21,6 +22,7 @@
         <tr>
             <td>{{ entry.name }} ({{ entry.provider_id }})</td>
             <td>{{ entry.card }}</td>
+            <td>{{ entry.memory|round(2) }}</td>
             <td>
                 {% if entry.status.value == 'free' %}
                 <b class="text-success">{{ entry.status.value }}</b>
@@ -35,10 +37,12 @@
                     <input type="hidden" name="package" value="pytorch" />
                     <button class="btn btn-primary px-4" data-provider-id="{{ entry.provider_id }}" type="submit">Start PyTorch</button>
                 </form>
-                <form action="/machines/{{ entry.provider_id }}/rent/" method="POST">
-                    <input type="hidden" name="package" value="automatic" />
-                    <button class="btn btn-primary px-4" data-provider-id="{{ entry.provider_id }}" type="submit">Start Automatic</button>
-                </form>
+                    {% if entry.memory >= 12 %}
+                    <form action="/machines/{{ entry.provider_id }}/rent/" method="POST">
+                        <input type="hidden" name="package" value="automatic" />
+                        <button class="btn btn-primary px-4" data-provider-id="{{ entry.provider_id }}" type="submit">Start Automatic</button>
+                    </form>
+                    {% endif %}
                 {% endif %}
             </td>
         </tr>
