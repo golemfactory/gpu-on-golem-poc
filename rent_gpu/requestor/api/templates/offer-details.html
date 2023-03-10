@@ -6,7 +6,8 @@
 <p>
     Provider id: <b>{{ offer.provider_id }}</b><br>
     Name: <b>{{ offer.name }}</b><br>
-    GPU: <b>{{ offer.card }}</b>
+    GPU: <b>{{ offer.card }}</b><br>
+    Memory: <b>{{ offer.memory|round(2) }}GB</b>
 </p>
 <p>
     Status: <b{% if offer.status.value == 'ready' %} class="text-success"{% endif %}>{{ offer.status.value }}</b>
@@ -16,11 +17,16 @@
     Password: <b>{{ offer.password }}</b><br/><br/>
 
     {% if offer.status.value == 'ready' %}
-    Ssh command:
-    <pre><code>
-    ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -p {{ offer.port }} root@{{request.url.hostname}}
-    </code>
-    </pre> <br/>
+        {% if offer.package == 'pytorch' %}
+        Ssh command:
+        <pre><code>
+        ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -p {{ offer.port }} root@{{request.url.hostname}}
+        </code>
+        </pre> <br/>
+        {% elif offer.package == 'automatic' %}
+        Use this link to connect with Automatic FE: <a href="http://{{request.url.hostname}}:{{ offer.port }}" target="_blank">http://{{request.url.hostname}}:{{ offer.port }}</a>
+        <br/>
+        {% endif %}
 
     <form action="/machines/{{ offer.provider_id }}/terminate/" method="POST">
     <button class="btn btn-danger px-4" type="submit">Terminate</button>

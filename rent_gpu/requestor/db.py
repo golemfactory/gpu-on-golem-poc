@@ -17,8 +17,10 @@ class Offer(SQLModel, table=True):
     provider_id: str = Field(default=None, unique=True)
     name: str
     card: str
+    memory: float
     status: Optional[OfferStatus] = OfferStatus.FREE
     job_id: Optional[int] = None
+    package: Optional[str] = None
     port: Optional[int] = None
     password: Optional[str] = None
 

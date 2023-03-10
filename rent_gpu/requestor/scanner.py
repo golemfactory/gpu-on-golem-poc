@@ -44,13 +44,15 @@ async def list_offers(conf: Configuration, subnet_tag: str):
                         if existing_offer:
                             existing_offer.name = event.props.get('golem.node.id.name')
                             existing_offer.card = cuda_card
+                            existing_offer.memory = float(event.props.get('golem.inf.mem.gib'))
                             session.add(existing_offer)
                         else:
                             session.add(
                                 Offer(
                                     provider_id=event.issuer,
                                     name=event.props.get('golem.node.id.name'),
-                                    card=cuda_card
+                                    card=cuda_card,
+                                    memory=float(event.props.get('golem.inf.mem.gib')),
                                 )
                             )
                         session.commit()
