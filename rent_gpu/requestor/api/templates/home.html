@@ -20,7 +20,10 @@
     <tbody>
     {% for entry in offers %}
         <tr>
-            <td>{{ entry.name }} ({{ entry.provider_id }})</td>
+            <td>
+                <a href="/machines/{{ entry.provider_id }}/">{{ entry.name }}</a> <br/>
+                {{ entry.provider_id }}
+            </td>
             <td>{{ entry.card }}</td>
             <td>{{ entry.memory|round(2) }}</td>
             <td>
@@ -28,21 +31,34 @@
                 <b class="text-success">{{ entry.status.value }}</b>
                 {% else %}
                 <b class="text-danger">{{ entry.status.value }}</b>
+                {% if entry.status.value == 'ready' %}
+                <p><small class="text-muted">{{ entry.package }}</small></p>
+                {% endif %}
                 {% endif %}
             </td>
             <td>
-                <a href="/machines/{{ entry.provider_id }}/" class="btn btn-primary">Details</a>
                 {% if entry.status.value == 'free' %}
-                <form action="/machines/{{ entry.provider_id }}/rent/" method="POST">
-                    <input type="hidden" name="package" value="pytorch" />
-                    <button class="btn btn-primary px-4" data-provider-id="{{ entry.provider_id }}" type="submit">Start PyTorch</button>
-                </form>
-                    {% if entry.memory >= 12 %}
-                    <form action="/machines/{{ entry.provider_id }}/rent/" method="POST">
-                        <input type="hidden" name="package" value="automatic" />
-                        <button class="btn btn-primary px-4" data-provider-id="{{ entry.provider_id }}" type="submit">Start Automatic</button>
-                    </form>
-                    {% endif %}
+                    <div class="dropdown">
+                      <button class="btn btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        Start...
+                      </button>
+                      <ul class="dropdown-menu">
+                        <li>
+                            <form action="/machines/{{ entry.provider_id }}/rent/" method="POST">
+                                <input type="hidden" name="package" value="pytorch" />
+                                <button class="dropdown-item" type="submit">PyTorch</button>
+                            </form>
+                        </li>
+                        {% if entry.memory >= 12 %}
+                        <li>
+                            <form action="/machines/{{ entry.provider_id }}/rent/" method="POST">
+                                <input type="hidden" name="package" value="automatic" />
+                                <button class="dropdown-item" type="submit">Automatic + Stable diffusion</button>
+                            </form>
+                        </li>
+                        {% endif %}
+                      </ul>
+                    </div>
                 {% endif %}
             </td>
         </tr>

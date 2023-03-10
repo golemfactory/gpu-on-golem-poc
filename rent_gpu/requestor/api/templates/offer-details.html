@@ -6,7 +6,8 @@
 <p>
     Provider id: <b>{{ offer.provider_id }}</b><br>
     Name: <b>{{ offer.name }}</b><br>
-    GPU: <b>{{ offer.card }}</b>
+    GPU: <b>{{ offer.card }}</b><br>
+    Memory: <b>{{ offer.memory|round(2) }}GB</b>
 </p>
 <p>
     Status: <b{% if offer.status.value == 'ready' %} class="text-success"{% endif %}>{{ offer.status.value }}</b>
