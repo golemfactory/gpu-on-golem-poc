@@ -4,6 +4,7 @@ WORKDIR /usr/src/app
 VOLUME /usr/src/app/output
 
 COPY run_service.sh ./
+COPY wait_for_service.sh ./
 COPY proxy.conf /etc/nginx/conf.d/
 
 RUN apt-get update && apt-get install -y python3-pip pciutils curl git net-tools nginx

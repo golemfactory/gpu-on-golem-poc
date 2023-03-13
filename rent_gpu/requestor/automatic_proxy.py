@@ -31,8 +31,8 @@ class AutomaticService(HttpProxyService):
     @staticmethod
     async def get_payload():
         return await vm.repo(
-            image_hash='d95c9d6b4ab27a06324770de7b330121a6ee4f57731ab2889eae646d',
-            image_url='http://gpu-on-golem.s3.eu-central-1.amazonaws.com/automatic-golem-d95c9d6b4ab27a06324770de7b330121a6ee4f57731ab2889eae646d.gvmi',
+            image_hash='08bb10cc737b04d2b89150712f8ca7f31d3862fd01679ae514e53217',
+            image_url='http://gpu-on-golem.s3.eu-central-1.amazonaws.com/automatic-golem-08bb10cc737b04d2b89150712f8ca7f31d3862fd01679ae514e53217.gvmi',
             capabilities=[vm.VM_CAPS_VPN, 'cuda*'],
         )
 
@@ -48,6 +48,10 @@ class AutomaticService(HttpProxyService):
 
         script = self._ctx.new_script()
         script.run("/usr/sbin/nginx")
+        yield script
+
+        script = self._ctx.new_script()
+        script.run("/usr/src/app/wait_for_service.sh", "8000")
         yield script
 
         with Session(engine) as session:
