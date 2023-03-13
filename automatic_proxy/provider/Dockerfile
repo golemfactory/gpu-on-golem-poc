@@ -14,6 +14,8 @@ RUN pip install --no-cache-dir -r stable-diffusion-webui/requirements.txt
 COPY stable-diffusion-v1-5/v1-5-pruned-emaonly.ckpt ./stable-diffusion-webui/models/Stable-diffusion
 COPY openai ./stable-diffusion-webui/openai
 
+RUN rm /etc/nginx/sites-enabled/default
+
 WORKDIR stable-diffusion-webui
 
 # Disabling Gzipped responses from API
