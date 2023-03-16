@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Optional
 from enum import Enum
@@ -12,6 +13,9 @@ class OfferStatus(Enum):
     TERMINATING = 'terminating'
 
 
+MACHINE_LIFETIME = timedelta(minutes=30)
+
+
 class Offer(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     provider_id: str = Field(default=None, unique=True)
@@ -23,6 +27,7 @@ class Offer(SQLModel, table=True):
     package: Optional[str] = None
     port: Optional[int] = None
     password: Optional[str] = None
+    started_at: Optional[datetime] = None
 
 
 sqlite_file_name = Path(__file__).parent.joinpath('./database.db').resolve()

@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta
 from pathlib import Path
 import random
 
@@ -10,7 +11,7 @@ from rq.job import Job
 from redis import Redis
 from sqlmodel import Session, select
 
-from rent_gpu.requestor.db import engine, Offer, OfferStatus
+from rent_gpu.requestor.db import engine, Offer, OfferStatus, MACHINE_LIFETIME
 from rent_gpu.requestor.ssh_proxy import rent_server as rent_server_pytorch_ssh
 from rent_gpu.requestor.automatic_proxy import rent_server as rent_server_automatic
 
@@ -48,6 +49,7 @@ async def rent(provider_id: str, package: str = Form(...)):
             offer.job_id = job.get_id()
             offer.package = package
             offer.port = port
+            offer.started_at = datetime.now()
             session.add(offer)
             session.commit()
             q.enqueue_job(job)
@@ -84,4 +86,6 @@ async def provider_status(provider_id: str, request: Request):
             return JSONResponse({'error': f'Provider id: {provider_id} not found.'},
                                 status_code=status.HTTP_404_NOT_FOUND)
         else:
-            return templates.TemplateResponse("offer-details.html", {"request": request, "offer": offer})
+            expire_in = max(offer.started_at + MACHINE_LIFETIME - datetime.now(), timedelta(seconds=0))
+            return templates.TemplateResponse("offer-details.html", {"request": request, "offer": offer,
+                                                                     "expire_in": expire_in})

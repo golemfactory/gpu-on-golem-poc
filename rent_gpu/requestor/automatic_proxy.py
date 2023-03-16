@@ -10,7 +10,7 @@ from yapapi.payload import vm
 from yapapi.services import ServiceState
 from yapapi.strategy import SCORE_REJECTED, SCORE_TRUSTED, MarketStrategy
 
-from rent_gpu.requestor.db import engine, Offer, OfferStatus
+from rent_gpu.requestor.db import engine, Offer, OfferStatus, MACHINE_LIFETIME
 
 
 CLUSTER_EXPIRATION_TIME = datetime.timedelta(days=365)
@@ -95,6 +95,10 @@ async def main(provider_id: str, local_port: int):
                     await asyncio.sleep(5)
                     with Session(engine) as session:
                         offer = session.exec(select(Offer).where(Offer.provider_id == provider_id)).one()
+                        if datetime.datetime.now() > offer.started_at + MACHINE_LIFETIME:
+                            offer.status = OfferStatus.TERMINATING
+                            session.add(offer)
+                            session.commit()
                         if offer.status == OfferStatus.TERMINATING:
                             break
                 except (KeyboardInterrupt, asyncio.CancelledError):
@@ -114,6 +118,9 @@ async def main(provider_id: str, local_port: int):
                 offer.status = OfferStatus.FREE
                 offer.port = None
                 offer.password = None
+                offer.started_at = None
+                offer.job_id = None
+                offer.package = None
                 session.add(offer)
                 session.commit()
 

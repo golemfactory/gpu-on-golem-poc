@@ -1,5 +1,5 @@
 import asyncio
-from datetime import timedelta
+from datetime import datetime, timedelta
 import pathlib
 import random
 import string
@@ -11,7 +11,7 @@ from yapapi.contrib.service.socket_proxy import SocketProxy, SocketProxyService
 from yapapi.payload import vm
 from yapapi.strategy import SCORE_REJECTED, SCORE_TRUSTED, MarketStrategy
 
-from rent_gpu.requestor.db import engine, Offer, OfferStatus
+from rent_gpu.requestor.db import engine, Offer, OfferStatus, MACHINE_LIFETIME
 
 
 examples_dir = pathlib.Path(__file__).resolve().parent.parent
@@ -98,6 +98,10 @@ async def main(provider_id: str, local_port: int):
                     await asyncio.sleep(5)
                     with Session(engine) as session:
                         offer = session.exec(select(Offer).where(Offer.provider_id == provider_id)).one()
+                        if datetime.now() > offer.started_at + MACHINE_LIFETIME:
+                            offer.status = OfferStatus.TERMINATING
+                            session.add(offer)
+                            session.commit()
                         if offer.status == OfferStatus.TERMINATING:
                             break
                 except (KeyboardInterrupt, asyncio.CancelledError):
@@ -117,6 +121,9 @@ async def main(provider_id: str, local_port: int):
                 offer.status = OfferStatus.FREE
                 offer.port = None
                 offer.password = None
+                offer.started_at = None
+                offer.job_id = None
+                offer.package = None
                 session.add(offer)
                 session.commit()
 

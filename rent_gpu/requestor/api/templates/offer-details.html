@@ -28,9 +28,13 @@
         <br/>
         {% endif %}
 
-    <form action="/machines/{{ offer.provider_id }}/terminate/" method="POST">
-    <button class="btn btn-danger px-4" type="submit">Terminate</button>
-    </form>
+        <p>
+        Machine will be terminated in {{ expire_in }}
+        </p>
+
+{#    <form action="/machines/{{ offer.provider_id }}/terminate/" method="POST">#}
+{#    <button class="btn btn-danger px-4" type="submit">Terminate</button>#}
+{#    </form>#}
     {% endif %}
 </p>
 
