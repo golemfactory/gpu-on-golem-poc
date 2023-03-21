@@ -26,15 +26,18 @@
         {% elif offer.package == 'automatic' %}
         Use this link to connect with Automatic FE: <a href="http://{{request.url.hostname}}:{{ offer.port }}" target="_blank">http://{{request.url.hostname}}:{{ offer.port }}</a>
         <br/>
+        {% elif offer.package == 'jupyter' %}
+        Use this link to connect with Jupyter Lab: <a href="http://{{request.url.hostname}}:{{ offer.port }}" target="_blank">http://{{request.url.hostname}}:{{ offer.port }}</a>
+        <br/>
         {% endif %}
 
         <p>
-        Machine will be terminated in {{ expire_in }}
+        Machine will be terminated automatically in {{ expire_in }}
         </p>
 
-{#    <form action="/machines/{{ offer.provider_id }}/terminate/" method="POST">#}
-{#    <button class="btn btn-danger px-4" type="submit">Terminate</button>#}
-{#    </form>#}
+        <form action="/machines/{{ offer.provider_id }}/terminate/" method="POST">
+        <button class="btn btn-danger px-4" type="submit">Terminate</button>
+        </form>
     {% endif %}
 </p>
 

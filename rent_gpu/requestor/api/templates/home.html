@@ -49,6 +49,12 @@
                                 <button class="dropdown-item" type="submit">PyTorch</button>
                             </form>
                         </li>
+                        <li>
+                            <form action="/machines/{{ entry.provider_id }}/rent/" method="POST">
+                                <input type="hidden" name="package" value="jupyter" />
+                                <button class="dropdown-item" type="submit">Jupyter notebook</button>
+                            </form>
+                        </li>
                         {% if entry.memory >= 12 %}
                         <li>
                             <form action="/machines/{{ entry.provider_id }}/rent/" method="POST">

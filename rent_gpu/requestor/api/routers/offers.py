@@ -14,6 +14,7 @@ from sqlmodel import Session, select
 from rent_gpu.requestor.db import engine, Offer, OfferStatus, MACHINE_LIFETIME
 from rent_gpu.requestor.ssh_proxy import rent_server as rent_server_pytorch_ssh
 from rent_gpu.requestor.automatic_proxy import rent_server as rent_server_automatic
+from rent_gpu.requestor.jupyter_proxy import rent_server as rent_server_jupyter
 
 redis_conn = Redis()
 q = Queue(connection=redis_conn)
@@ -31,9 +32,14 @@ async def list_offers(request: Request):
 
 @router.post("/machines/{provider_id}/rent/")
 async def rent(provider_id: str, package: str = Form(...)):
+    package_to_function_map = {
+        'pytorch': rent_server_pytorch_ssh,
+        'automatic': rent_server_automatic,
+        'jupyter': rent_server_jupyter,
+    }
     # Random port is good enough for PoC
     port = random.randint(2000, 2999)
-    vm_run_function = rent_server_automatic if package == 'automatic' else rent_server_pytorch_ssh
+    vm_run_function = package_to_function_map[package]
     job = Job.create(vm_run_function, (provider_id, port), connection=redis_conn, timeout='100d')
     with Session(engine) as session:
         try:
