@@ -18,11 +18,16 @@
 
     {% if offer.status.value == 'ready' %}
         {% if offer.package == 'pytorch' %}
-        Ssh command:
+        Terminal connection:
         <pre><code>
         ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -p {{ offer.port }} root@{{request.url.hostname}}
         </code>
         </pre> <br/>
+        Send file:
+        <pre><code>
+        scp -P {{ offer.port }} [local_file] root@{{request.url.hostname}}:[destination_path]
+        </code>
+        </pre>
         {% elif offer.package == 'automatic' %}
         Use this link to connect with Automatic FE: <a href="http://{{request.url.hostname}}:{{ offer.port }}" target="_blank">http://{{request.url.hostname}}:{{ offer.port }}</a>
         <br/>
