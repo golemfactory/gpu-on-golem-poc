@@ -31,9 +31,11 @@
         <br/>
         {% endif %}
 
+        {% if expire_in %}
         <p>
         Machine will be terminated automatically in {{ expire_in }}
         </p>
+        {% endif %}
 
         <form action="/machines/{{ offer.provider_id }}/terminate/" method="POST">
         <button class="btn btn-danger px-4" type="submit">Terminate</button>

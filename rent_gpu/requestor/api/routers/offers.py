@@ -92,6 +92,9 @@ async def provider_status(provider_id: str, request: Request):
             return JSONResponse({'error': f'Provider id: {provider_id} not found.'},
                                 status_code=status.HTTP_404_NOT_FOUND)
         else:
-            expire_in = max(offer.started_at + MACHINE_LIFETIME - datetime.now(), timedelta(seconds=0))
+            if offer.started_at:
+                expire_in = max(offer.started_at + MACHINE_LIFETIME - datetime.now(), timedelta(seconds=0))
+            else:
+                expire_in = None
             return templates.TemplateResponse("offer-details.html", {"request": request, "offer": offer,
                                                                      "expire_in": expire_in})
