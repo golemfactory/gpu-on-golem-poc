@@ -33,7 +33,7 @@ async def list_offers(request: Request, access_key: Optional[str] = Cookie(None)
         response = templates.TemplateResponse("home.html", {"request": request, "offers": accessible_offers})
         if not access_key:
             expires = datetime.utcnow() + timedelta(days=30)
-            response.set_cookie('access_key', value=str(uuid.uuid4()), secure=True, httponly=True, samesite='none',
+            response.set_cookie('access_key', value=str(uuid.uuid4()), httponly=True,
                                 expires=expires.strftime("%a, %d %b %Y %H:%M:%S GMT"))
         return response
 
