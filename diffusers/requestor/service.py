@@ -19,8 +19,8 @@ from config import SENTRY_DSN
 from redis_db.functions import update_job_data, set_service_data, jobs_queue, set_provider_processing_time
 
 
-CLUSTER_INSTANCES_NUMBER = 2
-CLUSTER_SUBNET_TAG = 'public'
+CLUSTER_INSTANCES_NUMBER = os.environ.get('GPUOG_INSTANCES_NUMBER', 1)
+CLUSTER_SUBNET_TAG = os.environ.get('GPUOG_SUBNET', 'public')
 CLUSTER_BUDGET = 10.0
 CLUSTER_EXPIRATION_TIME = datetime.timedelta(days=365)
 INTERMEDIARY_IMAGES_NUMBER = 3
