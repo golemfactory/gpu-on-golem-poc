@@ -118,6 +118,7 @@ async def main(provider_id: str, local_port: int):
                 offer.started_at = None
                 offer.job_id = None
                 offer.package = None
+                offer.reserved_by = None
                 session.add(offer)
                 session.commit()
 

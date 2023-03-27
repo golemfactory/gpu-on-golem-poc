@@ -1,9 +1,11 @@
 from datetime import datetime, timedelta
 from pathlib import Path
 import random
+from typing import Optional
+import uuid
 
 import sqlalchemy.exc
-from fastapi import APIRouter, Request, status, Form
+from fastapi import APIRouter, Request, status, Form, Cookie
 from fastapi.responses import JSONResponse, RedirectResponse, HTMLResponse
 from fastapi.templating import Jinja2Templates
 from rq import Queue
@@ -24,14 +26,20 @@ templates = Jinja2Templates(directory="rent_gpu/requestor/api/templates")
 
 
 @router.get("/", response_class=HTMLResponse)
-async def list_offers(request: Request):
+async def list_offers(request: Request, access_key: Optional[str] = Cookie(None)):
     with Session(engine) as session:
         offers = session.exec(select(Offer))
-        return templates.TemplateResponse("home.html", {"request": request, "offers": offers})
+        accessible_offers = filter(lambda o: o.has_access(access_key), offers)
+        response = templates.TemplateResponse("home.html", {"request": request, "offers": accessible_offers})
+        if not access_key:
+            expires = datetime.utcnow() + timedelta(days=30)
+            response.set_cookie('access_key', value=str(uuid.uuid4()), secure=True, httponly=True, samesite='none',
+                                expires=expires.strftime("%a, %d %b %Y %H:%M:%S GMT"))
+        return response
 
 
 @router.post("/machines/{provider_id}/rent/")
-async def rent(provider_id: str, package: str = Form(...)):
+async def rent(provider_id: str, package: str = Form(...), access_key: Optional[str] = Cookie(None)):
     package_to_function_map = {
         'pytorch': rent_server_pytorch_ssh,
         'automatic': rent_server_automatic,
@@ -48,7 +56,7 @@ async def rent(provider_id: str, package: str = Form(...)):
                 .where(Offer.provider_id == provider_id, Offer.status == OfferStatus.FREE)
             ).one()
         except sqlalchemy.exc.NoResultFound:
-            return JSONResponse({'error': f'Provider id: {provider_id} not found.'},
+            return JSONResponse({'error': f'Provider id: {provider_id} not found. Might be also already reserved.'},
                                 status_code=status.HTTP_404_NOT_FOUND)
         else:
             offer.status = OfferStatus.RESERVED
@@ -56,6 +64,7 @@ async def rent(provider_id: str, package: str = Form(...)):
             offer.package = package
             offer.port = port
             offer.started_at = datetime.now()
+            offer.reserved_by = access_key
             session.add(offer)
             session.commit()
             q.enqueue_job(job)
@@ -64,7 +73,7 @@ async def rent(provider_id: str, package: str = Form(...)):
 
 
 @router.post("/machines/{provider_id}/terminate/")
-async def terminate(provider_id: str):
+async def terminate(provider_id: str, access_key: Optional[str] = Cookie(None)):
     with Session(engine) as session:
         try:
             offer = session.exec(select(Offer).where(Offer.provider_id == provider_id)).one()
@@ -72,19 +81,23 @@ async def terminate(provider_id: str):
             return JSONResponse({'error': f'Provider id: {provider_id} not found.'},
                                 status_code=status.HTTP_404_NOT_FOUND)
         else:
-            if offer.status == OfferStatus.READY:
-                offer.status = OfferStatus.TERMINATING
-                session.add(offer)
-                session.commit()
+            if not offer.has_access(access_key):
+                return JSONResponse({'error': f'Provider id: {provider_id} reserved by someone else.'},
+                                    status_code=status.HTTP_403_FORBIDDEN)
             else:
-                return JSONResponse({'error': f'Cannot stop machine in status {offer.status}.'},
-                                    status_code=status.HTTP_400_BAD_REQUEST)
+                if offer.status == OfferStatus.READY:
+                    offer.status = OfferStatus.TERMINATING
+                    session.add(offer)
+                    session.commit()
+                else:
+                    return JSONResponse({'error': f'Cannot stop machine in status {offer.status}.'},
+                                        status_code=status.HTTP_400_BAD_REQUEST)
     return RedirectResponse(router.url_path_for("provider_status", provider_id=provider_id),
                             status_code=status.HTTP_302_FOUND)
 
 
 @router.get("/machines/{provider_id}/", response_class=HTMLResponse)
-async def provider_status(provider_id: str, request: Request):
+async def provider_status(provider_id: str, request: Request, access_key: Optional[str] = Cookie(None)):
     with Session(engine) as session:
         try:
             offer = session.exec(select(Offer).where(Offer.provider_id == provider_id)).one()
@@ -92,9 +105,13 @@ async def provider_status(provider_id: str, request: Request):
             return JSONResponse({'error': f'Provider id: {provider_id} not found.'},
                                 status_code=status.HTTP_404_NOT_FOUND)
         else:
-            if offer.started_at:
-                expire_in = max(offer.started_at + MACHINE_LIFETIME - datetime.now(), timedelta(seconds=0))
+            if not offer.has_access(access_key):
+                return JSONResponse({'error': f'Provider id: {provider_id} reserved by someone else.'},
+                                    status_code=status.HTTP_403_FORBIDDEN)
             else:
-                expire_in = None
-            return templates.TemplateResponse("offer-details.html", {"request": request, "offer": offer,
-                                                                     "expire_in": expire_in})
+                if offer.started_at:
+                    expire_in = max(offer.started_at + MACHINE_LIFETIME - datetime.now(), timedelta(seconds=0))
+                else:
+                    expire_in = None
+                return templates.TemplateResponse("offer-details.html", {"request": request, "offer": offer,
+                                                                         "expire_in": expire_in})

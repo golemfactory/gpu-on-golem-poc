@@ -28,6 +28,18 @@ class Offer(SQLModel, table=True):
     port: Optional[int] = None
     password: Optional[str] = None
     started_at: Optional[datetime] = None
+    reserved_by: Optional[str] = None
+
+    def has_access(self, access_key):
+        if access_key == 'admin':
+            return True
+
+        if self.status == OfferStatus.FREE:
+            return True
+        elif self.reserved_by == access_key:
+            return True
+        else:
+            return False
 
 
 sqlite_file_name = Path(__file__).parent.joinpath('./database.db').resolve()

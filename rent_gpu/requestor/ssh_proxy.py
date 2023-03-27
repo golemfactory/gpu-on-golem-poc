@@ -98,7 +98,7 @@ async def main(provider_id: str, local_port: int):
                     await asyncio.sleep(5)
                     with Session(engine) as session:
                         offer = session.exec(select(Offer).where(Offer.provider_id == provider_id)).one()
-                        if datetime.now() > offer.started_at + MACHINE_LIFETIME:
+                        if offer.started_at and datetime.now() > offer.started_at + MACHINE_LIFETIME:
                             offer.status = OfferStatus.TERMINATING
                             session.add(offer)
                             session.commit()
@@ -124,6 +124,7 @@ async def main(provider_id: str, local_port: int):
                 offer.started_at = None
                 offer.job_id = None
                 offer.package = None
+                offer.reserved_by = None
                 session.add(offer)
                 session.commit()
 
