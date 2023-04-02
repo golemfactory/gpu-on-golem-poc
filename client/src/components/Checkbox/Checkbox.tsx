@@ -23,9 +23,11 @@ function Checkbox({ name, label, link, href, on, onChange, disabled, error }: Ch
         >
           {label}
         </label>{' '}
-        <Link className="text-10 text-white underline" href={href}>
-          {link}
-        </Link>
+        {href && (
+          <Link className="text-10 text-white underline" href={href}>
+            {link}
+          </Link>
+        )}
       </div>
       {error?.length && (
         <span className="absolute left-[1.8rem] top-[1.8rem] w-[12rem] text-10 text-[#ff0000]">{error}</span>

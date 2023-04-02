@@ -1,6 +1,6 @@
 import { twMerge } from 'tailwind-merge';
 import { renderIcon } from 'assets/utils';
-import { Checkbox } from 'components';
+import { Terms } from 'components';
 
 function Form({ value, onChange, error, disabled, onSubmit, onExample, onClear, terms }: useFormType) {
   return (
@@ -50,14 +50,7 @@ function Form({ value, onChange, error, disabled, onSubmit, onExample, onClear, 
       </form>
       {!disabled && (
         <div className="relative flex justify-between sm:ml-[3rem] sm:-mt-[1.8rem] sm:ml-[8.4rem] sm:mr-[14.4rem]">
-          <Checkbox
-            name="terms"
-            label="I accept the"
-            link="Terms of Use"
-            href="/terms"
-            disabled={disabled}
-            {...terms}
-          />
+          <Terms disabled={disabled} terms={terms} />
           <button
             className="text-left uppercase underline sm:translate-x-full sm:-translate-y-[0.1rem]"
             type="button"

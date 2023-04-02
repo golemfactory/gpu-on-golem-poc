@@ -15,5 +15,6 @@ export { default as Process, useNodes } from './Process';
 export { default as Progress } from './Progress';
 export { default as Queue, useQueue } from './Queue';
 export { default as Result, useResult } from './Result';
+export { default as Terms, useTermsRemember } from './Terms';
 export { default as Tooltip } from './Tooltip';
 export { default as View } from './View';

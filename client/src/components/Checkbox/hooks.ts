@@ -1,8 +1,8 @@
 import { useToggle } from 'react-use';
 import { useFormError } from 'components';
 
-export function useCheckbox(): useCheckboxType & { onError: onErrorType } {
-  const [on, toggle] = useToggle(false);
+export function useCheckbox(initialValue: boolean): useCheckboxType & { onError: onErrorType } {
+  const [on, toggle] = useToggle(initialValue);
   const { error, onError } = useFormError();
 
   const handleChange = () => {
@@ -12,6 +12,7 @@ export function useCheckbox(): useCheckboxType & { onError: onErrorType } {
 
   return {
     on,
+    toggle,
     onChange: handleChange,
     onError,
     error,

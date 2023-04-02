@@ -4,7 +4,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { adjectives, animals, colors, uniqueNamesGenerator } from 'unique-names-generator';
 import { Api } from 'enums/api';
 import gaEvent from 'lib/ga';
-import { useCheckbox } from 'components';
+import { useCheckbox, useTermsRemember } from 'components';
 import { selectJobId, setJobId } from 'slices/data';
 import { setQueue } from 'slices/queue';
 import { setStatus } from 'slices/status';
@@ -37,7 +37,8 @@ export function useForm(): useFormType {
 
   const [value, setValue] = useState<string>('');
   const { error, onError } = useFormError();
-  const terms = useCheckbox();
+  const terms_remember = useTermsRemember();
+  const terms = useCheckbox(terms_remember.value);
 
   const disabled = !!job_id;
 
