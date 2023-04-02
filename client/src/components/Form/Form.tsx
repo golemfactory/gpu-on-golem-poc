@@ -1,12 +1,14 @@
+import { twMerge } from 'tailwind-merge';
 import { renderIcon } from 'assets/utils';
 
 function Form({ value, onChange, error, disabled, onSubmit, onExample, onClear }: useFormType) {
   return (
     <form className="relative my-[2.6rem] flex justify-center text-12 text-black" onSubmit={onSubmit}>
       <label
-        className={`min-w-[8.4rem] rounded-l-full bg-[#e8e8e8] p-[1.7rem] text-right${
-          disabled ? ' text-[#6d6d6d]' : ''
-        }`}
+        className={twMerge(
+          'min-w-[8.4rem] rounded-l-full bg-[#e8e8e8] p-[1.7rem] text-right',
+          disabled && 'text-[#6d6d6d]',
+        )}
         htmlFor="phrase"
       >
         Type:

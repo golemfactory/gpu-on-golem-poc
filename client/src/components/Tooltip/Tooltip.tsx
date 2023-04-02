@@ -1,3 +1,4 @@
+import { twMerge } from 'tailwind-merge';
 import { renderIcon } from 'assets/utils';
 
 function Tooltip({ type, text, bottom }: { type: string; text: string; bottom?: boolean }) {
@@ -8,9 +9,10 @@ function Tooltip({ type, text, bottom }: { type: string; text: string; bottom?: 
         style={{ backgroundImage: `url(${renderIcon(type)})` }}
       />
       <span
-        className={`absolute ${
-          bottom ? 'top-[5.7rem]' : '-top-[0.5rem]'
-        } right-0 hidden w-[25rem] -translate-y-full rounded-[0.8rem] bg-[#e8e8e8] p-[1rem] text-10 text-black group-hover:flex`}
+        className={twMerge(
+          'absolute right-0 hidden w-[25rem] -translate-y-full rounded-[0.8rem] bg-[#e8e8e8] p-[1rem] text-10 text-black group-hover:flex',
+          bottom ? 'top-[5.7rem]' : '-top-[0.5rem]',
+        )}
       >
         {text}
       </span>

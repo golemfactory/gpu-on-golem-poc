@@ -4,6 +4,6 @@ type useFormType = {
   error: string | undefined;
   disabled: boolean;
   onSubmit: (e: FormEvent) => void;
-  onExample: () => void;
-  onClear: () => void;
+  onExample: Noop;
+  onClear: Noop;
 };

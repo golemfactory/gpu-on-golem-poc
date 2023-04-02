@@ -1,4 +1,5 @@
 import { ReactNode, useState } from 'react';
+import { twMerge } from 'tailwind-merge';
 import { Layout } from 'components';
 import { renderIcon } from 'assets/utils';
 
@@ -630,7 +631,7 @@ export default Terms;
 function renderList(title: string, items?: ReactNode[], bold?: boolean) {
   return (
     <li>
-      <span className={bold ? 'font-bold' : ''}>{title}</span>
+      <span className={twMerge(bold && 'font-bold')}>{title}</span>
       {!!items?.length && (
         <ol>
           {items.map((item, index) => (

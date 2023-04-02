@@ -1,6 +1,8 @@
-import ReactCountdown, { CountdownRenderProps } from 'react-countdown';
-import { useEffect, useRef } from 'react';
+import { useRef } from 'react';
+import { useEffectOnce } from 'react-use';
 import { useSelector } from 'react-redux';
+import ReactCountdown, { CountdownRenderProps } from 'react-countdown';
+import { twMerge } from 'tailwind-merge';
 import { selectEta } from 'slices/data';
 
 function Countdown({ customStyles }: { customStyles: string }) {
@@ -9,15 +11,15 @@ function Countdown({ customStyles }: { customStyles: string }) {
   const sharedStyles =
     'inline-flex min-w-[4.5rem] text-right ' +
     "before:absolute before:-left-[1rem] before:leading-[1.2rem] before:content-['|'] ";
-  const props = { className: sharedStyles + customStyles };
+  const props = { className: twMerge(sharedStyles, customStyles) };
 
   const date = useRef<number>();
 
-  useEffect(() => {
+  useEffectOnce(() => {
     if (eta) {
       date.current = Date.now() + eta * 1000;
     }
-  }, []);
+  });
 
   return !!date.current ? (
     <ReactCountdown date={date.current} intervalDelay={0} precision={2} renderer={(args) => renderer(args, props)} />

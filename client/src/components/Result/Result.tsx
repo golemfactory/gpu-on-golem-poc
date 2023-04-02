@@ -5,7 +5,7 @@ import { Copy, Placeholder, Process, View } from 'components';
 import { selectData } from 'slices/data';
 import { useStatusState } from 'utils/hooks';
 
-function Result({ value, onReset }: { value: string; onReset: () => void }) {
+function Result({ value, onReset }: { value: string; onReset: Noop }) {
   const data = useSelector(selectData);
 
   const { forState } = useStatusState();

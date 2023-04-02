@@ -94,4 +94,42 @@
   .button {
     @apply m-[1.8rem] min-h-[5.6rem] min-w-[18.2rem] rounded-[0.8rem] font-sans text-[1.6rem] font-bold leading-[2.4rem] tracking-[0.143rem];
   }
+
+  .progress-bar {
+    @apply relative mt-[1rem] mb-[6rem] h-[1.2rem] w-full rounded-full bg-[#e7edf3];
+  }
+
+  @media (min-width: 728px) {
+    .progress-bar {
+      @apply mx-[2rem] mb-[4rem];
+      max-width: calc(100% - 4rem);
+    }
+  }
+
+  @keyframes slide {
+    from {
+      background-position: 0 0;
+    }
+    to {
+      background-position: 50px 50px;
+    }
+  }
+
+  .progress-bar-indicator {
+    @apply mx-[0.2rem] h-[0.8rem] translate-y-[0.2rem] rounded-full;
+
+    background: -webkit-linear-gradient(
+      135deg,
+      rgba(0, 125, 255, 0.85) 25%,
+      rgb(0, 125, 255) 25%,
+      rgb(0, 125, 255) 50%,
+      rgba(0, 125, 255, 0.85) 50%,
+      rgba(0, 125, 255, 0.85) 75%,
+      rgb(0, 125, 255) 75%
+    );
+    background-size: 50px 50px;
+
+    animation: slide 2s linear infinite;
+    will-change: background-position;
+  }
 }
