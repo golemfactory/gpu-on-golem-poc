@@ -1,8 +1,10 @@
-import { FormEvent, useEffect, useRef, useState } from 'react';
+import { FormEvent, useRef, useState } from 'react';
+import { useEffectOnce } from 'react-use';
 import { useDispatch, useSelector } from 'react-redux';
 import { adjectives, animals, colors, uniqueNamesGenerator } from 'unique-names-generator';
 import { Api } from 'enums/api';
 import gaEvent from 'lib/ga';
+import { useCheckbox } from 'components';
 import { selectJobId, setJobId } from 'slices/data';
 import { setQueue } from 'slices/queue';
 import { setStatus } from 'slices/status';
@@ -18,12 +20,24 @@ const example = () =>
     length: 5,
   });
 
+export function useFormError(): useErrorType {
+  const [error, setError] = useState<string | undefined>(undefined);
+
+  const handleError = (error?: string) => setError(error ?? undefined);
+
+  return {
+    error,
+    onError: handleError,
+  };
+}
+
 export function useForm(): useFormType {
   const dispatch = useDispatch();
   const job_id = useSelector(selectJobId);
 
   const [value, setValue] = useState<string>('');
-  const [error, setError] = useState<string | undefined>(undefined);
+  const { error, onError } = useFormError();
+  const terms = useCheckbox();
 
   const disabled = !!job_id;
 
@@ -36,29 +50,29 @@ export function useForm(): useFormType {
     generated.current = prompt;
   };
 
-  useEffect(() => {
+  useEffectOnce(() => {
     handleGenerate();
 
     return () => {
       setValue('');
     };
-  }, []);
+  });
 
   const handleExample = () => {
     handleGenerate();
-    setError(undefined);
+    onError();
   };
 
   const handleClear = () => {
     setValue('');
-    setError(undefined);
+    onError();
   };
 
   const handleChange = async (e: FormEvent) => {
     const value = (e.target as HTMLInputElement).value;
 
     setValue(value);
-    setError(undefined);
+    onError();
   };
 
   const handlePost = useFetch();
@@ -66,7 +80,8 @@ export function useForm(): useFormType {
   const handleSubmit = async (e: HTMLFormElement) => {
     e.preventDefault();
 
-    if (!value.length) return setError('This field is required');
+    if (!value.length) return onError('This field is required');
+    if (!terms.on) return terms.onError('Consent is required');
 
     const result = await handlePost(url(Api.txt2img, false), {
       body: queryBuild({ prompt: value }),
@@ -79,7 +94,7 @@ export function useForm(): useFormType {
     });
 
     if (!result) return;
-    else if (result.detail) return setError(result.detail[0].msg);
+    else if (result.detail) return onError(result.detail[0].msg);
     else {
       dispatch(setStatus(result.status));
       dispatch(setQueue(result.queue_position));
@@ -95,5 +110,6 @@ export function useForm(): useFormType {
     onSubmit: handleSubmit,
     onExample: handleExample,
     onClear: handleClear,
+    terms,
   };
 }
