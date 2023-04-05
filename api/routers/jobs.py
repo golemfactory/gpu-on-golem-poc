@@ -1,10 +1,11 @@
 import asyncio
 import json
-import statistics
+import os
 from pathlib import Path
 import queue
-import uuid
+import statistics
 from statistics import fmean, median
+import uuid
 from typing import Optional
 
 import aioredis
@@ -20,7 +21,7 @@ from redis_db.functions import (subscribe_to_job_status, update_job_data, get_jo
                                 get_providers_processing_times)
 
 
-api_dir = Path(__file__).parent.joinpath('..').absolute()
+data_dir = Path(os.environ.get("GPUOG_DATA_DIR") or Path(__file__).parent.joinpath('..').absolute())
 router = APIRouter()
 limiter = Limiter(key_func=get_remote_address)
 
@@ -32,7 +33,7 @@ async def add_job_to_queue(request: Request, prompt: str = Form(...)):
         return JSONResponse({'error': 'Phrase cannot be empty.'}, status_code=status.HTTP_400_BAD_REQUEST)
 
     job_id = str(uuid.uuid4())
-    with open(api_dir / 'requests.log', 'a') as f:
+    with open(data_dir / 'requests.log', 'a') as f:
         f.write(f'{job_id} {prompt}\n')
 
     try:
@@ -69,7 +70,7 @@ async def job_detail_ws(job_id: str, websocket: WebSocket):
     final_img_path = f'images/{job_id}.jpg'
 
     async def prepare_job_message(data: dict):
-        local_img_path = api_dir / final_img_path
+        local_img_path = data_dir / final_img_path
         final_img_exists = local_img_path.exists()
         return {
             "status": data['status'],
