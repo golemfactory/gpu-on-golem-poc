@@ -28,7 +28,7 @@ INTERMEDIARY_IMAGES_NUMBER = 3
 NSFW_IMAGE_HASH = '4518b9ae5041f25d03106e4bb7d019d1'
 
 sentry_sdk.init(dsn=SENTRY_DSN, traces_sample_rate=1.0)
-data_dir = Path(os.environ.get("GPUOG_DATA_DIR")) or Path(__file__).parent.joinpath('../../api').absolute()
+data_dir = Path(os.environ.get("GPUOG_DATA_DIR") or Path(__file__).parent.joinpath('../../api').absolute())
 enable_default_logger(log_file=str(data_dir / 'sd-golem-service.log'))
 logger = logging.getLogger('yapapi')
 
