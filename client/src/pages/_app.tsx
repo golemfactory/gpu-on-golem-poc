@@ -1,9 +1,9 @@
 import type { AppProps } from 'next/app';
 import Head from 'next/head';
-import Script from 'next/script';
 import { Provider } from 'react-redux';
 import wrapper from 'store';
 import 'styles/globals.css';
+import { GoogleAnalytics } from 'components';
 
 function App({ Component, pageProps, ...rest }: AppProps) {
   const { store } = wrapper.useWrappedStore(rest);
@@ -13,19 +13,7 @@ function App({ Component, pageProps, ...rest }: AppProps) {
       <Head>
         <title>GPU on Golem</title>
       </Head>
-      <Script
-        src={`https://www.googletagmanager.com/gtag/js?id=${process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS}`}
-        strategy="afterInteractive"
-      />
-      <Script id="google-analytics" strategy="afterInteractive">
-        {`
-          window.dataLayer = window.dataLayer || [];
-          function gtag(){window.dataLayer.push(arguments);}
-          gtag('js', new Date());
-
-          gtag('config','${process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS}');
-        `}
-      </Script>
+      <GoogleAnalytics />
       <Provider store={store}>
         <Component {...pageProps} />
       </Provider>
