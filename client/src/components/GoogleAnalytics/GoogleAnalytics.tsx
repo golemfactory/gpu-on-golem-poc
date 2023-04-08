@@ -14,6 +14,8 @@ function GoogleAnalytics() {
           window.dataLayer = window.dataLayer || [];
           function gtag(){window.dataLayer.push(arguments);}
           gtag('js', new Date());
+          
+          gtag('cookie_consent', 'default', { 'analytics_storage': 'denied' });
 
           gtag('config','${process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS}');
         `}
