@@ -13,7 +13,7 @@ class OfferStatus(Enum):
     TERMINATING = 'terminating'
 
 
-MACHINE_LIFETIME = timedelta(minutes=30)
+MACHINE_LIFETIME = timedelta(days=365)
 
 
 class Offer(SQLModel, table=True):
