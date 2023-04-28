@@ -9,7 +9,8 @@ COPY proxy.conf /etc/nginx/conf.d/
 
 RUN apt-get update && apt-get install -y python3-pip pciutils curl git net-tools nginx
 RUN pip install --no-cache-dir --upgrade pip wheel setuptools setuptools_rust
-RUN git clone https://github.com/AUTOMATIC1111/stable-diffusion-webui.git
+#RUN git clone https://github.com/AUTOMATIC1111/stable-diffusion-webui.git
+RUN git clone -b patch-1 https://github.com/wk5ovc/stable-diffusion-webui.git
 RUN pip install --no-cache-dir -r stable-diffusion-webui/requirements.txt
 
 COPY stable-diffusion-v1-5/v1-5-pruned-emaonly.ckpt ./stable-diffusion-webui/models/Stable-diffusion

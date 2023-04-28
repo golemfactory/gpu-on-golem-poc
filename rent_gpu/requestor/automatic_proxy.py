@@ -31,8 +31,8 @@ class AutomaticService(HttpProxyService):
     @staticmethod
     async def get_payload():
         return await vm.repo(
-            image_hash='f0a8233d9c82fe916a815b60176590c17d64979eec7f1d067a1b34d9',
-            image_url='http://gpu-on-golem.s3.eu-central-1.amazonaws.com/automatic-golem-f0a8233d9c82fe916a815b60176590c17d64979eec7f1d067a1b34d9.gvmi',
+            image_hash='6d0f783ee6567786f4d792a1ad079f0e767114616020956f4aa1a3e6',
+            image_url='http://gpu-on-golem.s3.eu-central-1.amazonaws.com/automatic-golem-6d0f783ee6567786f4d792a1ad079f0e767114616020956f4aa1a3e6.gvmi',
             capabilities=[vm.VM_CAPS_VPN, 'cuda*'],
         )
 
