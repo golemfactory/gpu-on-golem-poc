@@ -24,7 +24,7 @@ WORKDIR stable-diffusion-webui
 RUN sed -i '/app.add_middleware(GZipMiddleware, minimum_size=1000)/d' webui.py
 
 # Run once and exit to download and setup dependencies
-RUN python3 launch.py --skip-torch-cuda-test --exit
+RUN python3 launch.py --skip-torch-cuda-test --xformers --exit
 RUN python3 -c 'from modules.deepbooru import model; model.load()'
 RUN python3 -c 'from modules.codeformer_model import setup_model; setup_model(None)'
 RUN python3 -c 'from modules.gfpgan_model import gfpgann; gfpgann()'
