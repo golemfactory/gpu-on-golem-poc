@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import { useEffectOnce } from 'react-use';
 import { useDispatch, useSelector } from 'react-redux';
 import useWebSocket from 'react-use-websocket';
 import { Api } from 'enums/api';
@@ -34,9 +35,9 @@ export function useQueue() {
     [dispatch, forState, job_id],
   );
 
-  useEffect(() => {
+  useEffectOnce(() => {
     setSocketUrl(url(Api.jobsInQueue, true));
-  }, []);
+  });
 
   useEffect(() => {
     if (lastMessage) {

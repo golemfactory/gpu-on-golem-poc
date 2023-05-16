@@ -94,4 +94,46 @@
   .button {
     @apply m-[1.8rem] min-h-[5.6rem] min-w-[18.2rem] rounded-[0.8rem] font-sans text-[1.6rem] font-bold leading-[2.4rem] tracking-[0.143rem];
   }
+
+  .progress-bar {
+    @apply relative mt-[1rem] mb-[6rem] h-[1.2rem] w-full rounded-full bg-[#e7edf3];
+  }
+
+  @media (min-width: 728px) {
+    .progress-bar {
+      @apply mx-[2rem] mb-[4rem];
+      max-width: calc(100% - 4rem);
+    }
+  }
+
+  @keyframes slide {
+    from {
+      background-position: 0 0;
+    }
+    to {
+      background-position: 50px 50px;
+    }
+  }
+
+  .progress-bar-indicator {
+    @apply mx-[0.2rem] h-[0.8rem] translate-y-[0.2rem] rounded-full;
+
+    background: -webkit-linear-gradient(
+      135deg,
+      rgba(0, 125, 255, 0.85) 25%,
+      rgb(0, 125, 255) 25%,
+      rgb(0, 125, 255) 50%,
+      rgba(0, 125, 255, 0.85) 50%,
+      rgba(0, 125, 255, 0.85) 75%,
+      rgb(0, 125, 255) 75%
+    );
+    background-size: 50px 50px;
+
+    animation: slide 2s linear infinite;
+    will-change: background-position;
+  }
+
+  .checkbox {
+    @apply relative float-left mr-[0.6rem] h-[1.125rem] w-[1.125rem] appearance-none rounded-[0.25rem] border-[0.125rem] border-solid border-grey bg-white outline-none before:pointer-events-none before:absolute before:h-[0.875rem] before:w-[0.875rem] before:scale-0 before:rounded-full before:bg-transparent before:opacity-0 before:content-[''] checked:border-blue checked:bg-blue checked:before:opacity-[0.16] checked:after:absolute checked:after:ml-[0.25rem] checked:after:-mt-px checked:after:block checked:after:h-[0.8125rem] checked:after:w-[0.375rem] checked:after:rotate-45 checked:after:border-[0.125rem] checked:after:border-t-0 checked:after:border-l-0 checked:after:border-solid checked:after:border-white checked:after:bg-transparent checked:after:content-[''] hover:cursor-pointer hover:before:opacity-[0.04] focus:shadow-none focus:transition-[border-color_0.2s] focus:before:scale-100 focus:before:opacity-[0.12] focus:after:absolute focus:after:z-[1] focus:after:block focus:after:h-[0.875rem] focus:after:w-[0.875rem] focus:after:rounded-[0.125rem] focus:after:bg-white focus:after:content-[''] checked:focus:border-blue checked:focus:bg-blue checked:focus:before:scale-100 checked:focus:after:ml-[0.25rem] checked:focus:after:-mt-px checked:focus:after:h-[0.8125rem] checked:focus:after:w-[0.375rem] checked:focus:after:rotate-45 checked:focus:after:rounded-none checked:focus:after:border-[0.125rem] checked:focus:after:border-t-0 checked:focus:after:border-l-0 checked:focus:after:border-solid checked:focus:after:border-white checked:focus:after:bg-blue disabled:cursor-not-allowed disabled:bg-grey;
+  }
 }

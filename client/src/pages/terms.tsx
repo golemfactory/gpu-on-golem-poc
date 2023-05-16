@@ -1,4 +1,5 @@
 import { ReactNode, useState } from 'react';
+import { twMerge } from 'tailwind-merge';
 import { Layout } from 'components';
 import { renderIcon } from 'assets/utils';
 
@@ -12,27 +13,48 @@ function Terms() {
 
   const handleReset = () => handleClick('terms');
 
+  const golemArtDiffuser = 'Golem Art Diffuser';
+  const attachmentA = 'Attachment A';
+  const attachmentB = 'Attachment B';
+  const attachmentC = 'Attachment C';
+
+  const cookieTableHeadings = ['Name', 'Description / purpose', 'Type of cookie', 'Duration'];
+  const cookieTableData = [
+    {
+      name: 'Application Terms of Use',
+      description: 'They remember if you have agreed to (or refused) our Application Terms of Use',
+      type: 'Strictly Necessary',
+      duration: 'until deleted',
+    },
+    {
+      name: 'Google Analytics',
+      description: 'They collect information about how visitors use our website',
+      type: 'Performance Cookies',
+      duration: '30 days',
+    },
+  ];
+
   return (
     <Layout footer={false}>
       <div className="mt-[20rem] mb-[8rem] font-light lg:mt-[15rem]">
         {state === 'terms' && (
           <>
-            <h1 className="text-18">Golem Image Generator</h1>
+            <h1 className="text-18">{golemArtDiffuser}</h1>
             <h2 className="mb-[2.6rem] text-18">Terms of Use</h2>
             <h2 className="mb-[0.6rem] text-left text-[1.4rem] font-bold">Important information</h2>
             <p className="text-justify font-sans text-[1.4rem]">
-              Prior to obtaining access to the Golem Image Generator (as defined below), please read the following
+              Prior to obtaining access to the {golemArtDiffuser} (as defined below), please read the following
               information carefully and ensure that you understand each provision. These Terms comprise an agreement
-              between the end-user (“{bold('You')}” or “{bold('User')}”) and Golem. By using this Golem Image Generator,
+              between the end-user (“{bold('You')}” or “{bold('User')}”) and Golem. By using this {golemArtDiffuser},
               including our application programming interface, software, tools, developer services, data, documentation,
-              and website related to Golem Image Generator (hereinafter collectively as “{bold('Services')}”) you
-              confirm that you have read, understood, and you accept all of the terms and conditions contained in this
-              Terms. These Terms of apply to every territory where Golem Image Generator is available and include our
-              Content Policy and Privacy Policy and other documentation, guidelines, or policies we may to You.
+              and website related to {golemArtDiffuser} (hereinafter collectively as “{bold('Services')}”) you confirm
+              that you have read, understood, and you accept all of the terms and conditions contained in this Terms.
+              These Terms of apply to every territory where {golemArtDiffuser} is available and include our Content
+              Policy and Privacy Policy and other documentation, guidelines, or policies we may to You.
             </p>
             <p className="my-[1rem] text-justify font-sans text-[1.4rem]">
               {underline(
-                'IF YOU DO NOT AGREE TO THE TERMS OF USE OF THIS GOLEM IMAGE GENERATOR OR YOU ARE UNABLE TO COMPLY WITH THESE TERMS, YOU MUST DISCONTINUE THE USING OF THE GOLEM IMAGE GENERATOR NOW. IN THIS CASE DISCONTINUING THE USE TERMINATE THE AGREEMENT BETWEEN YOU AND GOLEM. FAILURE TO COMPLY WITH THIS DIRECTIVE MAY RESULT IN A VIOLATION OF THE APPLICABLE LAWS OR REGULATIONS.',
+                'IF YOU DO NOT AGREE TO THE TERMS OF USE OF THIS GOLEM ART DIFFUSER OR YOU ARE UNABLE TO COMPLY WITH THESE TERMS, YOU MUST DISCONTINUE THE USING OF THE GOLEM ART DIFFUSER NOW. IN THIS CASE DISCONTINUING THE USE TERMINATE THE AGREEMENT BETWEEN YOU AND GOLEM. FAILURE TO COMPLY WITH THIS DIRECTIVE MAY RESULT IN A VIOLATION OF THE APPLICABLE LAWS OR REGULATIONS.',
               )}
             </p>
             <br />
@@ -44,18 +66,18 @@ function Terms() {
                   registered office in Zug at Dammstrasse 16 (street), Postal code: 6300 Zug, entered into the
                   commercial register under CHE-143.168.192 number (“{bold('Golem')}”) and we offer the multimodal
                   generative model that can create realistic images and art from a description in natural language (“
-                  {bold('Golem Image Generator')}”). These terms of use ("
-                  {bold('Terms')}”) apply to the rights and obligations of You using the Golem Image Generator.`
+                  {bold(golemArtDiffuser)}”). These terms of use ("
+                  {bold('Terms')}”) apply to the rights and obligations of You using the {golemArtDiffuser}.`
                 </>,
                 <>
                   {underline('Availability.')} Availability of the Services for the User residing outside the territory
                   of the Switzerland may be limited in whole or in part.
                 </>,
                 <>
-                  {underline('OpenRAIL license.')} Multimodal generative model being used in this Golem Image Generator
+                  {underline('OpenRAIL license.')} Multimodal generative model being used in this {golemArtDiffuser}
                   is copyrighted to Robin Rombach and Patrick Esser and contributors under{' '}
                   {bold('CreativeML Open RAIL-M license')} dated August 22, 2022, a copy of which is attached to these
-                  Terms in Attachment A.
+                  Terms in {attachmentA}.
                 </>,
                 <>
                   {underline('Additional terms.')} If a given service offered by Golem requires separate regulation, or
@@ -117,16 +139,26 @@ function Terms() {
                   or these Terms.
                 </>,
                 <>
+                  {underline('Golem rights.')} Please be aware that any Output You make in a shared or open space such
+                  as a Discord chatroom, is viewable by anyone in that chatroom. Golem is an open community which allows
+                  others to use and remix Your Outputs and prompts whenever they are posted in a public setting. By
+                  default, Your Outputs are publicly viewable and remixable when posted via Discord. As described above,
+                  You grant Golem and its successors a perpetual, worldwide, non-exclusive, sublicensable no-charge,
+                  royalty-free, irrevocable copyright license to publicly display, publicly perform, sublicense, and
+                  distribute your Input (e.g. text prompts), or Output produced by the Service at Your direction. This
+                  license survives termination of this Terms by any party, for any reason.
+                </>,
+                <>
                   {underline('Similarity of Content.')} Due to the nature of machine learning, Output may not be unique
-                  across users and the Golem Image Generator may generate the same or similar output for Golem or a
-                  third party. For example, you may provide input to a model such as “Color is the sun” and receive
-                  output such as the “picture of the sun”. Other users may also ask similar questions and receive the
-                  same response. Responses that are requested by and generated for other users are not considered your
+                  across users and the {golemArtDiffuser} may generate the same or similar output for Golem or a third
+                  party. For example, you may provide input to a model such as “Color is the sun” and receive output
+                  such as the “picture of the sun”. Other users may also ask similar questions and receive the same
+                  response. Responses that are requested by and generated for other users are not considered your
                   Content.
                 </>,
                 <>
                   {underline('Content Policy.')} You must comply with the Golem content policy and use based
-                  restrictions set forth in Attachment B.
+                  restrictions set forth in {attachmentB}.
                 </>,
                 <>
                   {underline('Content review.')} Golem may use third party contractors to review Content for safety and
@@ -173,9 +205,9 @@ function Terms() {
                   offer in connection with the Services, and your breach of these Terms or violation of applicable law.
                 </>,
                 <>
-                  {underline('Disclaimer.')} Golem Image Generator and Services are continuously developed during the
+                  {underline('Disclaimer.')}&nbsp;{golemArtDiffuser} and Services are continuously developed during the
                   prototyping stage, thus features that Golem offers are still on an alpha, preview, early access, or
-                  beta basis and therefore Golem Image Generator and Services are provided “AS IS.” Except to the extent
+                  beta basis and therefore {golemArtDiffuser} and Services are provided “AS IS.” Except to the extent
                   prohibited by law, we and our affiliates and licensors make no warranties (express, implied, statutory
                   or otherwise) with respect to the Services, and disclaim all warranties including but not limited to
                   warranties of merchantability, fitness for a particular purpose, satisfactory quality,
@@ -215,6 +247,14 @@ function Terms() {
                   to your use of the Services, you must promptly contact Golem and provide details of the vulnerability
                   or breach.
                 </>,
+                <>
+                  {underline('Cookies.')} Every time you visit the {golemArtDiffuser}, you will be prompted to accept or
+                  refuse cookies. The purpose is to enable the {golemArtDiffuser} to remember your preferences (such as
+                  language or your consent for these Terms etc.) for a certain period of time. That way, you don’t have
+                  to re-enter them when browsing around the {golemArtDiffuser} during the same visit. Cookies can also
+                  be used to establish anonymised statistics about the browsing experience on our {golemArtDiffuser}.
+                  The {attachmentC} explains how we use cookies when you visit our Application.
+                </>,
               ])}
               {renderList('General Terms and Updates', [
                 <>
@@ -229,17 +269,17 @@ function Terms() {
                   {underline('Updates.')} The Terms may be regularly reviewed and updated as required. Each document
                   comprising the Terms will include information on when it was last reviewed. You are advised to check
                   these Terms periodically to familiarize yourself with any changes to the Terms. Please observe what
-                  version of the Terms applies to you before you use Golem Image Generator.
+                  version of the Terms applies to you before you use {golemArtDiffuser}.
                 </>,
                 <>
                   {underline('Changes approval.')} Golem, in its sole discretion, reserves the right to make changes to
                   the Terms or to issue new Terms in the course of the agreement with the User, in particular due to
                   changes in the applicable law or due to changes in the functionality of the Services in order to
-                  provide its Users with more convenient terms of using both the Golem Image Generator and Services or
-                  in case of occurrence of other important reasons, including reasons of technological nature of the
-                  Golem Image Generator functioning. Changes are binding on users of the Services and will take effect
+                  provide its Users with more convenient terms of using both the {golemArtDiffuser} and Services or in
+                  case of occurrence of other important reasons, including reasons of technological nature of the
+                  {golemArtDiffuser} functioning. Changes are binding on users of the Services and will take effect
                   immediately upon posting. As a User, You agree to be bound by any changes, variations, or
-                  modifications to our Terms and your continued use of the Golem Image Generator shall constitute
+                  modifications to our Terms and your continued use of the {golemArtDiffuser} shall constitute
                   acceptance of any such changes, variations, or modifications.
                 </>,
                 <>
@@ -284,21 +324,24 @@ function Terms() {
             </ol>
             <div className="mt-[5rem] flex flex-col justify-between text-left font-sans text-[1.4rem] md:flex-row">
               <div>
-                <p onClick={() => handleClick('attachment-a')}>
-                  <span className="cursor-pointer text-blue">Attachment A</span> - CreativeML Open RAIL-M
+                <p onClick={() => handleClick(attachmentA)}>
+                  <span className="cursor-pointer text-blue">{attachmentA}</span> - CreativeML Open RAIL-M
                 </p>
-                <p onClick={() => handleClick('attachment-b')}>
-                  <span className="cursor-pointer text-blue">Attachment B</span> - Content Policy
+                <p onClick={() => handleClick(attachmentB)}>
+                  <span className="cursor-pointer text-blue">{attachmentB}</span> - Content Policy
+                </p>
+                <p onClick={() => handleClick(attachmentC)}>
+                  <span className="cursor-pointer text-blue">{attachmentC}</span> - Cookies Policy
                 </p>
               </div>
               <div className="mt-[1.2rem] md:mt-0">
-                <p>Date: 30.01.2023</p>
-                <p>Version: 1.0.</p>
+                <p>Date: 07.03.2023</p>
+                <p>Version: 1.1.</p>
               </div>
             </div>
           </>
         )}
-        {state === 'attachment-a' && (
+        {state === attachmentA && (
           <>
             <div className="flex">
               <div
@@ -307,7 +350,7 @@ function Terms() {
                 onClick={handleReset}
               />
               <h2 className="mb-[0.6rem] text-left text-[1.4rem]">
-                {bold('Attachment A')} - Golem Image Generator - Terms of Use
+                {bold(attachmentA)} - {golemArtDiffuser} - Terms of Use
               </h2>
             </div>
             <h2 className="mt-[2.6rem] text-18">CreativeML Open RAIL-M</h2>
@@ -464,8 +507,7 @@ function Terms() {
                   </li>
                 </ul>
                 {renderList(
-                  'Use-based restrictions. The restrictions set forth in Attachment A are considered Use-based restrictions. Therefore You cannot use the Model and the Derivatives of the Model for the specified restricted uses. You may use the Model subject to this License, including only for lawful purposes and in accordance with the License. Use may include creating any content with, finetuning, updating, running, training, evaluating and/or reparametrizing the Model. You shall require all of Your users who use \n' +
-                    'the Model or a Derivative of the Model to comply with the terms of this paragraph (paragraph 5).',
+                  `Use-based restrictions. The restrictions set forth in ${attachmentA} are considered Use-based restrictions. Therefore You cannot use the Model and the Derivatives of the Model for the specified restricted uses. You may use the Model subject to this License, including only for lawful purposes and in accordance with the License. Use may include creating any content with, finetuning, updating, running, training, evaluating and/or reparametrizing the Model. You shall require all of Your users who use the Model or a Derivative of the Model to comply with the terms of this paragraph (paragraph 5).`,
                 )}
                 {renderList(
                   'The Output You Generate. Except as set forth herein, Licensor claims no rights in the Output You generate using the Model. You are accountable for the Output you generate and its subsequent uses. No use of the output can contravene any provision as stated in the License.',
@@ -493,7 +535,7 @@ function Terms() {
               </ol>
               <br />
               <br />
-              <h3>Attachment A</h3>
+              <h3>{attachmentA}</h3>
               <h3 className="my-[2.6rem]">Use Restrictions</h3>
               <p className="mb-[0.6rem]">You agree not to use the Model or Derivatives of the Model:</p>
               <ul>
@@ -540,7 +582,7 @@ function Terms() {
             </div>
           </>
         )}
-        {state === 'attachment-b' && (
+        {state === attachmentB && (
           <>
             <div className="flex">
               <div
@@ -549,13 +591,13 @@ function Terms() {
                 onClick={handleReset}
               />
               <h2 className="mb-[0.6rem] text-left text-[1.4rem]">
-                {bold('Attachment B')} - Golem Image Generator - Terms of Use
+                {bold(attachmentB)} - {golemArtDiffuser} - Terms of Use
               </h2>
             </div>
             <h2 className="my-[2.6rem] text-18">Content Policy</h2>
             <ol className="text-justify">
               {renderList(
-                'By using the Golem Image Generator, you confirm that you will not use the Golem Image Generator:',
+                `By using the ${golemArtDiffuser}, you confirm that you will not use the ${golemArtDiffuser}:`,
                 [
                   <>
                     In any way that violates any applicable national, federal, state, local or international law or
@@ -599,13 +641,13 @@ function Terms() {
                 ],
               )}
               {renderList(
-                'The specific types of use listed above are representative, but not exhaustive. If you are uncertain as to whether or not your use of the Golem Image Generator involves a above mentioned prohibited use, or have questions about how these requirements apply to you, please contact us at office@golem.network.',
+                `The specific types of use listed above are representative, but not exhaustive. If you are uncertain as to whether or not your use of the ${golemArtDiffuser} involves a above mentioned prohibited use, or have questions about how these requirements apply to you, please contact us at office@golem.network.`,
               )}
               {renderList(
                 'When sharing your work, we encourage you to proactively disclose AI/ML involvement in your work.',
               )}
               {renderList(
-                'You may remove the Golem’s signature (if any) if you wish, but you may not mislead others about the nature of the work produced by Golem Image Generator. For example, you may not tell people that the work was entirely human generated or that the work is an unaltered photograph of a real event.',
+                `You may remove the Golem’s signature (if any) if you wish, but you may not mislead others about the nature of the work produced by ${golemArtDiffuser}. For example, you may not tell people that the work was entirely human generated or that the work is an unaltered photograph of a real event.`,
               )}
               {renderList('Respect the rights of others:', [
                 <>Do not upload images of people without their consent.</>,
@@ -620,6 +662,75 @@ function Terms() {
             </ol>
           </>
         )}
+        {state === attachmentC && (
+          <>
+            <div className="flex">
+              <div
+                className="mr-[1rem] h-[2.1rem] w-[2.1rem] cursor-pointer bg-contain bg-no-repeat"
+                style={{ backgroundImage: `url(${renderIcon('back')})` }}
+                onClick={handleReset}
+              />
+              <h2 className="mb-[0.6rem] text-left text-[1.4rem]">
+                {bold(attachmentC)} - {golemArtDiffuser} - Terms of Use
+              </h2>
+            </div>
+            <h2 className="my-[2.6rem] text-18">Cookies Policy</h2>
+            <ol className="text-justify">
+              {renderSimpleList('Why do we use Cookies?', [
+                {
+                  content:
+                    'Our use of cookies is to primarily help enhance your user experience and to improve the efficiency of our website. We use certain cookies to remember you when you visit the website, to keep track of browsing patterns and to understand how visitors use the website site.',
+                },
+              ])}
+              {renderSimpleList('What are Cookies?', [
+                {
+                  content:
+                    'Cookies are text files containing small amounts of information which are downloaded to your device when you visit a website. There are different types of cookies: some are essential for the site to operate properly, whereas others are aimed at enhancing and personalising your user experience. Cookies can help us to understand how you are interacting with our website, which helps us to improve our site and deliver a better service to you.',
+                },
+              ])}
+              {renderSimpleList('What Cookies do we use?', [
+                {
+                  subtitle: 'Strictly necessary Cookies',
+                  content:
+                    "Generally, these cookies will be essential first-party session cookies. Not all first-party session cookies will fall into the strictly necessary category for the purposes of the respective cookie legislation. Strictly necessary cookies will generally be used to store a unique identifier to manage and identify the user as unique to other users currently viewing the website, in order to provide a consistent and accurate service to the user. These are set by us and only we can read them. They remember if you have agreed to our Application Terms of Use or if you have already replied to our cookie pop-up – so you won't be asked again.",
+                },
+                {
+                  subtitle: 'Essential Cookies',
+                  content:
+                    'These cookies are essential in order to enable you to move around the website and use its features. These are mainly technical cookies required by certain IT systems (e.g. maintain a secure session for you, during your visit).',
+                },
+                {
+                  subtitle: 'Performance Cookies',
+                  content:
+                    'These cookies generally collect information about how visitors use our website, for instance which pages visitors go to most often, and the pages that they don’t. This helps us to understand and improve the site so it is easy to use and includes helpful content. They allow us to fix bugs or glitches on the website. These cookies don’t collect information that identifies visitors, so we can’t identify you. For example, we use “Google Analytics” cookies (a web analytics service provided by Google, Inc).',
+                },
+              ])}
+              <div className="ml-[2.6rem] mb-[2.6rem] border border-b-0 border-r-0 border-grey text-left">
+                <div className="flex border-b border-grey font-bold">
+                  {cookieTableHeadings.map((heading) => (
+                    <span className="w-1/4 border-r border-grey p-1.5">{heading}</span>
+                  ))}
+                </div>
+                <div className="flex flex-col text-14">
+                  {cookieTableData.map(({ name, description, type, duration }) => (
+                    <div className="flex border-b border-grey">
+                      <span className="w-1/4 border-r border-grey p-1.5">{name}</span>
+                      <span className="w-1/4 border-r border-grey p-1.5">{description}</span>
+                      <span className="w-1/4 border-r border-grey p-1.5">{type}</span>
+                      <span className="w-1/4 border-r border-grey p-1.5">{duration}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              {renderSimpleList('How to turn off Cookies?', [
+                {
+                  content:
+                    'You can turn off cookies at any time, by going into your browser settings, however this may have a detrimental effect on your user experience. If you are happy to continue letting us use cookies in the ways set out in this policy, to help us guide our work, then you need not do anything.',
+                },
+              ])}
+            </ol>
+          </>
+        )}
       </div>
     </Layout>
   );
@@ -630,7 +741,7 @@ export default Terms;
 function renderList(title: string, items?: ReactNode[], bold?: boolean) {
   return (
     <li>
-      <span className={bold ? 'font-bold' : ''}>{title}</span>
+      <span className={twMerge(bold && 'font-bold')}>{title}</span>
       {!!items?.length && (
         <ol>
           {items.map((item, index) => (
@@ -655,5 +766,19 @@ function link(text: string, href?: string) {
     <a className="text-blue" href={href ?? text} target="_blank" rel="noreferrer">
       {text}
     </a>
+  );
+}
+
+function renderSimpleList(title: string, items: { subtitle?: string; content: string }[]) {
+  return (
+    <li className="mb-[2.4rem] font-sans text-14">
+      <span className="text-16 font-bold">{title}</span>
+      {items.map((item) => (
+        <>
+          <div className="mt-[1.2rem]">{underline(item.subtitle ?? '')}</div>
+          <div className="mt-[1.2rem]">{item.content}</div>
+        </>
+      ))}
+    </li>
   );
 }

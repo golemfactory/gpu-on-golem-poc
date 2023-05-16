@@ -1,2 +1,2 @@
 export { default } from './Form';
-export { useForm } from './hooks';
+export { useForm, useFormError } from './hooks';

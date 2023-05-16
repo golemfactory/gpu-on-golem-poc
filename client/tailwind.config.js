@@ -8,6 +8,7 @@ module.exports = {
       black: '#000000',
       grey: '#c3c3c3',
       stone: '#9c9c9c',
+      transparent: 'transparent',
     },
     fontFamily: {
       sans: ['Inter', 'sans'],

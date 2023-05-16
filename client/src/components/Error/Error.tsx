@@ -5,7 +5,7 @@ function Error({
 }: {
   heading?: string;
   text?: string;
-  button: { label: string; onClick: () => void };
+  button: { label: string; onClick: Noop };
 }) {
   return (
     <div className="mt-[20rem]">

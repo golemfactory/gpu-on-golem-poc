@@ -5,6 +5,7 @@ import {
   Background,
   Error,
   Form,
+  gaEvent,
   Hero,
   Layout,
   Loader,
@@ -15,7 +16,6 @@ import {
   useQueue,
   useResult,
 } from 'components';
-import gaEvent from 'lib/ga';
 import { selectJobId } from 'slices/data';
 import { selectError } from 'slices/error';
 import { resetQueue } from 'slices/queue';
