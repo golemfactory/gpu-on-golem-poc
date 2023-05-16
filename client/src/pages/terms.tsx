@@ -707,13 +707,15 @@ function Terms() {
               ])}
               <div className="ml-[2.6rem] mb-[2.6rem] border border-b-0 border-r-0 border-grey text-left">
                 <div className="flex border-b border-grey font-bold">
-                  {cookieTableHeadings.map((heading) => (
-                    <span className="w-1/4 border-r border-grey p-1.5">{heading}</span>
+                  {cookieTableHeadings.map((heading, idx) => (
+                    <span key={idx} className="w-1/4 border-r border-grey p-1.5">
+                      {heading}
+                    </span>
                   ))}
                 </div>
                 <div className="flex flex-col text-14">
-                  {cookieTableData.map(({ name, description, type, duration }) => (
-                    <div className="flex border-b border-grey">
+                  {cookieTableData.map(({ name, description, type, duration }, idx) => (
+                    <div key={idx} className="flex border-b border-grey">
                       <span className="w-1/4 border-r border-grey p-1.5">{name}</span>
                       <span className="w-1/4 border-r border-grey p-1.5">{description}</span>
                       <span className="w-1/4 border-r border-grey p-1.5">{type}</span>
