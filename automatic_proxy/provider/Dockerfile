@@ -5,9 +5,8 @@ VOLUME /usr/src/app/output
 
 COPY run_service.sh ./
 COPY wait_for_service.sh ./
-COPY proxy.conf /etc/nginx/conf.d/
 
-RUN apt-get update && apt-get install -y python3-pip pciutils curl git net-tools nginx
+RUN apt-get update && apt-get install -y python3-pip pciutils curl git net-tools
 RUN pip install --no-cache-dir --upgrade pip wheel setuptools setuptools_rust
 #RUN git clone https://github.com/AUTOMATIC1111/stable-diffusion-webui.git
 RUN git clone -b patch-1 https://github.com/wk5ovc/stable-diffusion-webui.git
@@ -18,8 +17,6 @@ RUN pip install xformers==0.0.20
 
 COPY stable-diffusion-v1-5/v1-5-pruned-emaonly.ckpt ./stable-diffusion-webui/models/Stable-diffusion
 COPY openai ./stable-diffusion-webui/openai
-
-RUN rm /etc/nginx/sites-enabled/default
 
 WORKDIR stable-diffusion-webui
 

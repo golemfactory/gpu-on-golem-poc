@@ -31,8 +31,8 @@ class AutomaticService(HttpProxyService):
     @staticmethod
     async def get_payload():
         return await vm.repo(
-            image_hash='89d3d833ea24c7a96f463d9650121c43c0bf3f8a3daf433894545aa1',
-            image_url='http://gpu-on-golem.s3.eu-central-1.amazonaws.com/automatic-golem-89d3d833ea24c7a96f463d9650121c43c0bf3f8a3daf433894545aa1.gvmi',
+            image_hash='254f10f60636ee424b435056b5ad11f3da758e1c9df2fb14a95ede5d',
+            image_url='http://gpu-on-golem.s3.eu-central-1.amazonaws.com/docker-automatic-golem-latest-f47a987679.gvmi',
             capabilities=[vm.VM_CAPS_VPN, 'cuda*'],
         )
 
@@ -43,22 +43,22 @@ class AutomaticService(HttpProxyService):
             yield script
 
         script = self._ctx.new_script()
-        script.run("/usr/src/app/run_service.sh", "127.0.0.1", "8000")
+        script.run("/usr/src/app/run_service.sh", "0.0.0.0", "8000")
         yield script
 
-        script = self._ctx.new_script()
-        script.run("/usr/sbin/nginx")
-        yield script
+        # script = self._ctx.new_script()
+        # script.run("/usr/sbin/nginx")
+        # yield script
 
         script = self._ctx.new_script()
         script.run("/usr/src/app/wait_for_service.sh", "8000")
         yield script
 
-        with Session(engine) as session:
-            offer = session.exec(select(Offer).where(Offer.provider_id == self.provider_id)).one()
-            offer.status = OfferStatus.READY
-            session.add(offer)
-            session.commit()
+        # with Session(engine) as session:
+        #     offer = session.exec(select(Offer).where(Offer.provider_id == self.provider_id)).one()
+        #     offer.status = OfferStatus.READY
+        #     session.add(offer)
+        #     session.commit()
 
 
 async def main(provider_id: str, local_port: int):
@@ -67,12 +67,13 @@ async def main(provider_id: str, local_port: int):
     :param local_port: The port on requestor through which tunnel is opened to provider machine.
     """
 
-    async with Golem(budget=1.0, subnet_tag='gpu-test', strategy=ConcreteProviderStrategy(provider_id)) as golem:
+    async with Golem(budget=1.0, subnet_tag='gpu-test', strategy=ConcreteProviderStrategy(provider_id), payment_network='polygon') as golem:
         network = await golem.create_network("192.168.0.1/24")
 
         async with network:
             cluster = await golem.run_service(
                 AutomaticService,
+                instance_params=[{'remote_port': 8000}],
                 network=network,
                 expiration=datetime.datetime.now() + CLUSTER_EXPIRATION_TIME,
                 num_instances=1,
@@ -93,14 +94,14 @@ async def main(provider_id: str, local_port: int):
                 print(instances)
                 try:
                     await asyncio.sleep(5)
-                    with Session(engine) as session:
-                        offer = session.exec(select(Offer).where(Offer.provider_id == provider_id)).one()
-                        if offer.started_at and datetime.datetime.now() > offer.started_at + MACHINE_LIFETIME:
-                            offer.status = OfferStatus.TERMINATING
-                            session.add(offer)
-                            session.commit()
-                        if offer.status == OfferStatus.TERMINATING:
-                            break
+                    # with Session(engine) as session:
+                    #     offer = session.exec(select(Offer).where(Offer.provider_id == provider_id)).one()
+                    #     if offer.started_at and datetime.datetime.now() > offer.started_at + MACHINE_LIFETIME:
+                    #         offer.status = OfferStatus.TERMINATING
+                    #         session.add(offer)
+                    #         session.commit()
+                    #     if offer.status == OfferStatus.TERMINATING:
+                    #         break
                 except (KeyboardInterrupt, asyncio.CancelledError):
                     break
 
