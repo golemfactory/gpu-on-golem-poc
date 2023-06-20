@@ -31,8 +31,8 @@ class AutomaticService(HttpProxyService):
     @staticmethod
     async def get_payload():
         return await vm.repo(
-            image_hash='4ba14df835cfd3b127b57cf888dc252735b4909c2e8dd3a923ea2367',
-            image_url='http://gpu-on-golem.s3.eu-central-1.amazonaws.com/oobabooga-golem-4ba14df835cfd3b127b57cf888dc252735b4909c2e8dd3a923ea2367.gvmi',
+            image_hash='e6580979812e4edc01fe0753a66d632acbf0035c4d8fb7fbf2c3781e',
+            image_url='http://gpu-on-golem.s3.eu-central-1.amazonaws.com/oobabooga-golem-e6580979812e4edc01fe0753a66d632acbf0035c4d8fb7fbf2c3781e.gvmi',
             capabilities=[vm.VM_CAPS_VPN, 'cuda*'],
         )
 
@@ -43,16 +43,22 @@ class AutomaticService(HttpProxyService):
             yield script
 
         script = self._ctx.new_script()
-        script.run("/usr/src/app/run_service.sh", "8001", "127.0.0.1", "8000")
+        # script.run("/usr/src/app/run_service_local.sh", "8000", "127.0.0.1", "8001")
+        script.run("/usr/bin/sed", "-i", "s;launch(;launch(debug=True, ;g", "/home/python_user/text-generation-webui/server.py")
+        yield script
+
+        script = self._ctx.new_script()
+        # script.run("/usr/src/app/run_service_local.sh", "8000", "127.0.0.1", "8001")
+        script.run("/usr/src/app/run_service_local.sh", "8001", "127.0.0.1", "8000")
         yield script
 
         script = self._ctx.new_script()
         script.run("/usr/sbin/nginx")
         yield script
 
-        script = self._ctx.new_script()
-        script.run("/usr/src/app/wait_for_service.sh", "8001")
-        yield script
+        # script = self._ctx.new_script()
+        # script.run("/usr/src/app/wait_for_service.sh", "8001")
+        # yield script
 
         # with Session(engine) as session:
         #     offer = session.exec(select(Offer).where(Offer.provider_id == self.provider_id)).one()
