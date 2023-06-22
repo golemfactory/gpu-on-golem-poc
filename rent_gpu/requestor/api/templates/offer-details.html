@@ -34,6 +34,9 @@
         {% elif offer.package == 'jupyter' %}
         Use this link to connect with Jupyter Lab: <a href="http://{{request.url.hostname}}:{{ offer.port }}" target="_blank">http://{{request.url.hostname}}:{{ offer.port }}</a>
         <br/>
+        {% elif offer.package == 'text-webui' %}
+        Use this link to connect with Text generation WebUI: <a href="http://{{request.url.hostname}}:{{ offer.port }}" target="_blank">http://{{request.url.hostname}}:{{ offer.port }}</a>
+        <br/>
         {% endif %}
 
         {% if expire_in %}
