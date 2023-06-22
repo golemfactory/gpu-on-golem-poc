@@ -18,9 +18,6 @@ CLUSTER_EXPIRATION_TIME = datetime.timedelta(days=365)
 examples_dir = pathlib.Path(__file__).resolve().parent.parent
 sys.path.append(str(examples_dir))
 
-from yapapi.log import enable_default_logger
-enable_default_logger(log_file='oobabooga.log')
-
 
 class ConcreteProviderStrategy(MarketStrategy):
     def __init__(self, provider_id):
@@ -40,8 +37,8 @@ class TextUIService(SocketProxyService):
     @staticmethod
     async def get_payload():
         return await vm.repo(
-            image_hash='e6580979812e4edc01fe0753a66d632acbf0035c4d8fb7fbf2c3781e',
-            image_url='http://gpu-on-golem.s3.eu-central-1.amazonaws.com/oobabooga-golem-e6580979812e4edc01fe0753a66d632acbf0035c4d8fb7fbf2c3781e.gvmi',
+            image_hash='21c18d94b185dedc189c52ec9f6e7bf2f1694407f5740865ff2762f1',
+            image_url='http://gpu-on-golem.s3.eu-central-1.amazonaws.com/oobabooga-golem-21c18d94b185dedc189c52ec9f6e7bf2f1694407f5740865ff2762f1.gvmi',
             capabilities=[vm.VM_CAPS_VPN, 'cuda*'],
         )
 
@@ -65,11 +62,11 @@ class TextUIService(SocketProxyService):
         script.run("/usr/src/app/wait_for_service.sh", "8001")
         yield script
 
-        # with Session(engine) as session:
-        #     offer = session.exec(select(Offer).where(Offer.provider_id == self.provider_id)).one()
-        #     offer.status = OfferStatus.READY
-        #     session.add(offer)
-        #     session.commit()
+        with Session(engine) as session:
+            offer = session.exec(select(Offer).where(Offer.provider_id == self.provider_id)).one()
+            offer.status = OfferStatus.READY
+            session.add(offer)
+            session.commit()
 
 
 async def main(provider_id: str, local_port: int):
@@ -103,14 +100,14 @@ async def main(provider_id: str, local_port: int):
                 print(instances)
                 try:
                     await asyncio.sleep(5)
-                    # with Session(engine) as session:
-                    #     offer = session.exec(select(Offer).where(Offer.provider_id == provider_id)).one()
-                    #     if offer.started_at and datetime.datetime.now() > offer.started_at + MACHINE_LIFETIME:
-                    #         offer.status = OfferStatus.TERMINATING
-                    #         session.add(offer)
-                    #         session.commit()
-                    #     if offer.status == OfferStatus.TERMINATING:
-                    #         break
+                    with Session(engine) as session:
+                        offer = session.exec(select(Offer).where(Offer.provider_id == provider_id)).one()
+                        if offer.started_at and datetime.datetime.now() > offer.started_at + MACHINE_LIFETIME:
+                            offer.status = OfferStatus.TERMINATING
+                            session.add(offer)
+                            session.commit()
+                        if offer.status == OfferStatus.TERMINATING:
+                            break
                 except (KeyboardInterrupt, asyncio.CancelledError):
                     break
 
@@ -123,17 +120,17 @@ async def main(provider_id: str, local_port: int):
                 await asyncio.sleep(5)
                 cnt += 1
 
-            # with Session(engine) as session:
-            #     offer = session.exec(select(Offer).where(Offer.provider_id == provider_id)).one()
-            #     offer.status = OfferStatus.FREE
-            #     offer.port = None
-            #     offer.password = None
-            #     offer.started_at = None
-            #     offer.job_id = None
-            #     offer.package = None
-            #     offer.reserved_by = None
-            #     session.add(offer)
-            #     session.commit()
+            with Session(engine) as session:
+                offer = session.exec(select(Offer).where(Offer.provider_id == provider_id)).one()
+                offer.status = OfferStatus.FREE
+                offer.port = None
+                offer.password = None
+                offer.started_at = None
+                offer.job_id = None
+                offer.package = None
+                offer.reserved_by = None
+                session.add(offer)
+                session.commit()
 
 
 def rent_server(provider_id: str, local_port: int):
