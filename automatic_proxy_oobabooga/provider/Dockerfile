@@ -4,7 +4,6 @@ WORKDIR /usr/src/app
 VOLUME /usr/src/app/output
 
 COPY run_service.sh ./
-COPY run_service_local.sh ./
 COPY wait_for_service.sh ./
 COPY proxy.conf /etc/nginx/conf.d/
 

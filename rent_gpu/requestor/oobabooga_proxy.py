@@ -5,7 +5,7 @@ import sys
 
 from sqlmodel import Session, select
 from yapapi import Golem
-from yapapi.contrib.service.http_proxy import HttpProxyService, LocalHttpProxy
+from yapapi.contrib.service.socket_proxy import SocketProxy, SocketProxyService
 from yapapi.payload import vm
 from yapapi.services import ServiceState
 from yapapi.strategy import SCORE_REJECTED, SCORE_TRUSTED, MarketStrategy
@@ -18,6 +18,9 @@ CLUSTER_EXPIRATION_TIME = datetime.timedelta(days=365)
 examples_dir = pathlib.Path(__file__).resolve().parent.parent
 sys.path.append(str(examples_dir))
 
+from yapapi.log import enable_default_logger
+enable_default_logger(log_file='oobabooga.log')
+
 
 class ConcreteProviderStrategy(MarketStrategy):
     def __init__(self, provider_id):
@@ -27,7 +30,13 @@ class ConcreteProviderStrategy(MarketStrategy):
         return SCORE_TRUSTED if offer.issuer == self.provider_id else SCORE_REJECTED
 
 
-class AutomaticService(HttpProxyService):
+class TextUIService(SocketProxyService):
+    ui_port = 80
+
+    def __init__(self, proxy: SocketProxy):
+        super().__init__()
+        self.proxy = proxy
+
     @staticmethod
     async def get_payload():
         return await vm.repo(
@@ -43,22 +52,18 @@ class AutomaticService(HttpProxyService):
             yield script
 
         script = self._ctx.new_script()
-        # script.run("/usr/src/app/run_service_local.sh", "8000", "127.0.0.1", "8001")
-        script.run("/usr/bin/sed", "-i", "s;launch(;launch(debug=True, ;g", "/home/python_user/text-generation-webui/server.py")
-        yield script
-
-        script = self._ctx.new_script()
-        # script.run("/usr/src/app/run_service_local.sh", "8000", "127.0.0.1", "8001")
-        script.run("/usr/src/app/run_service_local.sh", "8001", "127.0.0.1", "8000")
+        script.run("/usr/src/app/run_service.sh", "8001", "127.0.0.1", "8000")
         yield script
 
         script = self._ctx.new_script()
         script.run("/usr/sbin/nginx")
         yield script
 
-        # script = self._ctx.new_script()
-        # script.run("/usr/src/app/wait_for_service.sh", "8001")
-        # yield script
+        await self.proxy.run_server(self, self.ui_port)
+
+        script = self._ctx.new_script()
+        script.run("/usr/src/app/wait_for_service.sh", "8001")
+        yield script
 
         # with Session(engine) as session:
         #     offer = session.exec(select(Offer).where(Offer.provider_id == self.provider_id)).one()
@@ -75,14 +80,15 @@ async def main(provider_id: str, local_port: int):
 
     async with Golem(budget=1.0, subnet_tag='gpu-test', strategy=ConcreteProviderStrategy(provider_id), payment_network='polygon') as golem:
         network = await golem.create_network("192.168.0.1/24")
+        proxy = SocketProxy(address='0.0.0.0', ports=[local_port])
 
         async with network:
             cluster = await golem.run_service(
-                AutomaticService,
+                TextUIService,
                 network=network,
                 expiration=datetime.datetime.now() + CLUSTER_EXPIRATION_TIME,
                 num_instances=1,
-                # instance_params=[{'remote_port': 8000}]
+                instance_params=[{'proxy': proxy}]
             )
             instances = cluster.instances
 
@@ -92,9 +98,6 @@ async def main(provider_id: str, local_port: int):
             while still_starting():
                 print('Starting')
                 await asyncio.sleep(5)
-
-            proxy = LocalHttpProxy(cluster, local_port)
-            await proxy.run()
 
             while True:
                 print(instances)
