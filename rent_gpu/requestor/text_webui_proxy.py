@@ -77,7 +77,7 @@ async def main(provider_id: str, local_port: int):
     :param local_port: The port on requestor through which tunnel is opened to provider machine.
     """
 
-    async with Golem(budget=1.0, subnet_tag='gpu-test', strategy=ConcreteProviderStrategy(provider_id), payment_network='polygon') as golem:
+    async with Golem(budget=1.0, subnet_tag='gpu-test', strategy=ConcreteProviderStrategy(provider_id)) as golem:
         network = await golem.create_network("192.168.0.1/24")
         proxy = SocketProxy(address='0.0.0.0', ports=[local_port])
 
