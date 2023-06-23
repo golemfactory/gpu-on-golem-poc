@@ -63,6 +63,14 @@
                             </form>
                         </li>
                         {% endif %}
+                        {% if entry.memory >= 10 %}
+                        <li>
+                            <form action="/machines/{{ entry.provider_id }}/rent/" method="POST">
+                                <input type="hidden" name="package" value="text-webui" />
+                                <button class="dropdown-item" type="submit">Text webui + facebook/opt-1.3b</button>
+                            </form>
+                        </li>
+                        {% endif %}
                       </ul>
                     </div>
                 {% endif %}

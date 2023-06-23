@@ -17,6 +17,7 @@ from rent_gpu.requestor.db import engine, Offer, OfferStatus, MACHINE_LIFETIME
 from rent_gpu.requestor.ssh_proxy import rent_server as rent_server_pytorch_ssh
 from rent_gpu.requestor.automatic_proxy import rent_server as rent_server_automatic
 from rent_gpu.requestor.jupyter_proxy import rent_server as rent_server_jupyter
+from rent_gpu.requestor.text_webui_proxy import rent_server as rent_server_text_webui
 
 redis_conn = Redis()
 q = Queue(connection=redis_conn)
@@ -44,6 +45,7 @@ async def rent(provider_id: str, package: str = Form(...), access_key: Optional[
         'pytorch': rent_server_pytorch_ssh,
         'automatic': rent_server_automatic,
         'jupyter': rent_server_jupyter,
+        'text-webui': rent_server_text_webui,
     }
     # Random port is good enough for PoC
     port = random.randint(2000, 2999)
