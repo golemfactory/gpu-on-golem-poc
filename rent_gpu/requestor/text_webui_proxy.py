@@ -28,7 +28,9 @@ class ConcreteProviderStrategy(MarketStrategy):
 
 
 class TextUIService(SocketProxyService):
-    ui_port = 80
+    UI_PORT = 80  # nginx is listening on this port and forwarding to 8000
+    TEXT_UI_PORT = 8000  # FE port for text-generation-webui software
+    TEXT_UI_API_PORT = 8001  # Blocking API port for text-generation-webui software
 
     def __init__(self, proxy: SocketProxy):
         super().__init__()
@@ -49,17 +51,17 @@ class TextUIService(SocketProxyService):
             yield script
 
         script = self._ctx.new_script()
-        script.run("/usr/src/app/run_service.sh", "8001", "127.0.0.1", "8000")
+        script.run("/usr/src/app/run_service.sh", str(self.TEXT_UI_API_PORT), "127.0.0.1", str(self.TEXT_UI_PORT))
         yield script
 
         script = self._ctx.new_script()
         script.run("/usr/sbin/nginx")
         yield script
 
-        await self.proxy.run_server(self, self.ui_port)
+        await self.proxy.run_server(self, self.UI_PORT)
 
         script = self._ctx.new_script()
-        script.run("/usr/src/app/wait_for_service.sh", "8001")
+        script.run("/usr/src/app/wait_for_service.sh", str(self.TEXT_UI_API_PORT))
         yield script
 
         with Session(engine) as session:
