@@ -29,7 +29,9 @@ RUN pyenv install 3.10.9
 RUN pyenv global 3.10.9
 
 RUN git clone https://github.com/oobabooga/text-generation-webui
-RUN pip install torch torchvision torchaudio
+COPY MedQuAD_output.json text-generation-webui/training/datasets/
 
+RUN pip install torch torchvision torchaudio
 RUN cd text-generation-webui && pip install -r requirements.txt
+
 RUN cd text-generation-webui && python3 download-model.py facebook/opt-1.3b
