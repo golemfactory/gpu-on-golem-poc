@@ -26,6 +26,7 @@ CLUSTER_EXPIRATION_TIME = datetime.timedelta(days=365)
 INTERMEDIARY_IMAGES_NUMBER = 3
 # MD5 hash of a black image provided by service when NSFW content is detected
 NSFW_IMAGE_HASH = '4518b9ae5041f25d03106e4bb7d019d1'
+JOB_EXPIRATION_TIME = datetime.timedelta(hours=1)
 
 sentry_sdk.init(dsn=SENTRY_DSN, traces_sample_rate=1.0)
 data_dir = Path(os.environ.get("GPUOG_DATA_DIR") or Path(__file__).parent.joinpath('../../api').absolute())
@@ -64,6 +65,10 @@ class GenerateImageService(Service):
             await asyncio.sleep(0.3)
 
             job_started_at = datetime.datetime.now()
+            if datetime.datetime.fromtimestamp(job['created_at']) + JOB_EXPIRATION_TIME < job_started_at:
+                logger.info(f'{self.name}: job {job["job_id"]} expired. Ignoring.')
+                continue
+
             job_data_update = {
                 'status': JobStatus.PROCESSING.value,
                 'provider_name': self.provider_name,

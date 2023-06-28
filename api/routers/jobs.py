@@ -1,4 +1,5 @@
 import asyncio
+from datetime import datetime
 import json
 import os
 from pathlib import Path
@@ -36,8 +37,9 @@ async def add_job_to_queue(request: Request, prompt: str = Form(...)):
     with open(data_dir / 'requests.log', 'a') as f:
         f.write(f'{job_id} {prompt}\n')
 
+    created_at = int(datetime.now().timestamp())
     try:
-        queue_position = await jobs_queue.put({'prompt': prompt, 'job_id': job_id})
+        queue_position = await jobs_queue.put({'prompt': prompt, 'job_id': job_id, 'created_at': created_at})
     except queue.Full:
         return JSONResponse({'error': 'Service busy. Try again later.'},
                             status_code=status.HTTP_503_SERVICE_UNAVAILABLE)
