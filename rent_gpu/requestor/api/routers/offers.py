@@ -48,9 +48,12 @@ async def rent(provider_id: str, package: str = Form(...), access_key: Optional[
         'text-webui': rent_server_text_webui,
     }
     # Random port is good enough for PoC
-    port = random.randint(2000, 2999)
+    port = random.randint(2000, 2998)
     vm_run_function = package_to_function_map[package]
-    job = Job.create(vm_run_function, (provider_id, port), connection=redis_conn, timeout='100d')
+    vm_args = (provider_id, port)
+    if package == 'text-webui':
+        vm_args = (provider_id, port, port + 1)
+    job = Job.create(vm_run_function, vm_args, connection=redis_conn, timeout='100d')
     with Session(engine) as session:
         try:
             offer = session.exec(

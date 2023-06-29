@@ -1,6 +1,8 @@
 import asyncio
 import datetime
 import pathlib
+import random
+import string
 import sys
 
 from sqlmodel import Session, select
@@ -31,6 +33,7 @@ class TextUIService(SocketProxyService):
     UI_PORT = 80  # nginx is listening on this port and forwarding to 8000
     TEXT_UI_PORT = 8000  # FE port for text-generation-webui software
     TEXT_UI_API_PORT = 8001  # Blocking API port for text-generation-webui software
+    SSH_PORT = 22
 
     def __init__(self, proxy: SocketProxy):
         super().__init__()
@@ -50,6 +53,13 @@ class TextUIService(SocketProxyService):
         async for script in super().start():
             yield script
 
+        password = "".join(random.choice(string.ascii_letters + string.digits) for _ in range(8))
+        script = self._ctx.new_script(timeout=datetime.timedelta(seconds=10))
+        script.run("/bin/bash", "-c", "ssh-keygen -A")
+        script.run("/bin/bash", "-c", f'echo -e "{password}\n{password}" | passwd')
+        script.run("/bin/bash", "-c", "/usr/sbin/sshd")
+        yield script
+
         script = self._ctx.new_script()
         script.run("/usr/src/app/run_service.sh", str(self.TEXT_UI_API_PORT), "127.0.0.1", str(self.TEXT_UI_PORT))
         yield script
@@ -59,6 +69,7 @@ class TextUIService(SocketProxyService):
         yield script
 
         await self.proxy.run_server(self, self.UI_PORT)
+        server = await self.proxy.run_server(self, self.SSH_PORT)
 
         script = self._ctx.new_script()
         script.run("/usr/src/app/wait_for_service.sh", str(self.TEXT_UI_API_PORT))
@@ -67,19 +78,28 @@ class TextUIService(SocketProxyService):
         with Session(engine) as session:
             offer = session.exec(select(Offer).where(Offer.provider_id == self.provider_id)).one()
             offer.status = OfferStatus.READY
+            offer.password = password
             session.add(offer)
             session.commit()
 
+        print(
+            f"connect with:\n"
+            f"ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no "
+            f"-p {server.local_port} root@{server.local_address}"
+        )
+        print(f"password: {password}")
 
-async def main(provider_id: str, local_port: int):
+
+async def main(provider_id: str, webui_port: int, ssh_port: int):
     """
     :param provider_id:
-    :param local_port: The port on requestor through which tunnel is opened to provider machine.
+    :param webui_port: The port on requestor to tunnel webui.
+    :param ssh_port: The port on requestor to tunnel ssh.
     """
 
     async with Golem(budget=1.0, subnet_tag='gpu-test', strategy=ConcreteProviderStrategy(provider_id)) as golem:
         network = await golem.create_network("192.168.0.1/24")
-        proxy = SocketProxy(address='0.0.0.0', ports=[local_port])
+        proxy = SocketProxy(address='0.0.0.0', ports=[webui_port, ssh_port])
 
         async with network:
             cluster = await golem.run_service(
@@ -135,12 +155,12 @@ async def main(provider_id: str, local_port: int):
                 session.commit()
 
 
-def rent_server(provider_id: str, local_port: int):
+def rent_server(provider_id: str, webui_port: int, ssh_port: int):
     try:
-        asyncio.run(main(provider_id, local_port))
+        asyncio.run(main(provider_id, webui_port, ssh_port))
     except KeyboardInterrupt:
         print('Interruption')
 
 
 if __name__ == "__main__":
-    rent_server(sys.argv[1], int(sys.argv[2]))
+    rent_server(sys.argv[1], int(sys.argv[2]), int(sys.argv[3]))
