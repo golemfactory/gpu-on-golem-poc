@@ -42,8 +42,8 @@ class TextUIService(SocketProxyService):
     @staticmethod
     async def get_payload():
         return await vm.repo(
-            image_hash='21c18d94b185dedc189c52ec9f6e7bf2f1694407f5740865ff2762f1',
-            image_url='http://gpu-on-golem.s3.eu-central-1.amazonaws.com/oobabooga-golem-21c18d94b185dedc189c52ec9f6e7bf2f1694407f5740865ff2762f1.gvmi',
+            image_hash='54e16c800935e8831adc5b47a89a7d69c8093b861ec4c62c1989a2d6',
+            image_url='http://gpu-on-golem.s3.eu-central-1.amazonaws.com/text-webui-golem-54e16c800935e8831adc5b47a89a7d69c8093b861ec4c62c1989a2d6.gvmi',
             capabilities=[vm.VM_CAPS_VPN, 'cuda*'],
         )
 
