@@ -12,6 +12,8 @@ from yapapi.strategy import SCORE_REJECTED, SCORE_TRUSTED, MarketStrategy
 
 from rent_gpu.requestor.db import engine, Offer, OfferStatus, MACHINE_LIFETIME
 
+from yapapi.log import enable_default_logger
+enable_default_logger(log_file='sd-golem-service.log')
 
 CLUSTER_EXPIRATION_TIME = datetime.timedelta(days=365)
 
@@ -31,8 +33,8 @@ class AutomaticService(HttpProxyService):
     @staticmethod
     async def get_payload():
         return await vm.repo(
-            image_hash='89d3d833ea24c7a96f463d9650121c43c0bf3f8a3daf433894545aa1',
-            image_url='http://gpu-on-golem.s3.eu-central-1.amazonaws.com/automatic-golem-89d3d833ea24c7a96f463d9650121c43c0bf3f8a3daf433894545aa1.gvmi',
+            image_hash='922d727c1204693b0dbf9500c452761c1228b031149bc7b731856448',
+            image_url='http://gpu-on-golem.s3.eu-central-1.amazonaws.com/automatic-golem-922d727c1204693b0dbf9500c452761c1228b031149bc7b731856448.gvmi',
             capabilities=[vm.VM_CAPS_VPN, 'cuda*'],
         )
 
@@ -67,7 +69,7 @@ async def main(provider_id: str, local_port: int):
     :param local_port: The port on requestor through which tunnel is opened to provider machine.
     """
 
-    async with Golem(budget=1.0, subnet_tag='gpu-test', strategy=ConcreteProviderStrategy(provider_id)) as golem:
+    async with Golem(budget=1.0, subnet_tag='gpu-test2', strategy=ConcreteProviderStrategy(provider_id)) as golem:
         network = await golem.create_network("192.168.0.1/24")
 
         async with network:
