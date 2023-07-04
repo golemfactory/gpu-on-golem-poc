@@ -110,24 +110,24 @@ async def main(provider_id: str, local_port: int):
                 await asyncio.sleep(5)
                 cnt += 1
 
-            with Session(engine) as session:
-                offer = session.exec(select(Offer).where(Offer.provider_id == provider_id)).one()
-                offer.status = OfferStatus.FREE
-                offer.port = None
-                offer.password = None
-                offer.started_at = None
-                offer.job_id = None
-                offer.package = None
-                offer.reserved_by = None
-                session.add(offer)
-                session.commit()
-
 
 def rent_server(provider_id: str, local_port: int):
     try:
         asyncio.run(main(provider_id, local_port))
     except KeyboardInterrupt:
         print('Interruption')
+    finally:
+        with Session(engine) as session:
+            offer = session.exec(select(Offer).where(Offer.provider_id == provider_id)).one()
+            offer.status = OfferStatus.FREE
+            offer.port = None
+            offer.password = None
+            offer.started_at = None
+            offer.job_id = None
+            offer.package = None
+            offer.reserved_by = None
+            session.add(offer)
+            session.commit()
 
 
 if __name__ == "__main__":

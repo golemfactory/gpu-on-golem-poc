@@ -11,7 +11,12 @@ RUN apt-get update && apt-get install -y python3-pip pciutils jq \
   make build-essential libssl-dev zlib1g-dev \
   libbz2-dev libreadline-dev libsqlite3-dev wget curl llvm libncurses5-dev\
   libncursesw5-dev xz-utils tk-dev libffi-dev liblzma-dev python-openssl\
-  git nginx
+  git nginx openssh-server ufw
+
+RUN mkdir /run/sshd
+RUN echo "UseDNS no" >> /etc/ssh/sshd_config && \
+    echo "PermitRootLogin yes" >> /etc/ssh/sshd_config && \
+    echo "PasswordAuthentication yes" >> /etc/ssh/sshd_config
 
 RUN rm /etc/nginx/sites-enabled/default
 
