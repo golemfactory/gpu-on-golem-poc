@@ -54,7 +54,15 @@ class TextUIService(SocketProxyService):
             yield script
 
         password = "".join(random.choice(string.ascii_letters + string.digits) for _ in range(8))
-        script = self._ctx.new_script(timeout=datetime.timedelta(seconds=10))
+        script = self._ctx.new_script(timeout=datetime.timedelta(seconds=300))
+        script.run("/bin/bash", "-c", "mkdir /usr/src/app/output/training")
+        script.run("/bin/bash", "-c", "mv /home/python_user/text-generation-webui/training/datasets /usr/src/app/output/training/datasets && ln -s /usr/src/app/output/training/datasets /home/python_user/text-generation-webui/training/datasets")
+        script.run("/bin/bash", "-c", "mv /home/python_user/text-generation-webui/training/formats /usr/src/app/output/training/formats && ln -s /usr/src/app/output/training/formats /home/python_user/text-generation-webui/training/formats")
+        script.run("/bin/bash", "-c", "mv /home/python_user/text-generation-webui/models /usr/src/app/output/models && ln -s /usr/src/app/output/models /home/python_user/text-generation-webui/models")
+        script.run("/bin/bash", "-c", "mv /home/python_user/text-generation-webui/loras /usr/src/app/output/loras && ln -s /usr/src/app/output/loras /home/python_user/text-generation-webui/loras")
+        script.run("/bin/bash", "-c", "mv /home/python_user/text-generation-webui/prompts /usr/src/app/output/prompts && ln -s /usr/src/app/output/prompts /home/python_user/text-generation-webui/prompts")
+        script.run("/bin/bash", "-c", "mv /home/python_user/text-generation-webui/presets /usr/src/app/output/presets && ln -s /usr/src/app/output/presets /home/python_user/text-generation-webui/presets")
+
         script.run("/bin/bash", "-c", "ssh-keygen -A")
         script.run("/bin/bash", "-c", f'echo -e "{password}\n{password}" | passwd')
         script.run("/bin/bash", "-c", "/usr/sbin/sshd")
