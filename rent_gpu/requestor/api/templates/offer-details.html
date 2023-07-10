@@ -37,6 +37,124 @@
         {% elif offer.package == 'text-webui' %}
         Use this link to connect with Text generation WebUI: <a href="http://{{request.url.hostname}}:{{ offer.port }}" target="_blank">http://{{request.url.hostname}}:{{ offer.port }}</a>
         <br/>
+
+        <style>
+            .accordion {
+              background-color: #eee;
+              color: #444;
+              outline: none;
+              transition: 0.4s;
+            }
+
+            .active {
+              background-color: #ddd;
+            }
+
+            .accordion:hover {
+              background-color: #ccc;
+            }
+
+            .panel {
+              display: none;
+            }
+        </style>
+
+        <h2>Communication commands</h2>
+
+        <button class="accordion p-2 w-100 border-0 text-start">Download from provider</button>
+        <div class="panel px-3">
+            <button class="accordion p-2 w-100 border-0 text-start">Download Dataset</button>
+            <div class="panel px-3">
+              <code>
+                  scp -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -P {{ offer.port + 1 }} <b>[expected location/path on the user's computer]</b> root@{{request.url.hostname}}:/usr/src/app/output/training/datasets/<b>[filename]</b>
+              </code>
+            </div>
+            <button class="accordion p-2 w-100 border-0 text-start">Download Format</button>
+            <div class="panel px-3">
+                <code>
+                scp -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -P {{ offer.port + 1 }} <b>[expected location/path on the user's computer]</b> root@{{request.url.hostname}}:/usr/src/app/output/training/formats/<b>[filename]</b>
+                </code>
+            </div>
+            <button class="accordion p-2 w-100 border-0 text-start">Download Model</button>
+            <div class="panel px-3">
+                  <code>
+                      scp -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -P {{ offer.port + 1 }} <b>[expected location/path on the user's computer]</b> root@{{request.url.hostname}}:/usr/src/app/output/models/<b>[filename]</b>
+                </code>
+            </div>
+            <button class="accordion p-2 w-100 border-0 text-start">Download LoRA</button>
+            <div class="panel px-3">
+                <code>
+                scp -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -P {{ offer.port + 1 }} <b>[expected location/path on the user's computer]</b> root@{{request.url.hostname}}:/usr/src/app/output/loras/<b>[filename]</b>
+                </code>
+            </div>
+            <button class="accordion p-2 w-100 border-0 text-start">Download Prompt</button>
+            <div class="panel px-3">
+                <code>
+                scp -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -P {{ offer.port + 1 }} <b>[expected location/path on the user's computer]</b> root@{{request.url.hostname}}:/usr/src/app/output/prompts/<b>[filename]</b>
+            </code>
+            </div>
+            <button class="accordion p-2 w-100 border-0 text-start">Download Preset</button>
+            <div class="panel px-3">
+            <code>
+                  scp -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -P {{ offer.port + 1 }} <b>[expected location/path on the user's computer]</b> root@{{request.url.hostname}}:/usr/src/app/output/presets/<b>[filename]</b>
+            </code>
+            </div>
+        </div>
+
+        <button class="accordion p-2 w-100 border-0 text-start">Upload to provider</button>
+        <div class="panel px-3">
+            <button class="accordion p-2 w-100 border-0 text-start">Upload Dataset</button>
+            <div class="panel px-3">
+              <code>
+                  scp -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -P {{ offer.port + 1 }} root@{{request.url.hostname}}:/usr/src/app/output/training/datasets/<b>[filename]</b> <b>[expected location/path on the user's computer]</b>
+              </code>
+            </div>
+            <button class="accordion p-2 w-100 border-0 text-start">Upload Format</button>
+            <div class="panel px-3">
+                <code>
+                scp -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -P {{ offer.port + 1 }} root@{{request.url.hostname}}:/usr/src/app/output/training/formats/<b>[filename]</b>  <b>[expected location/path on the user's computer]</b>
+                </code>
+            </div>
+            <button class="accordion p-2 w-100 border-0 text-start">Upload Model</button>
+            <div class="panel px-3">
+                  <code>
+                      scp -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -P {{ offer.port + 1 }} root@{{request.url.hostname}}:/usr/src/app/output/models/<b>[filename]</b> <b>[expected location/path on the user's computer]</b>
+                </code>
+            </div>
+            <button class="accordion p-2 w-100 border-0 text-start">Upload LoRA</button>
+            <div class="panel px-3">
+                <code>
+                scp -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -P {{ offer.port + 1 }} root@{{request.url.hostname}}:/usr/src/app/output/loras/<b>[filename]</b> <b>[expected location/path on the user's computer]</b>
+                </code>
+            </div>
+            <button class="accordion p-2 w-100 border-0 text-start">Upload Prompt</button>
+            <div class="panel px-3">
+                <code>
+                scp -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -P {{ offer.port + 1 }} root@{{request.url.hostname}}:/usr/src/app/output/prompts/<b>[filename]</b> <b>[expected location/path on the user's computer]</b>
+            </code>
+            </div>
+            <button class="accordion p-2 w-100 border-0 text-start">Upload Preset</button>
+            <div class="panel px-3">
+            <code>
+                  scp -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -P {{ offer.port + 1 }} root@{{request.url.hostname}}:/usr/src/app/output/presets/<b>[filename]</b> <b>[expected location/path on the user's computer]</b>
+            </code>
+            </div>
+        </div>
+
+        <script>
+            var acc = document.getElementsByClassName("accordion");
+            var i;
+
+            for (i = 0; i < acc.length; i++) {
+              acc[i].addEventListener("click", function() {
+                this.classList.toggle("active");
+                var panel = this.nextElementSibling;
+                panel.classList.toggle("d-block");
+                }
+              );
+            }
+        </script>
+
         {% endif %}
 
         {% if expire_in %}
