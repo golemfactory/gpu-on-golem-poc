@@ -41,7 +41,8 @@ async def list_offers(request: Request, access_key: Optional[str] = Cookie(None)
 
 
 @router.post("/machines/{provider_id}/rent/")
-async def rent(provider_id: str, package: str = Form(...), access_key: Optional[str] = Cookie(None)):
+async def rent(provider_id: str, package: str = Form(...), model_url: str = Form(None), hf_username: str = Form(None),
+               hf_password: str = Form(None), access_key: Optional[str] = Cookie(None)):
     package_to_function_map = {
         'pytorch': rent_server_pytorch_ssh,
         'automatic': rent_server_automatic,
@@ -55,6 +56,8 @@ async def rent(provider_id: str, package: str = Form(...), access_key: Optional[
     vm_args = (provider_id, port)
     if package == 'text-webui':
         vm_args = (provider_id, port, port + 1)
+    elif package == 'custom-automatic':
+        vm_args = (provider_id, port, model_url, hf_username, hf_password)
     job = Job.create(vm_run_function, vm_args, connection=redis_conn, timeout='100d')
     with Session(engine) as session:
         try:

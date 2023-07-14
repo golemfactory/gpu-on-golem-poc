@@ -19,8 +19,8 @@ CLUSTER_EXPIRATION_TIME = datetime.timedelta(days=365)
 examples_dir = pathlib.Path(__file__).resolve().parent.parent
 sys.path.append(str(examples_dir))
 
-IMAGE_URL = 'http://gpu-on-golem.s3.eu-central-1.amazonaws.com/automatic-golem-89d3d833ea24c7a96f463d9650121c43c0bf3f8a3daf433894545aa1.gvmi'
-IMAGE_HASH = '89d3d833ea24c7a96f463d9650121c43c0bf3f8a3daf433894545aa1'
+IMAGE_URL = 'http://gpu-on-golem.s3.eu-central-1.amazonaws.com/automatic-golem-custom-model-0cd20b493fe3b8593586913cd47ff1f74b421e47558896ab17c17282.gvmi'
+IMAGE_HASH = '0cd20b493fe3b8593586913cd47ff1f74b421e47558896ab17c17282'
 
 
 class ConcreteProviderStrategy(MarketStrategy):
@@ -32,6 +32,12 @@ class ConcreteProviderStrategy(MarketStrategy):
 
 
 class AutomaticService(HttpProxyService):
+    def __init__(self, hf_username, hf_password, model_url):
+        super().__init__()
+        self.hf_username = hf_username
+        self.hf_password = hf_password
+        self.model_url = model_url
+
     @staticmethod
     async def get_payload():
         manifest = open(pathlib.Path(__file__).parent.joinpath("custom_model_manifest.json"), "rb").read()
@@ -52,7 +58,16 @@ class AutomaticService(HttpProxyService):
         async for script in super().start():
             yield script
 
-        # TODO: Add downloading command here
+        # TODO: we have to adjust this properly. Looks like automatic requires directories inside .../models dir
+        script = self._ctx.new_script()
+        script.run('mkdir /usr/src/app/output/models')
+        script.run('ln -s /usr/src/app/output/models /usr/src/app/stable-diffusion-webui/models')
+        yield script
+
+        credentials = f'-u {self.hf_username}:{self.hf_password}' if self.hf_username and self.hf_password else ''
+        script = self._ctx.new_script()
+        script.run(f"curl --remote-name --remote-header-name --output-dir /usr/src/app/output/models/ {credentials} {self.model_url}")
+        yield script
 
         script = self._ctx.new_script()
         script.run("/usr/src/app/run_service.sh", "127.0.0.1", "8000")
@@ -73,7 +88,7 @@ class AutomaticService(HttpProxyService):
             session.commit()
 
 
-async def main(provider_id: str, local_port: int):
+async def main(provider_id: str, local_port: int, model_url: str, hf_username: str, hf_password: str):
     """
     :param provider_id:
     :param local_port: The port on requestor through which tunnel is opened to provider machine.
@@ -88,6 +103,7 @@ async def main(provider_id: str, local_port: int):
                 network=network,
                 expiration=datetime.datetime.now() + CLUSTER_EXPIRATION_TIME,
                 num_instances=1,
+                instance_params=[{"hf_username": hf_username, "hf_password": hf_password, "model_url": model_url}],
             )
             instances = cluster.instances
 
@@ -126,9 +142,9 @@ async def main(provider_id: str, local_port: int):
                 cnt += 1
 
 
-def rent_server(provider_id: str, local_port: int):
+def rent_server(provider_id: str, local_port: int, model_url: str, hf_username: str = None, hf_password: str = None):
     try:
-        asyncio.run(main(provider_id, local_port))
+        asyncio.run(main(provider_id, local_port, model_url, hf_username, hf_password))
     except KeyboardInterrupt:
         print('Interruption')
     finally:
@@ -146,4 +162,4 @@ def rent_server(provider_id: str, local_port: int):
 
 
 if __name__ == "__main__":
-    rent_server(sys.argv[1], int(sys.argv[2]))
+    rent_server(sys.argv[1], int(sys.argv[2]), sys.argv[3], sys.argv[4], sys.argv[5])
