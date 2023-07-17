@@ -4,7 +4,7 @@ from fastapi import APIRouter, Request, status, WebSocket
 from fastapi.responses import JSONResponse
 from websockets import ConnectionClosed
 
-from redis_db.functions import get_service_data, jobs_queue
+from redis_db.functions import get_service_data, jobs_queue, get_providers_processing_times
 
 QUEUE_STATE_WS_REFRESH_SECONDS = 5
 
@@ -14,6 +14,11 @@ router = APIRouter()
 @router.get("/monitoring/cluster/")
 async def monitoring(request: Request):
     service_data = await get_service_data()
+    processing_times_per_provider = await get_providers_processing_times()
+    cluster_instances = service_data.get('cluster', {}).get('instances', [])
+    for i, instance in enumerate(cluster_instances):
+        service_data['cluster']['instances'][i]['job_times'] = \
+            processing_times_per_provider.get(instance['provider_id'], [])
     return JSONResponse(service_data, status_code=status.HTTP_200_OK)
 
 
