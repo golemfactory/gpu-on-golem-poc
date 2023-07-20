@@ -60,13 +60,19 @@ class AutomaticService(HttpProxyService):
 
         # TODO: we have to adjust this properly. Looks like automatic requires directories inside .../models dir
         script = self._ctx.new_script()
-        script.run('mkdir /usr/src/app/output/models')
+        script.run('/usr/bin/mkdir /usr/src/app/output/models')
         script.run('ln -s /usr/src/app/output/models /usr/src/app/stable-diffusion-webui/models')
+        yield script
+
+        # This is making sure that outbound interface has proper MTU
+        # There was problem with too big MTU resulting in permanent lost packets
+        script = self._ctx.new_script()
+        script.run('/sbin/ifconfig', 'eth1', 'mtu', '1450', 'up'),
         yield script
 
         credentials = f'-u {self.hf_username}:{self.hf_password}' if self.hf_username and self.hf_password else ''
         script = self._ctx.new_script()
-        script.run(f"curl --remote-name --remote-header-name --output-dir /usr/src/app/output/models/ {credentials} {self.model_url}")
+        script.run("/usr/local/bin/curl", "--remote-name", "--remote-header-name", "--output-dir", "/usr/src/app/output/models/", credentials, self.model_url)
         yield script
 
         script = self._ctx.new_script()
@@ -162,4 +168,6 @@ def rent_server(provider_id: str, local_port: int, model_url: str, hf_username: 
 
 
 if __name__ == "__main__":
-    rent_server(sys.argv[1], int(sys.argv[2]), sys.argv[3], sys.argv[4], sys.argv[5])
+    user = sys.argv[4] if len(sys.argv) > 5 else None
+    password = sys.argv[5] if len(sys.argv) > 5 else None
+    rent_server(sys.argv[1], int(sys.argv[2]), sys.argv[3], user, password)
