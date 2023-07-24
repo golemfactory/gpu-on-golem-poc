@@ -33,7 +33,8 @@
         "out": {
           "protocols": ["https"],
           "urls": [
-            "https://huggingface.co"
+            "https://huggingface.co",
+            "https://cdn-lfs.huggingface.co"
           ]
         }
       }

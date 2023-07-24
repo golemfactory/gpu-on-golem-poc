@@ -60,8 +60,13 @@ class AutomaticService(HttpProxyService):
 
         # TODO: we have to adjust this properly. Looks like automatic requires directories inside .../models dir
         script = self._ctx.new_script()
-        script.run('/usr/bin/mkdir /usr/src/app/output/models')
-        script.run('ln -s /usr/src/app/output/models /usr/src/app/stable-diffusion-webui/models')
+        script.run("/bin/bash", "-c",
+                   'mv /usr/src/app/stable-diffusion-webui/models /usr/src/app/output/models && ln -s /usr/src/app/output/models /usr/src/app/stable-diffusion-webui/models')
+        yield script
+
+        script = self._ctx.new_script()
+        script.run("/bin/bash", "-c", 'echo "108.138.51.21 huggingface.co" >> /etc/hosts')
+        script.run("/bin/bash", "-c", 'echo "18.244.102.9 cdn-lfs.huggingface.co" >> /etc/hosts')
         yield script
 
         # This is making sure that outbound interface has proper MTU
@@ -72,11 +77,11 @@ class AutomaticService(HttpProxyService):
 
         credentials = f'-u {self.hf_username}:{self.hf_password}' if self.hf_username and self.hf_password else ''
         script = self._ctx.new_script()
-        script.run("/usr/bin/curl", "--remote-name", "--remote-header-name", "--output-dir", "/usr/src/app/output/models/", credentials, self.model_url)
+        script.run("/bin/bash", "-c", f"cd /usr/src/app/output/models/Stable-diffusion && curl -vvv -L --remote-name --remote-header-name {credentials} {self.model_url}")
         yield script
 
         script = self._ctx.new_script()
-        script.run("/usr/src/app/run_service.sh", "127.0.0.1", "8000")
+        script.run("/bin/bash", "-c", "/usr/src/app/run_service.sh", "127.0.0.1", "8000")
         yield script
 
         script = self._ctx.new_script()
@@ -87,11 +92,11 @@ class AutomaticService(HttpProxyService):
         script.run("/usr/src/app/wait_for_service.sh", "8000")
         yield script
 
-        # with Session(engine) as session:
-        #     offer = session.exec(select(Offer).where(Offer.provider_id == self.provider_id)).one()
-        #     offer.status = OfferStatus.READY
-        #     session.add(offer)
-        #     session.commit()
+        with Session(engine) as session:
+            offer = session.exec(select(Offer).where(Offer.provider_id == self.provider_id)).one()
+            offer.status = OfferStatus.READY
+            session.add(offer)
+            session.commit()
 
 
 async def main(provider_id: str, local_port: int, model_url: str, hf_username: str, hf_password: str):
@@ -127,14 +132,14 @@ async def main(provider_id: str, local_port: int, model_url: str, hf_username: s
                 print(instances)
                 try:
                     await asyncio.sleep(5)
-                    # with Session(engine) as session:
-                    #     offer = session.exec(select(Offer).where(Offer.provider_id == provider_id)).one()
-                    #     if offer.started_at and datetime.datetime.now() > offer.started_at + MACHINE_LIFETIME:
-                    #         offer.status = OfferStatus.TERMINATING
-                    #         session.add(offer)
-                    #         session.commit()
-                    #     if offer.status == OfferStatus.TERMINATING:
-                    #         break
+                    with Session(engine) as session:
+                        offer = session.exec(select(Offer).where(Offer.provider_id == provider_id)).one()
+                        if offer.started_at and datetime.datetime.now() > offer.started_at + MACHINE_LIFETIME:
+                            offer.status = OfferStatus.TERMINATING
+                            session.add(offer)
+                            session.commit()
+                        if offer.status == OfferStatus.TERMINATING:
+                            break
                 except (KeyboardInterrupt, asyncio.CancelledError):
                     break
 
@@ -153,18 +158,18 @@ def rent_server(provider_id: str, local_port: int, model_url: str, hf_username: 
         asyncio.run(main(provider_id, local_port, model_url, hf_username, hf_password))
     except KeyboardInterrupt:
         print('Interruption')
-    # finally:
-        # with Session(engine) as session:
-        #     offer = session.exec(select(Offer).where(Offer.provider_id == provider_id)).one()
-        #     offer.status = OfferStatus.FREE
-        #     offer.port = None
-        #     offer.password = None
-        #     offer.started_at = None
-        #     offer.job_id = None
-        #     offer.package = None
-        #     offer.reserved_by = None
-        #     session.add(offer)
-        #     session.commit()
+    finally:
+        with Session(engine) as session:
+            offer = session.exec(select(Offer).where(Offer.provider_id == provider_id)).one()
+            offer.status = OfferStatus.FREE
+            offer.port = None
+            offer.password = None
+            offer.started_at = None
+            offer.job_id = None
+            offer.package = None
+            offer.reserved_by = None
+            session.add(offer)
+            session.commit()
 
 
 if __name__ == "__main__":
