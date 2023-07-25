@@ -77,11 +77,11 @@ class AutomaticService(HttpProxyService):
 
         credentials = f'-u {self.hf_username}:{self.hf_password}' if self.hf_username and self.hf_password else ''
         script = self._ctx.new_script()
-        script.run("/bin/bash", "-c", f"cd /usr/src/app/output/models/Stable-diffusion && curl -vvv -L --remote-name --remote-header-name {credentials} {self.model_url}")
+        script.run("/bin/bash", "-c", f"cd /usr/src/app/output/models/Stable-diffusion && curl -L --remote-name --remote-header-name {credentials} {self.model_url}")
         yield script
 
         script = self._ctx.new_script()
-        script.run("/bin/bash", "-c", "/usr/src/app/run_service.sh", "127.0.0.1", "8000")
+        script.run("/usr/src/app/run_service.sh", "127.0.0.1", "8000")
         yield script
 
         script = self._ctx.new_script()
