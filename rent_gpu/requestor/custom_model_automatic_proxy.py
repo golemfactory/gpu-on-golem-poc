@@ -58,7 +58,6 @@ class AutomaticService(HttpProxyService):
         async for script in super().start():
             yield script
 
-        # TODO: we have to adjust this properly. Looks like automatic requires directories inside .../models dir
         script = self._ctx.new_script()
         script.run("/bin/bash", "-c",
                    'mv /usr/src/app/stable-diffusion-webui/models /usr/src/app/output/models && ln -s /usr/src/app/output/models /usr/src/app/stable-diffusion-webui/models')
@@ -74,7 +73,6 @@ class AutomaticService(HttpProxyService):
         script = self._ctx.new_script()
         script.run('/sbin/ifconfig', 'eth1', 'mtu', '1450', 'up'),
         yield script
-
 
         credentials = f'-u {self.hf_username}:{self.hf_password}' if self.hf_username and self.hf_password else ''
         script = self._ctx.new_script()
