@@ -16,7 +16,6 @@ RUN pip install --no-cache-dir -r stable-diffusion-webui/requirements.txt
 ENV TORCH_CUDA_ARCH_LIST=6.0;6.1;6.2;7.0;7.2;7.5;8.0;8.6
 RUN pip install xformers==0.0.20
 
-COPY stable-diffusion-v1-5/v1-5-pruned-emaonly.ckpt ./stable-diffusion-webui/models/Stable-diffusion
 COPY openai ./stable-diffusion-webui/openai
 
 RUN rm /etc/nginx/sites-enabled/default

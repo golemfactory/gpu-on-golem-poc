@@ -63,6 +63,11 @@
                             </form>
                         </li>
                         {% endif %}
+                        {% if entry.memory >= 12 %}
+                        <li>
+                            <button class="dropdown-item" data-provider-id="{{ entry.provider_id }}" data-bs-toggle="modal" data-bs-target="#custom-automatic-modal">Automatic with custom model...</button>
+                        </li>
+                        {% endif %}
                         {% if entry.memory >= 10 %}
                         <li>
                             <form action="/machines/{{ entry.provider_id }}/rent/" method="POST">
@@ -79,4 +84,61 @@
     {% endfor %}
     </tbody>
 </table>
+
+<div class="modal fade" id="custom-automatic-modal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Automatic1111 with custom model - Additional information needed</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form action="" method="POST">
+            <input class="form-control" type="hidden" name="package" value="custom-automatic" />
+            <div class="mb-3">
+                <label class="form-label">Hugging Face URL</label>
+                <p class="fw-light">Currently only single files from <a href="https://huggingface.co/">Hugging Face</a> website are supported.</p>
+                <input class="form-control" type="text" name="model_url" value="" placeholder="Hugging Face URL" />
+            </div>
+            <div class="mb-3 form-check">
+                <input type="checkbox" class="form-check-input" id="isPrivateRepo" onchange="togglePasswordInput()">
+                <label class="form-check-label" for="isPrivateRepo">File is in private repository</label>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Hugging Face username</label>
+                <input class="form-control" type="text" name="hf_username" value="" placeholder="Hugging Face username" id="hf_username" disabled=True/>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Hugging Face password</label>
+                <input class="form-control" type="password" name="hf_password" value="" placeholder="Hugging Face password" id="hf_password" disabled=True/>
+            </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button id="custom-automatic-start-btn" type="button" class="btn btn-primary">Start</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="text/javascript">
+    const customAutomaticModal = document.getElementById('custom-automatic-modal');
+    customAutomaticModal.addEventListener('show.bs.modal', event => {
+        customAutomaticModal.querySelector('form').action = `/machines/${event.relatedTarget.dataset.providerId}/rent/`;
+    });
+
+    const customAutomaticStartBtn = document.getElementById('custom-automatic-start-btn');
+    customAutomaticStartBtn.addEventListener('click', event => {
+        document.querySelector('#custom-automatic-modal form').submit();
+    });
+
+    function togglePasswordInput() {
+        let usernameInput = document.getElementById("hf_username");
+        let passwordInput = document.getElementById("hf_password");
+        const checkbox = document.getElementById("isPrivateRepo");
+        passwordInput.disabled = !checkbox.checked;
+        usernameInput.disabled = !checkbox.checked;
+    }
+</script>
 {% endblock %}

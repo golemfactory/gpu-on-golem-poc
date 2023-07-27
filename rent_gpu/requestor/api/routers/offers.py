@@ -18,6 +18,7 @@ from rent_gpu.requestor.ssh_proxy import rent_server as rent_server_pytorch_ssh
 from rent_gpu.requestor.automatic_proxy import rent_server as rent_server_automatic
 from rent_gpu.requestor.jupyter_proxy import rent_server as rent_server_jupyter
 from rent_gpu.requestor.text_webui_proxy import rent_server as rent_server_text_webui
+from rent_gpu.requestor.custom_model_automatic_proxy import rent_server as rent_server_custom_automatic
 
 redis_conn = Redis()
 q = Queue(connection=redis_conn)
@@ -40,12 +41,14 @@ async def list_offers(request: Request, access_key: Optional[str] = Cookie(None)
 
 
 @router.post("/machines/{provider_id}/rent/")
-async def rent(provider_id: str, package: str = Form(...), access_key: Optional[str] = Cookie(None)):
+async def rent(provider_id: str, package: str = Form(...), model_url: str = Form(None), hf_username: str = Form(None),
+               hf_password: str = Form(None), access_key: Optional[str] = Cookie(None)):
     package_to_function_map = {
         'pytorch': rent_server_pytorch_ssh,
         'automatic': rent_server_automatic,
         'jupyter': rent_server_jupyter,
         'text-webui': rent_server_text_webui,
+        'custom-automatic': rent_server_custom_automatic,
     }
     # Random port is good enough for PoC
     port = random.randint(2000, 2998)
@@ -53,6 +56,8 @@ async def rent(provider_id: str, package: str = Form(...), access_key: Optional[
     vm_args = (provider_id, port)
     if package == 'text-webui':
         vm_args = (provider_id, port, port + 1)
+    elif package == 'custom-automatic':
+        vm_args = (provider_id, port, model_url, hf_username, hf_password)
     job = Job.create(vm_run_function, vm_args, connection=redis_conn, timeout='100d')
     with Session(engine) as session:
         try:
