@@ -96,16 +96,21 @@
         <form action="" method="POST">
             <input class="form-control" type="hidden" name="package" value="custom-automatic" />
             <div class="mb-3">
-                <label class="form-label">URL</label>
-                <input class="form-control" type="text" name="model_url" value="" placeholder="URL" />
+                <label class="form-label">Hugging Face URL</label>
+                <p class="fw-light">Currently only single files from <a href="https://huggingface.co/">Hugging Face</a> website are supported.</p>
+                <input class="form-control" type="text" name="model_url" value="" placeholder="Hugging Face URL" />
+            </div>
+            <div class="mb-3 form-check">
+                <input type="checkbox" class="form-check-input" id="isPrivateRepo" onchange="togglePasswordInput()">
+                <label class="form-check-label" for="isPrivateRepo">File is in private repository</label>
             </div>
             <div class="mb-3">
-                <label class="form-label">Auth username</label>
-                <input class="form-control" type="text" name="hf_username" value="" placeholder="Auth username" />
+                <label class="form-label">Hugging Face username</label>
+                <input class="form-control" type="text" name="hf_username" value="" placeholder="Hugging Face username" id="hf_username" disabled=True/>
             </div>
             <div class="mb-3">
-                <label class="form-label">Auth password</label>
-                <input class="form-control" type="password" name="hf_password" value="" placeholder="Auth password" />
+                <label class="form-label">Hugging Face password</label>
+                <input class="form-control" type="password" name="hf_password" value="" placeholder="Hugging Face password" id="hf_password" disabled=True/>
             </div>
         </form>
       </div>
@@ -127,5 +132,13 @@
     customAutomaticStartBtn.addEventListener('click', event => {
         document.querySelector('#custom-automatic-modal form').submit();
     });
+
+    function togglePasswordInput() {
+        let usernameInput = document.getElementById("hf_username");
+        let passwordInput = document.getElementById("hf_password");
+        const checkbox = document.getElementById("isPrivateRepo");
+        passwordInput.disabled = !checkbox.checked;
+        usernameInput.disabled = !checkbox.checked;
+    }
 </script>
 {% endblock %}

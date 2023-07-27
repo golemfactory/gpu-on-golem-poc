@@ -75,6 +75,7 @@ class AutomaticService(HttpProxyService):
         script.run('/sbin/ifconfig', 'eth1', 'mtu', '1450', 'up'),
         yield script
 
+
         credentials = f'-u {self.hf_username}:{self.hf_password}' if self.hf_username and self.hf_password else ''
         script = self._ctx.new_script()
         script.run("/bin/bash", "-c", f"cd /usr/src/app/output/models/Stable-diffusion && curl -L --remote-name --remote-header-name {credentials} {self.model_url}")
