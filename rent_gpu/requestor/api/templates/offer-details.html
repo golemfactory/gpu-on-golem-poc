@@ -30,7 +30,7 @@
         scp -P {{ offer.port }} [local_file] root@{{request.url.hostname}}:[destination_path]
         </code>
         </pre>
-        {% elif offer.package == 'automatic' or 'custom-automatic' %}
+        {% elif offer.package in ('automatic', 'custom-automatic') %}
         Use this link to connect with Automatic FE: <a href="http://{{request.url.hostname}}:{{ offer.port }}" target="_blank">http://{{request.url.hostname}}:{{ offer.port }}</a>
         <br/>
         {% elif offer.package == 'jupyter' %}
