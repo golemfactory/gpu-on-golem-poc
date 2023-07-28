@@ -6,7 +6,7 @@ import sys
 
 from sqlmodel import Session, select
 from yapapi import Golem
-from yapapi.contrib.service.http_proxy import HttpProxyService, LocalHttpProxy
+from yapapi.contrib.service.socket_proxy import SocketProxy, SocketProxyService
 from yapapi.payload import vm
 from yapapi.services import ServiceState
 from yapapi.strategy import SCORE_REJECTED, SCORE_TRUSTED, MarketStrategy
@@ -31,9 +31,13 @@ class ConcreteProviderStrategy(MarketStrategy):
         return SCORE_TRUSTED if offer.issuer == self.provider_id else SCORE_REJECTED
 
 
-class AutomaticService(HttpProxyService):
-    def __init__(self, hf_username, hf_password, model_url):
+class AutomaticService(SocketProxyService):
+    UI_PORT = 80  # nginx is listening on this port and forwarding to SD_UI_PORT
+    SD_UI_PORT = 8000  # FE port for stable-diffusion-webui software
+
+    def __init__(self, proxy: SocketProxy, hf_username, hf_password, model_url):
         super().__init__()
+        self.proxy = proxy
         self.hf_username = hf_username
         self.hf_password = hf_password
         self.model_url = model_url
@@ -80,7 +84,7 @@ class AutomaticService(HttpProxyService):
         yield script
 
         script = self._ctx.new_script()
-        script.run("/usr/src/app/run_service.sh", "127.0.0.1", "8000")
+        script.run("/usr/src/app/run_service.sh", "127.0.0.1", str(self.SD_UI_PORT))
         yield script
 
         script = self._ctx.new_script()
@@ -88,8 +92,10 @@ class AutomaticService(HttpProxyService):
         yield script
 
         script = self._ctx.new_script()
-        script.run("/usr/src/app/wait_for_service.sh", "8000")
+        script.run("/usr/src/app/wait_for_service.sh", str(self.SD_UI_PORT))
         yield script
+
+        await self.proxy.run_server(self, self.UI_PORT)
 
         with Session(engine) as session:
             offer = session.exec(select(Offer).where(Offer.provider_id == self.provider_id)).one()
@@ -106,6 +112,7 @@ async def main(provider_id: str, local_port: int, model_url: str, hf_username: s
 
     async with Golem(budget=1.0, subnet_tag='gpu-test', strategy=ConcreteProviderStrategy(provider_id)) as golem:
         network = await golem.create_network("192.168.0.1/24")
+        proxy = SocketProxy(address='0.0.0.0', ports=[local_port])
 
         async with network:
             cluster = await golem.run_service(
@@ -113,7 +120,7 @@ async def main(provider_id: str, local_port: int, model_url: str, hf_username: s
                 network=network,
                 expiration=datetime.datetime.now() + CLUSTER_EXPIRATION_TIME,
                 num_instances=1,
-                instance_params=[{"hf_username": hf_username, "hf_password": hf_password, "model_url": model_url}],
+                instance_params=[{"proxy": proxy, "hf_username": hf_username, "hf_password": hf_password, "model_url": model_url}],
             )
             instances = cluster.instances
 
@@ -123,9 +130,6 @@ async def main(provider_id: str, local_port: int, model_url: str, hf_username: s
             while still_starting():
                 print('Starting')
                 await asyncio.sleep(5)
-
-            proxy = LocalHttpProxy(cluster, local_port)
-            await proxy.run()
 
             while True:
                 print(instances)
