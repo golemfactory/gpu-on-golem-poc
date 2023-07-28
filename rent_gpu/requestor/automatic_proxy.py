@@ -58,7 +58,7 @@ class AutomaticService(SocketProxyService):
         yield script
 
         script = self._ctx.new_script()
-        script.run("/usr/src/app/wait_for_service.sh", "8000")
+        script.run("/usr/src/app/wait_for_service.sh", str(self.SD_UI_PORT))
         yield script
 
         await self.proxy.run_server(self, self.UI_PORT)
