@@ -1,0 +1,41 @@
+version: "3.8"
+
+services:
+  backend:
+    restart: always
+    ports:
+      - "8000:8000"
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - ./backend/rent_golem:/code/
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file: .env
+
+  db:
+    image: postgres:15
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    ports:
+      - "5432:5432"
+    env_file: .env
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready" ]
+      interval: 3s
+      timeout: 3s
+      retries: 5
+
+  load-balancer:
+    image: haproxy
+    ports:
+      - "8100:8100"
+      - "8404:8404"  # stats
+    volumes:
+      - ./haproxy:/usr/local/etc/haproxy
+
+volumes:
+  postgres_data:
