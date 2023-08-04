@@ -2,15 +2,17 @@
 To run local environment you can use Docker Compose with [docker-compose.yaml](https://github.com/imapp-pl/pawnshop-app/blob/main/docker-compose.yaml "docker-compose.yaml") as a basic configuration. 
 For local development we are using following containers:
 
-| name             | build from     | description                                      |
-|------------------|----------------|--------------------------------------------------|
-| proxy            | nginx:latest   | Proxy server (TODO for production)               |
-| load_balancer    | haproxy:latest | Load balancer for routing requests to requestors |
-| postgres         | postgres:15    | Database                                         |
-| redis            | redis:7        | Celery backend (TODO)                            |
-| backend          | ./backend      | API                                              |
-| requestor-worker | ./backend      | Celery worker running golem requestors (TODO)    |
-| celery-beat      | ./backend      | Celery beat for cron jobs (TODO)                 |
+| name          | build from   | description                                                    |
+|---------------|--------------|----------------------------------------------------------------|
+| proxy         | nginx:latest | Proxy server (TODO for production)                             |
+| load_balancer | haproxy:2.8  | Load balancer for routing requests to requestors               |
+| postgres      | postgres:15  | Database                                                       |
+| redis         | redis:7      | Celery backend                                                 |
+| backend       | ./backend    | API                                                            |
+| celery-golem  | ./backend    | Celery worker running golem requestors                         |
+| celery-worker | ./backend    | Celery worker running HAProxy config refreshes and other tasks |
+| celery-beat   | ./backend    | Celery beat for cron jobs                                      |
+| yagna         | ?            | Running yagna daemon (TODO)                                    |
 
 #### Build
 `./backend/build_docker.sh`
