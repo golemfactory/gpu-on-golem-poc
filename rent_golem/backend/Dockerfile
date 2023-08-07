@@ -23,7 +23,7 @@ RUN pip install -r requirements.txt
 COPY rent_golem /code/
 
 RUN addgroup --gid $GID --system dev
-RUN useradd --uid=${UID} --gid=${GID} --shell /bin/bash dev
+RUN useradd --uid=${UID} --gid=${GID} --create-home --shell /bin/bash dev
 RUN chown -R dev:dev /code
 
 USER dev

@@ -10,11 +10,13 @@ For local development we are using following containers:
 | redis         | redis:7      | Celery backend                                                 |
 | backend       | ./backend    | API                                                            |
 | celery-golem  | ./backend    | Celery worker running golem requestors                         |
-| celery-worker | ./backend    | Celery worker running HAProxy config refreshes and other tasks |
+| celery-worker | ./backend    | Celery worker running HAProxy config refresher and other tasks |
 | celery-beat   | ./backend    | Celery beat for cron jobs                                      |
-| yagna         | ?            | Running yagna daemon (TODO)                                    |
+| yagna         | ./yagna      | Running yagna daemon                                    |
 
 #### Build
+It's important to build with this script to keep build order and avoid errors with file permissions.
+
 `./backend/build_docker.sh`
 
 #### Configure
@@ -25,11 +27,18 @@ Create file named `.env` based on `.env-example` and adjust variables if needed.
 docker compose up -d
 ```
 
-#### Setup
+#### Setup Django
 ```
 docker compose exec backend bash
 ./manage.py migrate
 ./manage.py createsuperuser 
+```
+
+#### Setup Yagna
+```
+docker compose exec yagna bash
+yagna payment fund
+yagna payment status  # to check if you have funds 
 ```
 
 Now check http://localhost:8000 if it works.

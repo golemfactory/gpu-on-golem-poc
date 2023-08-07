@@ -3,12 +3,13 @@ version: "3.8"
 services:
   backend:
     restart: always
-    ports:
-      - "8000:8000"
+    image: rent_golem/backend
     build:
       context: ./backend
       dockerfile: Dockerfile
     command: python manage.py runserver 0.0.0.0:8000
+    ports:
+      - "8000:8000"
     volumes:
       - ./backend/rent_golem:/code/
     depends_on:
@@ -16,6 +17,15 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+    env_file: .env
+
+  yagna:
+    build:
+      context: ./yagna
+      dockerfile: Dockerfile
+    command: /bin/bash -c 'yagna service run && sleep 5 && yagna payment init --sender'
+    volumes:
+      - yagna_data:/root/.local/share/yagna
     env_file: .env
 
   load-balancer:
@@ -60,7 +70,7 @@ services:
     restart: always
     build:
       context: ./backend
-      dockerfile: Dockerfile
+      dockerfile: celery-golem.Dockerfile
     command: celery -A rent_golem worker -Q clusters -l INFO --pidfile=
     volumes:
       - ./backend/rent_golem:/code/
@@ -94,3 +104,4 @@ services:
 
 volumes:
   postgres_data:
+  yagna_data:
