@@ -21,6 +21,8 @@ client/sentry.properties
 client/next.config.original.js
 client/next.config.wizardcopy.js
 
+rent_golem/notes.md
+
 discord/env.json
 
 __pycache__
