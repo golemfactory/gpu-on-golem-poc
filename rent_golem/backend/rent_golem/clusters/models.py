@@ -23,5 +23,5 @@ class Clusters(models.Model):
     # https://stackoverflow.com/questions/67469569/using-django-jsonfield-in-model -> possible JSON Schema
     additional_params = models.JSONField()
     size = models.PositiveIntegerField()
-    created_at = models.DateTimeField()  # auto add now
-    last_update = models.DateTimeField()  # auto now
+    created_at = models.DateTimeField(auto_now_add=True)
+    last_update = models.DateTimeField(auto_now=True)
