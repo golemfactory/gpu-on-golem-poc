@@ -1,7 +1,8 @@
 from rest_framework import serializers
-from . models import Clusters
+from .models import Clusters
+
 
 class ClustersSerializer(serializers.ModelSerializer):
     class Meta:
         model = Clusters
-        fields = '__all__'  # TODO Explicit all params
+        fields = ['uuid', 'package_type', 'status', 'additional_params', 'size', 'created_at', 'last_update']
