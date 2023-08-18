@@ -19,8 +19,8 @@ class Migration(migrations.Migration):
                 ('status', models.CharField(choices=[('Starting', 'Starting'), ('Stopping', 'Stopping'), ('Stopped', 'Stopped'), ('Continuing', 'Continuing'), ('Terminating', 'Terminating'), ('Terminated', 'Terminated')], default='Starting', max_length=255)),
                 ('additional_params', models.JSONField()),
                 ('size', models.PositiveIntegerField()),
-                ('created_at', models.DateTimeField()),
-                ('last_update', models.DateTimeField()),
+                ('created_at', models.DateTimeField(auto_now_add=True)),
+                ('last_update', models.DateTimeField(auto_now=True)),
             ],
         ),
     ]
