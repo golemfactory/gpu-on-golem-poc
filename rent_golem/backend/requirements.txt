@@ -6,3 +6,4 @@ django-celery-results==2.5.1
 django-celery-beat==2.5.0
 redis==4.6.0
 yapapi==0.11.0
+django-extensions==3.2.3

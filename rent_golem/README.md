@@ -14,13 +14,13 @@ For local development we are using following containers:
 | celery-beat   | ./backend    | Celery beat for cron jobs                                      |
 | yagna         | ./yagna      | Running yagna daemon                                    |
 
+#### Configure
+Create file named `.env` based on `.env-example` and adjust variables if needed.
+
 #### Build
 It's important to build with this script to keep build order and avoid errors with file permissions.
 
 `./backend/build_docker.sh`
-
-#### Configure
-Create file named `.env` based on `.env-example` and adjust variables if needed.
 
 #### Run
 ```
@@ -30,15 +30,26 @@ docker compose up -d
 #### Setup Django
 ```
 docker compose exec backend bash
+```
+
+And then inside container run:
+```
 ./manage.py migrate
 ./manage.py createsuperuser 
 ```
 
+Exit container with `exit`.
+
 #### Setup Yagna
+
 ```
 docker compose exec yagna bash
+```
+
+And then inside container run:
+```
 yagna payment fund
-yagna payment status  # to check if you have funds 
+yagna payment status 
 ```
 
 Now check http://localhost:8000 if it works.
