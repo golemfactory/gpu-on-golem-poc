@@ -39,8 +39,12 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
+    "django_extensions",
     "django_celery_beat",
     "django_celery_results",
+    "rest_framework",
+
+    "clusters"
 ]
 
 MIDDLEWARE = [
@@ -120,6 +124,7 @@ USE_I18N = True
 USE_TZ = True
 
 USE_L10N = False
+
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
