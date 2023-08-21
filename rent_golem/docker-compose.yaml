@@ -19,14 +19,14 @@ services:
         condition: service_healthy
     env_file: .env
 
-  yagna:
-    build:
-      context: ./yagna
-      dockerfile: Dockerfile
-    command: /bin/bash -c 'yagna service run && sleep 5 && yagna payment init --sender'
-    volumes:
-      - yagna_data:/root/.local/share/yagna
-    env_file: .env
+#  yagna:
+#    build:
+#      context: ./yagna
+#      dockerfile: Dockerfile
+#    command: /bin/bash -c 'yagna service run && sleep 5 && yagna payment init --sender'
+#    volumes:
+#      - yagna_data:/root/.local/share/yagna
+#    env_file: .env
 
   load-balancer:
     image: haproxy
@@ -66,20 +66,20 @@ services:
         condition: service_healthy
     env_file: .env
 
-  celery-golem:
-    restart: always
-    build:
-      context: ./backend
-      dockerfile: celery-golem.Dockerfile
-    command: celery -A rent_golem worker -Q clusters -l INFO --pidfile=
-    volumes:
-      - ./backend/rent_golem:/code/
-    depends_on:
-      db:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-    env_file: .env
+#  celery-golem:
+#    restart: always
+#    build:
+#      context: ./backend
+#      dockerfile: celery-golem.Dockerfile
+#    command: celery -A rent_golem worker -Q clusters -l INFO --pidfile=
+#    volumes:
+#      - ./backend/rent_golem:/code/
+#    depends_on:
+#      db:
+#        condition: service_healthy
+#      redis:
+#        condition: service_healthy
+#    env_file: .env
 
   db:
     image: postgres:15
