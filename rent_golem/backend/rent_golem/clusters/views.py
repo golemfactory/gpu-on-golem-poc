@@ -1,7 +1,7 @@
 from rest_framework import viewsets
 
-from .models import Clusters
-from .serializers import ClustersSerializer
+from clusters.models import Clusters
+from clusters.serializers import ClustersSerializer
 
 
 class ClustersViewSet(viewsets.ModelViewSet):

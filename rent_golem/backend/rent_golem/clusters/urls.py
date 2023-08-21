@@ -1,7 +1,9 @@
 from rest_framework import routers
-from . import views
+
+from clusters.views import ClustersViewSet
+
 
 router = routers.SimpleRouter()
-router.register(r'', views.ClustersViewSet)
+router.register(r'', ClustersViewSet)
 
 urlpatterns = router.urls
