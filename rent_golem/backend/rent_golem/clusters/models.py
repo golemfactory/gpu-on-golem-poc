@@ -20,7 +20,6 @@ class Clusters(models.Model):
     uuid = models.UUIDField(primary_key=True)
     package_type = models.CharField(max_length=255, choices=Package.choices, default=Package.JUPYTER)
     status = models.CharField(max_length=255, choices=Status.choices, default=Status.STARTING)
-    # https://stackoverflow.com/questions/67469569/using-django-jsonfield-in-model -> possible JSON Schema
     additional_params = models.JSONField()
     size = models.PositiveIntegerField()
     created_at = models.DateTimeField(auto_now_add=True)
