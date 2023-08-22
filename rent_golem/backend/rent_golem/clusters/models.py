@@ -1,7 +1,7 @@
 from django.db import models
 
 
-class Clusters(models.Model):
+class Cluster(models.Model):
     class Package(models.TextChoices):
         AUTOMATIC = 'automatic'
         CUSTOM_AUTOMATIC = 'automatic-custom'

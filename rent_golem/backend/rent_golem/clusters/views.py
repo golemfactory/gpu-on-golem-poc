@@ -1,9 +1,9 @@
 from rest_framework import viewsets
 
-from .models import Clusters
-from .serializers import ClustersSerializer
+from .models import Cluster
+from .serializers import ClusterSerializer
 
 
-class ClustersViewSet(viewsets.ModelViewSet):
-    queryset = Clusters.objects.all()
-    serializer_class = ClustersSerializer
+class ClusterViewSet(viewsets.ModelViewSet):
+    queryset = Cluster.objects.all()
+    serializer_class = ClusterSerializer
