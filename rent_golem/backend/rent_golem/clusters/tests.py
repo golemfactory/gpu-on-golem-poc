@@ -16,14 +16,14 @@ class ClusterViewSetTest(APITestCase):
         self,
         uuid: str = "dcec5482-59ef-4c0e-9ea4-4e5451c3cbda",
         package_type: str = Cluster.Package.AUTOMATIC,
-        cluster_status: str = Cluster.Status.STARTING,
+        status: str = Cluster.Status.STARTING,
         additional_params = None,
         size: int = 5
     ) -> Cluster:
         return Cluster.objects.create(
             uuid=uuid,
             package_type=package_type,
-            cluster_status=cluster_status,
+            status=status,
             additional_params=dict() if additional_params is None else additional_params,
             size=size
         )
@@ -41,10 +41,10 @@ class ClusterViewSetTest(APITestCase):
 
         self.assertEquals(response.status_code, status.HTTP_201_CREATED)
         cluster = Cluster.objects.get(uuid=cluster_data["uuid"])
-        self.assertEquals(self.json_data["package_type"], cluster.package_type)
-        self.assertEquals(self.json_data["status"], cluster.status)
-        self.assertEquals(self.json_data["additional_params"], cluster.additional_params)
-        self.assertEquals(self.json_data["size"], cluster.size)
+        self.assertEquals(cluster_data["package_type"], cluster.package_type)
+        self.assertEquals(cluster_data["status"], cluster.status)
+        self.assertEquals(cluster_data["additional_params"], cluster.additional_params)
+        self.assertEquals(cluster_data["size"], cluster.size)
 
 
     def test_read_one_object_from_db(self):
