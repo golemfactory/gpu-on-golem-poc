@@ -8,39 +8,39 @@ from .models import Cluster
 
 
 class ClusterViewSetTest(APITestCase):
-    json_data = {
-        "uuid": "dcec5482-59ef-4c0e-9ea4-4e5451c3cbda",
-        "package_type": "automatic",
-        "status": "Starting",
-        "additional_params": {},
-        "size": 5,
-    }
-
     def setUp(self) -> None:
         self.factory = APIRequestFactory()
         self.client = APIClient()
 
-    def create_dummy_db_object(
+    def create_cluster_object(
         self,
         uuid: str = "dcec5482-59ef-4c0e-9ea4-4e5451c3cbda",
-        package_type: str = "automatic",
-        cluster_status: str = "Starting",
-        additional_params: dict = {},
+        package_type: str = Cluster.Package.AUTOMATIC,
+        cluster_status: str = Cluster.Status.STARTING,
+        additional_params = None,
         size: int = 5
-    ) -> Tuple[Cluster, dict]:
-        json_data = {
-            "uuid": uuid,
-            "package_type": package_type,
-            "status": cluster_status,
-            "additional_params": additional_params,
-            "size": size,
-        }
-        return Cluster.objects.create(**json_data), json_data
+    ) -> Cluster:
+        return Cluster.objects.create(
+            uuid=uuid,
+            package_type=package_type,
+            cluster_status=cluster_status,
+            additional_params=dict() if additional_params is None else additional_params,
+            size=size
+        )
 
     def test_post_one_object_to_db(self):
-        response = self.client.post(reverse('cluster-list'), data=self.json_data, format="json")
+        cluster_data = {
+            "uuid": "dcec5482-59ef-4c0e-9ea4-4e5451c3cbda",
+            "package_type": Cluster.Package.AUTOMATIC,
+            "status": Cluster.Status.STARTING,
+            "additional_params": {},
+            "size": 5,
+        }
+
+        response = self.client.post(reverse('cluster-list'), data=cluster_data, format="json")
+
         self.assertEquals(response.status_code, status.HTTP_201_CREATED)
-        cluster = Cluster.objects.filter(uuid=self.json_data["uuid"]).first()
+        cluster = Cluster.objects.get(uuid=cluster_data["uuid"])
         self.assertEquals(self.json_data["package_type"], cluster.package_type)
         self.assertEquals(self.json_data["status"], cluster.status)
         self.assertEquals(self.json_data["additional_params"], cluster.additional_params)
@@ -48,9 +48,10 @@ class ClusterViewSetTest(APITestCase):
 
 
     def test_read_one_object_from_db(self):
-        cluster, json_data = self.create_dummy_db_object()
+        cluster = self.create_cluster_object()
 
-        get_response = self.client.get(reverse('cluster-detail', args=[json_data["uuid"]]))
+        get_response = self.client.get(reverse('cluster-detail', args=(cluster.uuid,)))
+
         self.assertEquals(get_response.status_code, status.HTTP_200_OK)
         self.assertEquals(get_response.data["package_type"], cluster.package_type)
         self.assertEquals(get_response.data["status"], cluster.status)
@@ -63,19 +64,19 @@ class ClusterViewSetTest(APITestCase):
             "bcec5482-59ef-4c0e-9ea4-4e5451c3cbda",
             "ccec5482-59ef-4c0e-9ea4-4e5451c3cbda"
         }
-
-        [self.create_dummy_db_object(uuid=uuid) for uuid in uuids]
+        for uuid in uuids:
+            self.create_cluster_object(uuid=uuid)
 
         list_response = self.client.get(reverse('cluster-list'))
-        self.assertEquals(list_response.status_code, status.HTTP_200_OK)
 
-        response_uuids = set([list_element["uuid"] for list_element in list_response.data])
-        self.assertEquals(response_uuids, uuids)
+        self.assertEquals(list_response.status_code, status.HTTP_200_OK)
+        response_uuids = {list_element["uuid"] for list_element in list_response.data}
+        self.assertSetEqual(response_uuids, uuids)
 
     def test_optimistic_delete(self):
-        post_response, self.json_data = self.create_dummy_db_object()
+        cluster = self.create_cluster_object()
 
-        delete_response = self.client.delete(reverse('cluster-detail', args=[self.json_data["uuid"]]))
+        delete_response = self.client.delete(reverse('cluster-detail', args=(cluster.uuid, )))
+
         self.assertEquals(delete_response.status_code, status.HTTP_204_NO_CONTENT)
-
-        self.assertFalse(Cluster.objects.filter(uuid=self.json_data["uuid"]).exists())
+        self.assertFalse(Cluster.objects.filter(uuid=cluster.uuid).exists())
