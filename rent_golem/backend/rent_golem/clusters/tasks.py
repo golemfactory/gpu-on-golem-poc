@@ -3,7 +3,7 @@ import logging
 from django.core.cache import cache
 from redis.exceptions import LockError
 
-from clusters.models import Clusters
+from clusters.models import Cluster
 from clusters.runner import ClusterRunner
 from rent_golem.celery import app
 
@@ -19,12 +19,12 @@ def run_cluster(self, cluster_id: int):
     try:
         with cache.lock(lock_name, blocking=False):
             try:
-                cluster = Clusters.objects.get(id=cluster_id)
-            except Clusters.DoesNotExist:
+                cluster = Cluster.objects.get(id=cluster_id)
+            except Cluster.DoesNotExist:
                 logger.error(f"No such cluster: ID={cluster_id}.")
                 raise
 
             runner = ClusterRunner(cluster)
-            runner.start()
+            runner.run()
     except LockError:
         logger.error(f"'{lock_name}' already locked.")
