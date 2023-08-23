@@ -1,9 +1,9 @@
 from rest_framework import serializers
 
-from clusters.models import Clusters
+from clusters.models import Cluster
 
 
-class ClustersSerializer(serializers.ModelSerializer):
+class ClusterSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Clusters
+        model = Cluster
         fields = ['uuid', 'package_type', 'status', 'additional_params', 'size', 'created_at', 'last_update']
