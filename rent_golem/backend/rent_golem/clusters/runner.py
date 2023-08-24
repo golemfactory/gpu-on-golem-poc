@@ -2,7 +2,7 @@ import logging
 import time
 
 from clusters.models import Cluster, Worker, Provider
-from clusters.tasks import create_worker, terminate_worker
+from clusters.worker_tasks import create_worker, terminate_worker
 
 
 logger = logging.getLogger(__name__)
