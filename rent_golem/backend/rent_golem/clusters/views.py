@@ -10,5 +10,5 @@ class ClusterViewSet(viewsets.ModelViewSet):
     serializer_class = ClusterSerializer
 
     def perform_create(self, serializer):
-        instance = super().perform_create(serializer)
-        run_cluster.delay(instance.id)
+        instance = serializer.save()
+        run_cluster.delay(str(instance.pk))

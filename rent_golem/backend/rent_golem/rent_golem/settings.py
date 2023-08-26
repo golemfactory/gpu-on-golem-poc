@@ -153,6 +153,55 @@ CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
 CELERY_RESULT_BACKEND = "django-db"
 CELERY_TASK_TRACK_STARTED = True
 CELERY_RESULT_EXTENDED = True
+CELERY_DEFAULT_QUEUE = 'default'
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": True,
+    "formatters": {
+        "simple": {
+            "format": "[%(asctime)s] %(levelname)s|%(name)s|%(message)s",
+            "datefmt": "%Y-%m-%d %H:%M:%S",
+        },
+    },
+    "handlers": {
+        "applogfile": {
+            "level": "DEBUG",
+            "class": "logging.handlers.RotatingFileHandler",
+            "filename": Path(BASE_DIR).resolve().joinpath("logs", "app.log"),
+            "maxBytes": 1024 * 1024 * 15,  # 15MB
+            "backupCount": 10,
+            "formatter": "simple",
+        },
+        "console": {
+            "level": "DEBUG",
+            "class": "logging.StreamHandler",
+            "formatter": "simple",
+        },
+    },
+    'loggers': {
+        '': {
+            'handlers': ['console', 'applogfile'],
+            'level': 'WARNING',
+        },
+        'django': {
+            'level': 'WARNING',
+            'handlers': ['console', 'applogfile'],
+        },
+        'clusters': {
+            'handlers': ['console', 'applogfile'],
+            'level': 'DEBUG',
+        },
+        "celery": {
+            "handlers": ["console", "applogfile"],
+            "level": "DEBUG",
+        },
+        "celery.beat": {
+            "handlers": ["console"],
+            "level": "DEBUG",
+        },
+    },
+}
 
 MAX_CLUSTER_SIZE = 10
 

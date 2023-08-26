@@ -15,12 +15,14 @@ CLUSTER_LOCK_NAME = "CLUSTER_RUN_LOCK_{cluster_id}"
 
 
 @app.task(bind=True)
-def run_cluster(self, cluster_id: int):
+def run_cluster(self, cluster_id: str):
+    logger.info('Starting run cluster.')
     lock_name = CLUSTER_LOCK_NAME.format(cluster_id=cluster_id)
     try:
-        with cache.lock(lock_name, blocking=False):
+        with cache.lock(lock_name, blocking_timeout=0):
+            logger.info('Lock acquired.')
             try:
-                cluster = Cluster.objects.get(id=cluster_id)
+                cluster = Cluster.objects.get(pk=cluster_id)
             except Cluster.DoesNotExist:
                 logger.error(f"No such cluster: ID={cluster_id}.")
                 raise

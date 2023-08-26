@@ -1,11 +1,14 @@
+from datetime import timedelta
 import logging
 import time
 
 from clusters.models import Cluster, Worker, Provider
-from clusters.worker_tasks import create_worker, terminate_worker
+from clusters.worker_tasks import create_worker, terminate_worker, check_worker_health
+from clusters.balancer_tasks import refresh_config
 
 
 logger = logging.getLogger(__name__)
+WORKERS_HEALTHCHECK_INTERVAL = timedelta(seconds=5)
 
 
 class ClusterRunner:
@@ -14,20 +17,20 @@ class ClusterRunner:
 
     def run(self):
         if not self._should_start():
-            logger.info(f"Cluster {self.cluster.id} in status: {self.cluster.status}. Not starting.")
+            logger.info(f"Cluster {self.cluster.pk} in status: {self.cluster.status}. Not starting.")
 
         while self._should_run():
             self._workers_healthcheck()
+
             is_modified = self._adjust_workers()
             if is_modified:
-                # TODO: schedule load balacer config refresh task
-                pass
+                refresh_config.delay()
 
-            time.sleep(5)
+            time.sleep(WORKERS_HEALTHCHECK_INTERVAL.total_seconds())
             self.cluster.refresh_from_db()
 
+        logger.debug(f"Terminating cluster: {self.cluster}.")
         self._terminate_cluster()
-
 
     def _should_start(self):
         return self.cluster.status is Cluster.Status.PENDING
@@ -36,22 +39,20 @@ class ClusterRunner:
         return self.cluster.status is not Cluster.Status.SHUTTING_DOWN
 
     def _workers_healthcheck(self):
-        # TODO
-        # We can check with API of provider and verify with load balancer stats
-        # Mark non-responsive workers with status=BAD
-
-        # When in status STARTING then wait for some time before marking as BAD.
-        # It would be good to have one place for this in logic for healthcheck and for starting process.
-        pass
+        logger.debug(f"Running workers healthcheck for cluster: {self.cluster}.")
+        for worker in self.cluster.workers.filter(status=Worker.Status.OK):
+            check_worker_health(worker)
 
     def _adjust_workers(self) -> bool:
         bad_workers = self.cluster.workers.filter(status=Worker.Status.BAD)
+        logger.debug(f"Got {len(bad_workers)} bad workers.")
         for bad_worker in bad_workers:
             self._terminate_worker(bad_worker)
 
         ok_workers = self.cluster.workers.filter(status__in=(Worker.Status.STARTING, Worker.Status.OK))
         ok_workers_count = ok_workers.count()
         delta_workers = self.cluster.size - ok_workers_count
+        logger.debug(f"Ok workers: {ok_workers_count}, Cluster size: {self.cluster.size}, Delta: {delta_workers}.")
         if delta_workers > 0:
             for _ in range(delta_workers):
                 self._start_worker()
@@ -63,18 +64,9 @@ class ClusterRunner:
         return is_cluster_modified
 
     def _start_worker(self):
-        if self.cluster.package_type in (Cluster.Package.AUTOMATIC, Cluster.Package.CUSTOM_AUTOMATIC):
-            # This should be probably moved to some other place where settings or code around packages lay.
-            # TODO: might be not saved to DB but taken dynamically in code based on worker.cluster.package_type
-            healthcheck_path = "/sdapi/v1/sd-models"
-        else:
-            logger.warning(f"Could not determine healthcheck path for package: {self.cluster.package_type}.")
-            healthcheck_path = None
-
         worker = Worker.objects.create(
             cluster=self.cluster,
             provider=Provider.RUNPOD,
-            healthcheck_path=healthcheck_path
         )
         create_worker.delay(worker.id)
 

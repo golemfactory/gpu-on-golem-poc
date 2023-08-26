@@ -4,7 +4,8 @@ from django.core.cache import cache
 from redis.exceptions import LockError
 
 from clusters.models import Worker, Provider
-from clusters.providers.runpod_provider import create_runpod_worker, terminate_runpod_worker
+from clusters.providers.runpod_provider import (create_runpod_worker, terminate_runpod_worker, is_worker_reachable,
+                                                worker_exists)
 from rent_golem.celery import app
 
 WORKER_LOCK_NAME = "WORKER_LOCK_{worker_id}"
@@ -16,8 +17,8 @@ logger = logging.getLogger(__name__)
 def create_worker(worker_id: int):
     lock_name = WORKER_LOCK_NAME.format(worker_id=worker_id)
     try:
-        with cache.lock(lock_name, blocking=False):
-            worker = Worker.objects.get(worker_id)
+        with cache.lock(lock_name, blocking_timeout=0):
+            worker = Worker.objects.get(id=worker_id)
             if worker.provider is Provider.RUNPOD:
                 create_runpod_worker(worker)
             else:
@@ -30,11 +31,27 @@ def create_worker(worker_id: int):
 def terminate_worker(worker_id: int):
     lock_name = WORKER_LOCK_NAME.format(worker_id=worker_id)
     try:
-        with cache.lock(lock_name, blocking=False):
-            worker = Worker.objects.get(worker_id)
+        with cache.lock(lock_name, blocking_timeout=0):
+            worker = Worker.objects.get(id=worker_id)
             if worker.provider is Provider.RUNPOD:
                 terminate_runpod_worker(worker)
             else:
                 logger.error(f'Cannot terminate worker. Unrecognized provider: {worker.provider}.')
     except LockError:
         logger.error(f"'{lock_name}' already locked.")
+
+
+def check_worker_health(worker: Worker):
+    if worker.cluster.package is Provider.RUNPOD:
+        exists = worker_exists(worker)
+        is_reachable = is_worker_reachable(worker)
+
+        if exists and is_reachable:
+            status = Worker.Status.OK
+        else:
+            status = Worker.Status.BAD
+
+        worker.status = status
+        worker.save(update_fields=['status'])
+    else:
+        logger.error(f'Cannot check worker health. Unrecognized provider: {worker.provider}.')

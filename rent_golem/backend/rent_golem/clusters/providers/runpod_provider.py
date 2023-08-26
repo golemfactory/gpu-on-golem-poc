@@ -6,6 +6,7 @@ from django.conf import settings
 import requests
 from rest_framework import status
 import runpod
+from runpod.error import QueryError
 
 from clusters.models import Worker
 
@@ -16,7 +17,16 @@ runpod.api_key = settings.RUNPOD_API_KEY
 WORKER_CREATION_TIMEOUT = timedelta(minutes=20)
 WORKER_STATUS_CHECK_INTERVAL = timedelta(seconds=20)
 
-def is_worker_reachable(worker):
+
+def worker_exists(worker: Worker) -> bool:
+    pod = runpod.get_pod(worker.service_id)
+    if pod is None:
+        return False
+    else:
+        return True
+
+
+def is_worker_reachable(worker: Worker) -> bool:
     response = requests.get(worker.healthcheck_url)
     return response.status_code == status.HTTP_200_OK
 
@@ -34,7 +44,7 @@ def create_runpod_worker(worker: Worker):
             ports="8000/http"
         )
         creation_time = datetime.now()
-    except runpod.errors.QueryError as e:
+    except QueryError as e:
         logger.error(f"Cannot create worker: {worker}.", extra={'error': str(e)})
         return
     else:
@@ -48,7 +58,9 @@ def create_runpod_worker(worker: Worker):
 
         time_elapsed = datetime.now() - creation_time
         if time_elapsed > WORKER_CREATION_TIMEOUT:
-            logger.error(f"Worker {worker} creation timed out.")
+            worker.status = Worker.Status.BAD
+            worker.save(update_fields=['status'])
+            logger.error(f"Worker {worker} creation timed out. Marking as '{Worker.Status.BAD}'.")
             return
 
         worker_data = runpod.get_pod(pod['id'])
@@ -64,7 +76,7 @@ def terminate_runpod_worker(worker: Worker):
 
     try:
         runpod.terminate_pod(worker.service_id)
-    except runpod.errors.QueryError as e:
+    except QueryError as e:
         logger.error(f"Cannot terminate worker: {worker}.", extra={'error': str(e)})
         return
     else:

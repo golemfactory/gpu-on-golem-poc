@@ -8,10 +8,6 @@ from django.db import models
 class Cluster(models.Model):
     class Package(models.TextChoices):
         AUTOMATIC = 'automatic'
-        CUSTOM_AUTOMATIC = 'automatic-custom'
-        TEXT_GEN_WEBUI = 'text-gen-webui'
-        JUPYTER = 'jupyter'
-        PYTORCH = 'pytorch'
 
     class Status(models.TextChoices):
         PENDING = 'pending'  # When machine has no active workers
@@ -20,7 +16,7 @@ class Cluster(models.Model):
         TERMINATED = 'terminated'  # When cluster runner finished
 
     uuid = models.UUIDField(primary_key=True)
-    package_type = models.CharField(max_length=255, choices=Package.choices)
+    package = models.CharField(max_length=255, choices=Package.choices)
     status = models.CharField(max_length=255, choices=Status.choices, default=Status.PENDING)
     additional_params = models.JSONField()
     size = models.PositiveIntegerField(
@@ -30,6 +26,9 @@ class Cluster(models.Model):
     address = models.CharField(max_length=1000, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     last_update = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f'ID: {self.pk}, {self.size}x{self.package} [{self.status}]'
 
 
 class Provider(models.TextChoices):
@@ -47,18 +46,16 @@ class Worker(models.Model):
     provider = models.CharField(max_length=255, choices=Provider.choices)
     service_id = models.CharField(max_length=255, null=True, help_text="ID of worker in provider space.")
     address = models.CharField(max_length=1000, null=True)
-    healthcheck_path = models.CharField(
-        max_length=1000,
-        null=True,
-        help_text="Path relative to address used as healthcheck."
-    )
     status = models.CharField(max_length=255, choices=Status.choices, default=Status.STARTING)
     created_at = models.DateTimeField(auto_now_add=True)
     last_update = models.DateTimeField(auto_now=True)
 
     @property
     def healthcheck_url(self):
-        return urljoin(self.address, self.healthcheck_path)
+        package_to_healthcheck_path = {
+            Cluster.Package.AUTOMATIC: "/sdapi/v1/sd-models",
+        }
+        return urljoin(self.address, package_to_healthcheck_path[self.cluster.package])
 
     def __str__(self):
         return f'ID: {self.id} Cluster_id: {self.cluster_id} [{self.provider}] -> {self.address}'
