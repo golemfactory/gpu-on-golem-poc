@@ -41,7 +41,7 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    command: celery -A rent_golem beat -l DEBUG --pidfile=
+    command: celery -A rent_golem beat -l INFO --pidfile=
     volumes:
       - ./backend/rent_golem:/code/
     depends_on:
@@ -56,7 +56,7 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    command: celery -A rent_golem worker -l DEBUG --pidfile=
+    command: celery -A rent_golem worker -l INFO -Q default, --pidfile=
     volumes:
       - ./backend/rent_golem:/code/
     depends_on:

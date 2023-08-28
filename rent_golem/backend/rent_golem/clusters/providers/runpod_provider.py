@@ -52,8 +52,8 @@ def create_runpod_worker(worker: Worker):
         worker.address = f"https://{pod['id']}-8000.proxy.runpod.net"
         worker.save()
 
-    worker_data = runpod.get_pod(pod['id'])
-    while worker_data['desiredStatus'] == 'RUNNING' and not is_worker_reachable(worker):
+    is_running = True
+    while is_running and not is_worker_reachable(worker):
         time.sleep(WORKER_STATUS_CHECK_INTERVAL.total_seconds())
 
         time_elapsed = datetime.now() - creation_time
@@ -64,9 +64,10 @@ def create_runpod_worker(worker: Worker):
             return
 
         worker_data = runpod.get_pod(pod['id'])
+        is_running = worker_data is not None and worker_data['desiredStatus'] == 'RUNNING'
         logger.debug(f'Checking worker {worker} status: {worker_data}.')
 
-    worker.status = Worker.Status.OK
+    worker.status = Worker.Status.OK if is_running else Worker.Status.BAD
     worker.save(update_fields=['status'])
     logger.info(f'Worker {worker} started.')
 

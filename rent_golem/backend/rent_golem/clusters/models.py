@@ -18,17 +18,17 @@ class Cluster(models.Model):
     uuid = models.UUIDField(primary_key=True)
     package = models.CharField(max_length=255, choices=Package.choices)
     status = models.CharField(max_length=255, choices=Status.choices, default=Status.PENDING)
-    additional_params = models.JSONField()
+    additional_params = models.JSONField(blank=True, default=dict)
     size = models.PositiveIntegerField(
         validators=[MinValueValidator(1), MaxValueValidator(settings.MAX_CLUSTER_SIZE)],
         help_text="Number of desired workers.",
     )
-    address = models.CharField(max_length=1000, null=True)
+    address = models.CharField(max_length=1000, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     last_update = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f'ID: {self.pk}, {self.size}x{self.package} [{self.status}]'
+        return f'ID: {self.pk}, {self.size} x {self.package} [{self.status}]'
 
 
 class Provider(models.TextChoices):
