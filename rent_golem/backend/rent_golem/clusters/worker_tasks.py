@@ -26,13 +26,18 @@ def create_worker(worker_id: int):
         logger.error(f"'{lock_name}' already locked.")
 
 
-@app.task()
+@app.task(
+    autoretry_for=(LockError,),
+    retry_kwargs={'max_retries': 3, 'countdown': 2}
+)
 def terminate_worker(worker_id: int):
-    worker = Worker.objects.get(id=worker_id)
-    if worker.provider == Provider.RUNPOD:
-        terminate_runpod_worker(worker)
-    else:
-        logger.error(f'Cannot terminate worker. Unrecognized provider: {worker.provider}.')
+    lock_name = WORKER_LOCK_NAME.format(worker_id=worker_id)
+    with cache.lock(lock_name, blocking_timeout=0, timeout=WORKER_CREATION_TIMEOUT.total_seconds()):
+        worker = Worker.objects.get(id=worker_id)
+        if worker.provider == Provider.RUNPOD:
+            terminate_runpod_worker(worker)
+        else:
+            logger.error(f'Cannot terminate worker. Unrecognized provider: {worker.provider}.')
 
 
 def check_worker_health(worker: Worker):
