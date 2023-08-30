@@ -29,12 +29,15 @@ services:
 #    env_file: .env
 
   load-balancer:
-    image: haproxy
+    build:
+      context: ./haproxy
+      dockerfile: Dockerfile
+    command: sh -c "(/usr/local/etc/haproxy/watch_and_reload_config.sh &) && (haproxy -W -db -f /usr/local/etc/haproxy/haproxy.cfg)"
     ports:
       - "8100:8100"
       - "8404:8404"  # monitoring
     volumes:
-      - ./haproxy:/usr/local/etc/haproxy
+      - ./haproxy/config:/usr/local/etc/haproxy
 
   celery-beat:
     restart: always
@@ -59,6 +62,7 @@ services:
     command: celery -A rent_golem worker -l INFO -Q default, --pidfile=
     volumes:
       - ./backend/rent_golem:/code/
+      - ./haproxy/config:/usr/local/etc/haproxy
     depends_on:
       db:
         condition: service_healthy

@@ -6,8 +6,8 @@ global
 defaults
     mode http
     timeout connect 5s
-    timeout client 5s
-    timeout server 5s
+    timeout client 30s
+    timeout server 30s
 
 frontend stats
     bind load-balancer:8404
@@ -19,9 +19,9 @@ frontend stats
     stats refresh 2s
     stats auth admin:pass
 
+#Exemplary config for Cluster (frontend + backend)
 #frontend http
 #    bind *:8100
-#    timeout client 10s
 #    default_backend all
 
 #backend all
@@ -29,11 +29,3 @@ frontend stats
 #    server wden37b83e55gy-8000.proxy.runpod.net wden37b83e55gy-8000.proxy.runpod.net:80 maxconn 1 check
 #    server 48hrg2tx134kln-8000.proxy.runpod.net 48hrg2tx134kln-8000.proxy.runpod.net:80 maxconn 1 check
 
-#frontend http2
-#    bind *:8300
-#    timeout client 10s
-#    default_backend all2
-
-#backend all2
-#    server s1 goapp1:8081 maxconn 1 check
-#    server s2 goapp2:8082 maxconn 1 check
