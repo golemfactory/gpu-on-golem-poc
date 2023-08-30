@@ -30,6 +30,10 @@ class Cluster(models.Model):
     def __str__(self):
         return f'ID: {self.pk}, {self.size} x {self.package} [{self.status}]'
 
+    @property
+    def short_id(self):
+        return str(self.uuid).split('-')[-1]
+
 
 class Provider(models.TextChoices):
     RUNPOD = 'runpod'
@@ -55,7 +59,7 @@ class Worker(models.Model):
         package_to_healthcheck_path = {
             Cluster.Package.AUTOMATIC: "/sdapi/v1/sd-models",
         }
-        return urljoin(self.address, package_to_healthcheck_path[self.cluster.package])
+        return urljoin(f'https://{self.address}', package_to_healthcheck_path[self.cluster.package])
 
     def __str__(self):
         return f'ID: {self.id} Cluster_id: {self.cluster_id} [{self.provider}] -> {self.address}'

@@ -26,12 +26,14 @@ class ClusterRunner:
             return
 
         while self._should_run():
-            self._workers_healthcheck()
-            self._update_status()
+            any_worker_status_changed = self._workers_healthcheck()
+            self._update_cluster_status()
 
-            is_modified = self._adjust_workers()
-            if is_modified:
+            logger.debug(f'Any worker status changed: {any_worker_status_changed}.')
+            if any_worker_status_changed:
                 refresh_config.delay()
+
+            self._adjust_workers()
 
             time.sleep(WORKERS_HEALTHCHECK_INTERVAL.total_seconds())
             self.cluster.refresh_from_db()
@@ -47,12 +49,15 @@ class ClusterRunner:
     def _should_run(self):
         return self.cluster.status != Cluster.Status.SHUTTING_DOWN
 
-    def _workers_healthcheck(self):
+    def _workers_healthcheck(self) -> bool:
         logger.debug(f"Running workers healthcheck for cluster: {self.cluster}.")
-        for worker in self.cluster.workers.filter(status=Worker.Status.OK):
+        status_modifications = [
             check_worker_health(worker)
+            for worker in self.cluster.workers.filter(status=Worker.Status.OK)
+        ]
+        return any(status_modifications)
 
-    def _update_status(self):
+    def _update_cluster_status(self):
         """
         Cluster starts with status: Status.Pending.
         Status should change to Status.RUNNING if there's at least one worker in OK state.
@@ -99,7 +104,7 @@ class ClusterRunner:
             cluster=self.cluster,
             provider=Provider.RUNPOD,
         )
-        create_worker.delay(worker.id)
+        create_worker.apply_async((worker.id, ), link=refresh_config.s())
 
     def _terminate_worker(self, worker: Worker):
         terminate_worker.delay(worker.id)
@@ -109,3 +114,4 @@ class ClusterRunner:
             self._terminate_worker(worker)
         self.cluster.status = Cluster.Status.TERMINATED
         self.cluster.save(update_fields=["status"])
+        refresh_config.delay()

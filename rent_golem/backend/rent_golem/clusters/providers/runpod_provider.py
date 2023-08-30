@@ -46,10 +46,12 @@ def create_runpod_worker(worker: Worker):
         creation_time = datetime.now()
     except QueryError as e:
         logger.error(f"Cannot create worker: {worker}.", extra={'error': str(e)})
+        worker.status = Worker.Status.BAD
+        worker.save(update_fields=['status'])
         return
     else:
         worker.service_id = pod['id']
-        worker.address = f"https://{pod['id']}-8000.proxy.runpod.net"
+        worker.address = f"{pod['id']}-8000.proxy.runpod.net"
         worker.save()
 
     is_running = True
@@ -69,17 +71,17 @@ def create_runpod_worker(worker: Worker):
 
     worker.status = Worker.Status.OK if is_running else Worker.Status.BAD
     worker.save(update_fields=['status'])
-    logger.info(f'Worker {worker} started.')
+    logger.info(f'Worker {worker} changed status to: {worker.status}.')
 
 
 def terminate_runpod_worker(worker: Worker):
-    assert worker.service_id is not None, "Cannot terminate worker without ID."
-
-    try:
-        runpod.terminate_pod(worker.service_id)
-    except QueryError as e:
-        logger.error(f"Cannot terminate worker: {worker}.", extra={'error': str(e)})
-        return
+    if worker.service_id is not None:
+        try:
+            runpod.terminate_pod(worker.service_id)
+        except QueryError as e:
+            logger.error(f"Cannot terminate worker: {worker}.", extra={'error': str(e)})
     else:
-        worker.status = Worker.Status.STOPPED
-        worker.save(update_fields=['status'])
+        logger.warning("Cannot terminate worker on provider side without ID.")
+
+    worker.status = Worker.Status.STOPPED
+    worker.save(update_fields=['status'])

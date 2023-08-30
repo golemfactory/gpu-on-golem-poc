@@ -200,7 +200,7 @@ LOGGING = {
         },
         "celery.beat": {
             "handlers": ["console"],
-            "level": "DEBUG",
+            "level": "INFO",
         },
     },
 }

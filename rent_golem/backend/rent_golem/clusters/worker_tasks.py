@@ -40,17 +40,26 @@ def terminate_worker(worker_id: int):
             logger.error(f'Cannot terminate worker. Unrecognized provider: {worker.provider}.')
 
 
-def check_worker_health(worker: Worker):
+def check_worker_health(worker: Worker) -> bool:
+    status_modified = False
+
     if worker.provider == Provider.RUNPOD:
         exists = worker_exists(worker)
         is_reachable = is_worker_reachable(worker)
 
         if exists and is_reachable:
-            status = Worker.Status.OK
+            current_status = Worker.Status.OK
         else:
-            status = Worker.Status.BAD
+            current_status = Worker.Status.BAD
 
-        worker.status = status
-        worker.save(update_fields=['status'])
+        if worker.status != current_status:
+            status_modified = True
+            worker.status = current_status
+            worker.save(update_fields=['status'])
     else:
         logger.error(f'Cannot check worker health. Unrecognized provider: {worker.provider}.')
+
+    return status_modified
+
+
+# TODO: periodic task watching for orphaned workers to terminate them
