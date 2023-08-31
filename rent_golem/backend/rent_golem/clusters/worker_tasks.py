@@ -1,14 +1,17 @@
+from datetime import timedelta
 import logging
 
 from django.core.cache import cache
+from django.utils import timezone
 from redis.exceptions import LockError
 
-from clusters.models import Worker, Provider
+from clusters.models import Cluster, Worker, Provider
 from clusters.providers.runpod_provider import (create_runpod_worker, terminate_runpod_worker, is_worker_reachable,
                                                 worker_exists, WORKER_CREATION_TIMEOUT)
 from rent_golem.celery import app
 
 WORKER_LOCK_NAME = "WORKER_LOCK_{worker_id}"
+AFTER_CLUSTER_TERMINATED_GRACE_PERIOD = timedelta(minutes=5)
 
 logger = logging.getLogger(__name__)
 
@@ -62,4 +65,27 @@ def check_worker_health(worker: Worker) -> bool:
     return status_modified
 
 
-# TODO: periodic task watching for orphaned workers to terminate them
+@app.task()
+def stop_orphaned_workers():
+    orphaned_workers = Worker.objects.filter(
+        cluster__status=Cluster.Status.TERMINATED,
+        last_update__lt=(timezone.now() - AFTER_CLUSTER_TERMINATED_GRACE_PERIOD),
+        status__in={Worker.Status.STARTING, Worker.Status.OK, Worker.Status.BAD}
+    )
+    for worker in orphaned_workers:
+        logger.warning(f'Detected orphaned worker: {worker}. Terminating.')
+        terminate_worker.delay(worker.id)
+
+
+# TODO: write migration which adds above task to schedule:
+# from django_celery_beat.models import PeriodicTask, IntervalSchedule
+#
+# schedule, created = IntervalSchedule.objects.create(
+#     every=5,
+#     period=IntervalSchedule.MINUTES,
+# )
+# PeriodicTask.objects.create(
+#     interval=schedule,
+#     name='Importing contacts',
+#     task='clusters.worker_tasks.stop_orphaned_workers',
+# )
