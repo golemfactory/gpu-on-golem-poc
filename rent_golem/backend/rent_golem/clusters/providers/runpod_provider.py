@@ -46,7 +46,7 @@ def create_runpod_worker(worker: Worker):
         creation_time = datetime.now()
     except QueryError as e:
         logger.error(f"Cannot create worker: {worker}.", extra={'error': str(e)})
-        worker.status = Worker.Status.BAD
+        worker.status = Worker.Status.STOPPED
         worker.save(update_fields=['status'])
         return
     else:
@@ -69,7 +69,7 @@ def create_runpod_worker(worker: Worker):
         is_running = worker_data is not None and worker_data['desiredStatus'] == 'RUNNING'
         logger.debug(f'Checking worker {worker} status: {worker_data}.')
 
-    worker.status = Worker.Status.OK if is_running else Worker.Status.BAD
+    worker.status = Worker.Status.OK if is_running else Worker.Status.STOPPED
     worker.save(update_fields=['status'])
     logger.info(f'Worker {worker} changed status to: {worker.status}.')
 
