@@ -3,6 +3,7 @@ import logging
 import time
 
 from django.conf import settings
+from django.utils import timezone
 import requests
 from rest_framework import status
 import runpod
@@ -15,6 +16,7 @@ runpod.api_key = settings.RUNPOD_API_KEY
 
 
 WORKER_CREATION_TIMEOUT = timedelta(minutes=20)
+WORKER_TERMINATION_TIMEOUT = timedelta(seconds=10)
 WORKER_STATUS_CHECK_INTERVAL = timedelta(seconds=20)
 
 
@@ -85,3 +87,32 @@ def terminate_runpod_worker(worker: Worker):
 
     worker.status = Worker.Status.STOPPED
     worker.save(update_fields=['status'])
+
+
+def stop_orphaned_runpod_machines():
+    """
+    Checking if there are any machines working on RUNPOD
+    which do not exist in the system or are marked as stopped.
+    Alerting and terminating such machines.
+    """
+
+    runpod_ids = {pod['id'] for pod in runpod.get_pods()}
+    stopped_workers = set(Worker.objects.filter(
+        status=Worker.Status.STOPPED,
+        last_update__lt=(timezone.now() - WORKER_TERMINATION_TIMEOUT)
+    ).values_list('service_id', flat=True))
+    all_workers = set(Worker.objects.all().values_list('service_id', flat=True))
+
+    runpod_running_but_marked_as_stopped_in_system = runpod_ids.intersection(stopped_workers)
+    if runpod_running_but_marked_as_stopped_in_system:
+        logger.warning(f'Detected running RUNPOD workers which should be stopped: '
+                       f'{runpod_running_but_marked_as_stopped_in_system}. Stopping...')
+        for runpod_id in runpod_running_but_marked_as_stopped_in_system:
+            runpod.terminate_pod(runpod_id)
+
+    runpod_running_but_not_exist_in_system = runpod_ids.difference(all_workers)
+    if runpod_running_but_not_exist_in_system:
+        logger.warning(f'Detected running RUNPOD workers which do not exist in the system: '
+                       f'{runpod_running_but_not_exist_in_system}. Stopping...')
+        for runpod_id in runpod_running_but_not_exist_in_system:
+            runpod.terminate_pod(runpod_id)

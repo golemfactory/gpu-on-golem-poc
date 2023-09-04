@@ -7,11 +7,12 @@ from redis.exceptions import LockError
 
 from clusters.models import Cluster, Worker, Provider
 from clusters.providers.runpod_provider import (create_runpod_worker, terminate_runpod_worker, is_worker_reachable,
-                                                worker_exists, WORKER_CREATION_TIMEOUT)
+                                                worker_exists, stop_orphaned_runpod_machines, WORKER_CREATION_TIMEOUT,
+                                                WORKER_TERMINATION_TIMEOUT)
 from rent_golem.celery import app
 
 WORKER_LOCK_NAME = "WORKER_LOCK_{worker_id}"
-AFTER_CLUSTER_TERMINATED_GRACE_PERIOD = timedelta(minutes=5)
+AFTER_TERMINATION_GRACE_PERIOD = timedelta(minutes=5)
 
 logger = logging.getLogger(__name__)
 
@@ -31,11 +32,11 @@ def create_worker(worker_id: int):
 
 @app.task(
     autoretry_for=(LockError,),
-    retry_kwargs={'max_retries': 3, 'countdown': 2}
+    retry_kwargs={'max_retries': 3, 'countdown': WORKER_TERMINATION_TIMEOUT.total_seconds()}
 )
 def terminate_worker(worker_id: int):
     lock_name = WORKER_LOCK_NAME.format(worker_id=worker_id)
-    with cache.lock(lock_name, blocking_timeout=0, timeout=WORKER_CREATION_TIMEOUT.total_seconds()):
+    with cache.lock(lock_name, blocking_timeout=0, timeout=WORKER_TERMINATION_TIMEOUT.total_seconds()):
         worker = Worker.objects.get(id=worker_id)
         if worker.provider == Provider.RUNPOD:
             terminate_runpod_worker(worker)
@@ -69,23 +70,11 @@ def check_worker_health(worker: Worker) -> bool:
 def stop_orphaned_workers():
     orphaned_workers = Worker.objects.filter(
         cluster__status=Cluster.Status.TERMINATED,
-        last_update__lt=(timezone.now() - AFTER_CLUSTER_TERMINATED_GRACE_PERIOD),
+        last_update__lt=(timezone.now() - AFTER_TERMINATION_GRACE_PERIOD),
         status__in={Worker.Status.STARTING, Worker.Status.OK, Worker.Status.BAD}
     )
     for worker in orphaned_workers:
         logger.warning(f'Detected orphaned worker: {worker}. Terminating.')
         terminate_worker.delay(worker.id)
 
-
-# TODO: write migration which adds above task to schedule:
-# from django_celery_beat.models import PeriodicTask, IntervalSchedule
-#
-# schedule, created = IntervalSchedule.objects.create(
-#     every=5,
-#     period=IntervalSchedule.MINUTES,
-# )
-# PeriodicTask.objects.create(
-#     interval=schedule,
-#     name='Importing contacts',
-#     task='clusters.worker_tasks.stop_orphaned_workers',
-# )
+    stop_orphaned_runpod_machines()
