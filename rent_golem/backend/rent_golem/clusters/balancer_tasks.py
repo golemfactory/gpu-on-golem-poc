@@ -21,9 +21,9 @@ frontend http_{cluster_id}
 
 backend be_cluster_{cluster_id}
     http-send-name-header Host
-    {workers_section}
+{workers_section}
 """
-CONFIG_WORKER_ENTRY_TEMPLATE = "server {worker_address} {worker_address}:80 maxconn 1 check"
+CONFIG_WORKER_ENTRY_TEMPLATE = "    server {worker_address} {worker_address}:80 maxconn 1 check"
 
 
 @app.task(
@@ -41,14 +41,13 @@ def refresh_config(self):
             create_load_balancer_config(cluster)
             for cluster in Cluster.objects.filter(status=Cluster.Status.RUNNING)
         ]
-        if cluster_configs:
-            with LOAD_BALANCER_CONFIG_TEMPLATE_PATH.open('r') as template:
-                config_content = template.read()
-                config_content += "\n\n".join(cluster_configs)
-                with LOAD_BALANCER_CONFIG_PATH.open('w') as balancer_config:
-                    logger.info(f'Saving load balancer config to file: {LOAD_BALANCER_CONFIG_PATH}. {config_content}')
-                    # Load balancer container triggers reload when config file is closed after write
-                    balancer_config.write(config_content)
+        with LOAD_BALANCER_CONFIG_TEMPLATE_PATH.open('r') as template:
+            config_content = template.read()
+            config_content += "\n\n".join(cluster_configs)
+            with LOAD_BALANCER_CONFIG_PATH.open('w') as balancer_config:
+                logger.info(f'Saving load balancer config to file: {LOAD_BALANCER_CONFIG_PATH}. {config_content}')
+                # Load balancer container triggers reload when config file is closed after write
+                balancer_config.write(config_content)
         logger.debug('Load balancer configuration refreshed.')
 
 

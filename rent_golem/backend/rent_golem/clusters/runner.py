@@ -1,7 +1,9 @@
 from datetime import timedelta
 import logging
 import time
+from typing import List
 
+from celery import chord
 from redis.lock import Lock
 
 from clusters.models import Cluster, Worker, Provider
@@ -28,12 +30,13 @@ class ClusterRunner:
         while self._should_run():
             any_worker_status_changed = self._workers_healthcheck()
             self._update_cluster_status()
+            self._terminate_bad_workers()
 
             logger.debug(f'Any worker status changed: {any_worker_status_changed}.')
             if any_worker_status_changed:
                 refresh_config.delay()
 
-            self._adjust_workers()
+            self._adjust_cluster_size()
 
             time.sleep(WORKERS_HEALTHCHECK_INTERVAL.total_seconds())
             self.cluster.refresh_from_db()
@@ -47,7 +50,11 @@ class ClusterRunner:
         return self.cluster.status == Cluster.Status.PENDING
 
     def _should_run(self):
-        return self.cluster.status != Cluster.Status.SHUTTING_DOWN
+        if self.cluster.status == Cluster.Status.TERMINATED:
+            logger.warning(f"Running Cluster {self.cluster} in {Cluster.Status.TERMINATED} status. Should not happen.")
+            return False
+        else:
+            return self.cluster.status != Cluster.Status.SHUTTING_DOWN
 
     def _workers_healthcheck(self) -> bool:
         logger.debug(f"Running workers healthcheck for cluster: {self.cluster}.")
@@ -79,12 +86,7 @@ class ClusterRunner:
             self.cluster.status = new_status
             self.cluster.save(update_fields=['status'])
 
-    def _adjust_workers(self) -> bool:
-        bad_workers = self.cluster.workers.filter(status=Worker.Status.BAD)
-        logger.debug(f"Got {len(bad_workers)} bad workers.")
-        for bad_worker in bad_workers:
-            self._terminate_worker(bad_worker)
-
+    def _adjust_cluster_size(self) -> bool:
         ok_workers = self.cluster.workers.filter(status__in=(Worker.Status.STARTING, Worker.Status.OK))
         ok_workers_count = ok_workers.count()
         delta_workers = self.cluster.size - ok_workers_count
@@ -93,25 +95,32 @@ class ClusterRunner:
             for _ in range(delta_workers):
                 self._start_worker()
         elif delta_workers < 0:
-            for redundant_worker in ok_workers[-delta_workers:]:
-                self._terminate_worker(redundant_worker)
+            redundant_workers = ok_workers[-delta_workers:]
+            self._terminate_workers(redundant_workers)
 
-        is_cluster_modified = len(bad_workers) > 0 or delta_workers > 0
+        is_cluster_modified = delta_workers > 0
         return is_cluster_modified
+
+    def _terminate_bad_workers(self):
+        bad_workers = self.cluster.workers.filter(status=Worker.Status.BAD)
+        logger.debug(f"Got {len(bad_workers)} bad workers.")
+        self._terminate_workers(bad_workers)
 
     def _start_worker(self):
         worker = Worker.objects.create(
             cluster=self.cluster,
             provider=Provider.RUNPOD,
         )
-        create_worker.apply_async((worker.id, ), link=refresh_config.s())
+        create_worker.apply_async((worker.id, ), link=refresh_config.si())
 
-    def _terminate_worker(self, worker: Worker):
-        terminate_worker.delay(worker.id)
+    def _terminate_workers(self, workers: List[Worker]):
+        if len(workers) > 0:
+            terminate_tasks = [terminate_worker.si(worker.id) for worker in workers]
+            # Waiting for termination tasks to finish and then refreshing LB config
+            chord(terminate_tasks)(refresh_config.si())
 
     def _terminate_cluster(self):
-        for worker in self.cluster.workers.exclude(status=Worker.Status.STOPPED):
-            self._terminate_worker(worker)
+        running_workers = self.cluster.workers.exclude(status=Worker.Status.STOPPED)
+        self._terminate_workers(running_workers)
         self.cluster.status = Cluster.Status.TERMINATED
         self.cluster.save(update_fields=["status"])
-        refresh_config.delay()
