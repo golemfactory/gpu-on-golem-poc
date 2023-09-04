@@ -54,6 +54,11 @@ class Worker(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     last_update = models.DateTimeField(auto_now=True)
 
+    class Meta:
+        constraints = [
+            models.UniqueConstraint("provider", "service_id", name="unique_provider_service_id"),
+        ]
+
     @property
     def healthcheck_url(self):
         package_to_healthcheck_path = {
