@@ -1,5 +1,6 @@
 from django.db import models
 
+from accounts.models import User
 
 class Cluster(models.Model):
     class Package(models.TextChoices):
@@ -18,6 +19,7 @@ class Cluster(models.Model):
         TERMINATED = 'Terminated'
 
     uuid = models.UUIDField(primary_key=True)
+    owner = models.ForeignKey(User, on_delete=models.PROTECT, default=None)
     package_type = models.CharField(max_length=255, choices=Package.choices, default=Package.JUPYTER)
     status = models.CharField(max_length=255, choices=Status.choices, default=Status.STARTING)
     # https://stackoverflow.com/questions/67469569/using-django-jsonfield-in-model -> possible JSON Schema
@@ -25,3 +27,4 @@ class Cluster(models.Model):
     size = models.PositiveIntegerField()
     created_at = models.DateTimeField(auto_now_add=True)
     last_update = models.DateTimeField(auto_now=True)
+
