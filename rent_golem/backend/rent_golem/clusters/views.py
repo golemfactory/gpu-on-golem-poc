@@ -4,6 +4,7 @@ from rest_framework.permissions import IsAuthenticated
 
 from clusters.models import Cluster
 from clusters.serializers import ClusterSerializer, ClusterUpdateSerializer
+from clusters.tasks import run_cluster
 
 
 class ClusterViewSet(viewsets.ModelViewSet):
@@ -16,6 +17,10 @@ class ClusterViewSet(viewsets.ModelViewSet):
             return ClusterUpdateSerializer
         else:
             return ClusterSerializer
+
+    def perform_create(self, serializer):
+        instance = serializer.save()
+        run_cluster.delay(str(instance.pk))
 
     def destroy(self, request, *args, **kwargs):
         cluster = self.get_object()
