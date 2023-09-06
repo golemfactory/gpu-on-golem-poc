@@ -1,9 +1,11 @@
 Django==4.2.4
+celery==5.3.1
+django-celery-beat==2.5.0
+django-celery-results==2.5.1
+django-extensions==3.2.3
+django-redis==5.3.0
 djangorestframework==3.14.0
 psycopg==3.1.9
-celery==5.3.1
-django-celery-results==2.5.1
-django-celery-beat==2.5.0
 redis==4.6.0
+runpod@git+https://github.com/runpod/runpod-python@fa6ac49
 yapapi==0.11.0
-django-extensions==3.2.3
