@@ -10,7 +10,6 @@ from .managers import CustomUserManager
 
 def generate_service_password():
     new_password = secrets.token_urlsafe(32)
-    # print(new_password)
     return new_password
 
 

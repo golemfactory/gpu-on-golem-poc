@@ -1,8 +1,11 @@
 from django.db import models
 
 from accounts.models import User
+from .managers import ExistingClusterManager
 
 class Cluster(models.Model):
+
+    existing_objects = ExistingClusterManager()
     class Package(models.TextChoices):
         AUTOMATIC = 'automatic'
         CUSTOM_AUTOMATIC = 'automatic-custom'
@@ -27,4 +30,5 @@ class Cluster(models.Model):
     size = models.PositiveIntegerField()
     created_at = models.DateTimeField(auto_now_add=True)
     last_update = models.DateTimeField(auto_now=True)
+    is_deleted = models.BooleanField(default=False)
 
