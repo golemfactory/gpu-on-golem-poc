@@ -1,9 +1,12 @@
 from urllib.parse import urljoin
+import uuid
 
 from django.conf import settings
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
+from accounts.models import User
+from clusters.managers import ExistingClusterManager
 
 class Cluster(models.Model):
     class Package(models.TextChoices):
@@ -15,7 +18,8 @@ class Cluster(models.Model):
         SHUTTING_DOWN = 'shutting-down'  # When user issued to terminate cluster
         TERMINATED = 'terminated'  # When cluster runner finished
 
-    uuid = models.UUIDField(primary_key=True)
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    owner = models.ForeignKey(User, on_delete=models.PROTECT, default=None)
     package = models.CharField(max_length=255, choices=Package.choices)
     status = models.CharField(max_length=255, choices=Status.choices, default=Status.PENDING)
     additional_params = models.JSONField(blank=True, default=dict)
@@ -26,13 +30,17 @@ class Cluster(models.Model):
     address = models.CharField(max_length=1000, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     last_update = models.DateTimeField(auto_now=True)
+    is_deleted = models.BooleanField(default=False)
+
+    objects = models.Manager()
+    existing_objects = ExistingClusterManager()
 
     def __str__(self):
         return f'ID: {self.pk}, {self.size} x {self.package} [{self.status}]'
 
     @property
     def short_id(self):
-        return str(self.uuid).split('-')[-1]
+        return str(self.id).split('-')[-1]
 
 
 class Provider(models.TextChoices):
