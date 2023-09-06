@@ -4,8 +4,6 @@ from accounts.models import User
 from .managers import ExistingClusterManager
 
 class Cluster(models.Model):
-
-    existing_objects = ExistingClusterManager()
     class Package(models.TextChoices):
         AUTOMATIC = 'automatic'
         CUSTOM_AUTOMATIC = 'automatic-custom'
@@ -25,10 +23,11 @@ class Cluster(models.Model):
     owner = models.ForeignKey(User, on_delete=models.PROTECT, default=None)
     package_type = models.CharField(max_length=255, choices=Package.choices, default=Package.JUPYTER)
     status = models.CharField(max_length=255, choices=Status.choices, default=Status.STARTING)
-    # https://stackoverflow.com/questions/67469569/using-django-jsonfield-in-model -> possible JSON Schema
     additional_params = models.JSONField()
     size = models.PositiveIntegerField()
     created_at = models.DateTimeField(auto_now_add=True)
     last_update = models.DateTimeField(auto_now=True)
     is_deleted = models.BooleanField(default=False)
 
+    objects = models.Manager()
+    existing_objects = ExistingClusterManager()

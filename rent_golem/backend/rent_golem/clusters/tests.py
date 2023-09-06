@@ -1,10 +1,8 @@
-from typing import List, Optional, Tuple
 from django.shortcuts import reverse
-
 from rest_framework.test import APIClient, APITestCase
 from rest_framework import status
 
-from .models import Cluster
+from clusters.models import Cluster
 from accounts.models import User
 
 
@@ -23,9 +21,7 @@ class ClusterViewSetTest(APITestCase):
             size: int = 5,
             owner: User = None
     ) -> Cluster:
-        if owner is None:
-            owner = User.objects.create_user(email="test@test.com", password="test1234")
-        return Cluster.existing_objects.create(
+        return Cluster.objects.create(
             uuid=uuid,
             package_type=package_type,
             status=status,
@@ -49,14 +45,14 @@ class ClusterViewSetTest(APITestCase):
         response = self.client.post(reverse('cluster-list'), data=cluster_data, format="json")
 
         self.assertEquals(response.status_code, status.HTTP_201_CREATED)
-        cluster = Cluster.existing_objects.get(uuid=cluster_data["uuid"])
+        cluster = Cluster.objects.get(uuid=cluster_data["uuid"])
         self.assertEquals(cluster_data["package_type"], cluster.package_type)
         self.assertEquals(cluster_data["status"], cluster.status)
         self.assertEquals(cluster_data["additional_params"], cluster.additional_params)
         self.assertEquals(cluster_data["size"], cluster.size)
-        self.assertEquals(cluster_data["owner"], self.owner.id)
+        self.assertEquals(cluster_data["owner"], cluster.owner_id)
 
-    def test_if_post_one_object_to_db_as_anonumous_will_fail(self):
+    def test_if_post_one_object_to_db_as_anonymous_will_fail(self):
         cluster_data = {
             "uuid": "aaec5482-59ef-4c0e-9ea4-4e5451c3cbda",
             "package_type": Cluster.Package.AUTOMATIC,
@@ -69,10 +65,7 @@ class ClusterViewSetTest(APITestCase):
         response = self.client.post(reverse('cluster-list'), data=cluster_data, format="json")
 
         self.assertEquals(response.status_code, status.HTTP_401_UNAUTHORIZED)
-        try:
-            Cluster.existing_objects.get(uuid=cluster_data["uuid"])
-        except Cluster.DoesNotExist as e:
-            self.assertIsNotNone(e)
+        self.assertFalse(Cluster.objects.filter(uuid=cluster_data["uuid"]).exists())
 
     def test_read_one_object_from_db_as_registered_user(self):
         cluster = self.create_cluster_object(owner=self.owner)
@@ -86,7 +79,7 @@ class ClusterViewSetTest(APITestCase):
         self.assertEquals(get_response.data["status"], cluster.status)
         self.assertEquals(get_response.data["additional_params"], cluster.additional_params)
         self.assertEquals(get_response.data["size"], cluster.size)
-        self.assertEquals(get_response.data["owner"], self.owner.id)
+        self.assertEquals(get_response.data["owner"], cluster.owner_id)
 
     def test_read_list_of_3_db_objects_as_registered_user(self):
         uuids = {
@@ -126,9 +119,7 @@ class ClusterViewSetTest(APITestCase):
         }
         for uuid in uuids:
             self.create_cluster_object(uuid=uuid, owner=self.owner)
-
-        self.create_cluster_object(uuid="dcec5482-59ef-4c0e-9ea4-4e5451c3cbda", owner=self.owner)
-        cluster = Cluster.existing_objects.get(uuid="dcec5482-59ef-4c0e-9ea4-4e5451c3cbda")
+        cluster = self.create_cluster_object(uuid="dcec5482-59ef-4c0e-9ea4-4e5451c3cbda", owner=self.owner)
         cluster.is_deleted = True
         cluster.save()
 
@@ -150,40 +141,36 @@ class ClusterViewSetTest(APITestCase):
             data={'size': cluster.size + 1}
         )
 
-        self.assertEquals(update_response.status_code, status.HTTP_202_ACCEPTED)
-        self.assertEquals(Cluster.existing_objects.get(uuid=cluster.uuid).size, 6)
+        self.assertEquals(update_response.status_code, status.HTTP_200_OK)
+        self.assertEquals(Cluster.objects.get(uuid=cluster.uuid).size, 6)
 
-    def test_update_by_owner_2_variables(self):
+    def test_update_2_fields_by_owner(self):
         cluster = self.create_cluster_object(owner=self.owner)
 
         self.client.force_authenticate(user=self.owner)
 
         update_response = self.client.patch(
             reverse('cluster-detail', args=(cluster.uuid,)),
-            data={'size': cluster.size + 1, 'package_type': Cluster.Package.AUTOMATIC}
+            data={'size': cluster.size + 1, 'package_type': Cluster.Package.JUPYTER}
         )
 
-        self.assertEquals(update_response.status_code, status.HTTP_202_ACCEPTED)
-        self.assertEquals(Cluster.existing_objects.get(uuid=cluster.uuid).size, 6)
-        self.assertEquals(
-            Cluster.existing_objects.get(uuid=cluster.uuid).package_type, Cluster.Package.JUPYTER
-        )
+        cluster.refresh_from_db()
+        self.assertEquals(update_response.status_code, status.HTTP_200_OK)
+        self.assertEquals(cluster.size, 6)
+        self.assertEquals(cluster.package_type, Cluster.Package.AUTOMATIC)
 
     def test_update_by_user_not_owner(self):
         cluster = self.create_cluster_object(owner=self.owner)
 
-        jwt_insignificant_user = self.client.post(
-            reverse("token_obtain_pair"), data={"email": self.insignificant_user.email, "password": "test1234"}
-        ).data["access"]
+        self.client.force_authenticate(user=self.insignificant_user)
 
         update_response = self.client.patch(
             reverse('cluster-detail', args=(cluster.uuid, )),
             data={'size': cluster.size+1},
-            headers={"Authorization": f"Bearer {jwt_insignificant_user}"}
         )
 
-        self.assertEquals(update_response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEquals(Cluster.existing_objects.get(uuid=cluster.uuid).size, 5)
+        self.assertEquals(update_response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEquals(Cluster.objects.get(uuid=cluster.uuid).size, 5)
 
     def test_update_by_anonymous_user(self):
         cluster = self.create_cluster_object(owner=self.owner)
@@ -194,11 +181,10 @@ class ClusterViewSetTest(APITestCase):
         )
 
         self.assertEquals(update_response.status_code, status.HTTP_401_UNAUTHORIZED)
-        self.assertEquals(Cluster.existing_objects.get(uuid=cluster.uuid).size, 5)
+        self.assertEquals(Cluster.objects.get(uuid=cluster.uuid).size, 5)
 
     def test_put_turned_off(self):
         cluster = self.create_cluster_object(owner=self.owner)
-
         self.client.force_authenticate(user=self.owner)
 
         put_response = self.client.put(
@@ -211,34 +197,33 @@ class ClusterViewSetTest(APITestCase):
     def test_delete_by_owner(self):
         cluster = self.create_cluster_object(owner=self.owner)
 
-        self.assertFalse(Cluster.existing_objects.get(uuid=cluster.uuid).is_deleted)
+        self.assertFalse(Cluster.objects.get(uuid=cluster.uuid).is_deleted)
 
         self.client.force_authenticate(user=self.owner)
 
         delete_response = self.client.delete(reverse('cluster-detail', args=(cluster.uuid,)))
 
         self.assertEquals(delete_response.status_code, status.HTTP_204_NO_CONTENT)
-        self.assertTrue(Cluster.existing_objects.get(uuid=cluster.uuid).is_deleted)
+        self.assertTrue(Cluster.objects.get(uuid=cluster.uuid).is_deleted)
 
     def test_delete_by_user_not_owner(self):
         cluster = self.create_cluster_object(owner=self.owner)
 
-        self.assertFalse(Cluster.existing_objects.get(uuid=cluster.uuid).is_deleted)
+        self.assertFalse(Cluster.objects.get(uuid=cluster.uuid).is_deleted)
 
         self.client.force_authenticate(user=self.insignificant_user)
 
         delete_response = self.client.delete(reverse('cluster-detail', args=(cluster.uuid,)))
 
         self.assertEquals(delete_response.status_code, status.HTTP_403_FORBIDDEN)
-        self.assertFalse(Cluster.existing_objects.get(uuid=cluster.uuid).is_deleted)
-
+        self.assertFalse(Cluster.objects.get(uuid=cluster.uuid).is_deleted)
 
     def test_delete_by_anonymous_user(self):
         cluster = self.create_cluster_object(owner=self.owner)
 
-        self.assertFalse(Cluster.existing_objects.get(uuid=cluster.uuid).is_deleted)
+        self.assertFalse(Cluster.objects.get(uuid=cluster.uuid).is_deleted)
 
         delete_response = self.client.delete(reverse('cluster-detail', args=(cluster.uuid,)))
 
         self.assertEquals(delete_response.status_code, status.HTTP_401_UNAUTHORIZED)
-        self.assertFalse(Cluster.existing_objects.get(uuid=cluster.uuid).is_deleted)
+        self.assertFalse(Cluster.objects.get(uuid=cluster.uuid).is_deleted)
