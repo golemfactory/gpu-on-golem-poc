@@ -14,16 +14,16 @@ class ClusterViewSetTest(APITestCase):
 
     def create_cluster_object(
             self,
-            uuid: str = "dcec5482-59ef-4c0e-9ea4-4e5451c3cbda",
-            package_type: str = Cluster.Package.AUTOMATIC,
-            status: str = Cluster.Status.STARTING,
+            owner,
+            cluster_id: str = "dcec5482-59ef-4c0e-9ea4-4e5451c3cbda",
+            package: str = Cluster.Package.AUTOMATIC,
+            status: str = Cluster.Status.PENDING,
             additional_params=None,
-            size: int = 5,
-            owner: User = None
+            size: int = 2,
     ) -> Cluster:
         return Cluster.objects.create(
-            uuid=uuid,
-            package_type=package_type,
+            id=cluster_id,
+            package=package,
             status=status,
             additional_params=dict() if additional_params is None else additional_params,
             size=size,
@@ -32,12 +32,9 @@ class ClusterViewSetTest(APITestCase):
 
     def test_post_one_object_to_db_as_registered_user(self):
         cluster_data = {
-            "uuid": "aaec5482-59ef-4c0e-9ea4-4e5451c3cbda",
-            "package_type": Cluster.Package.AUTOMATIC,
-            "status": Cluster.Status.STARTING,
+            "package": Cluster.Package.AUTOMATIC,
             "additional_params": {},
             "size": 5,
-            "owner": self.owner.id
         }
 
         self.client.force_authenticate(user=self.owner)
@@ -45,41 +42,39 @@ class ClusterViewSetTest(APITestCase):
         response = self.client.post(reverse('cluster-list'), data=cluster_data, format="json")
 
         self.assertEquals(response.status_code, status.HTTP_201_CREATED)
-        cluster = Cluster.objects.get(uuid=cluster_data["uuid"])
-        self.assertEquals(cluster_data["package_type"], cluster.package_type)
-        self.assertEquals(cluster_data["status"], cluster.status)
+        cluster = Cluster.objects.get(id=response.data["id"])
+        self.assertEquals(cluster_data["package"], cluster.package)
+        self.assertEquals(Cluster.Status.PENDING, cluster.status)
         self.assertEquals(cluster_data["additional_params"], cluster.additional_params)
         self.assertEquals(cluster_data["size"], cluster.size)
-        self.assertEquals(cluster_data["owner"], cluster.owner_id)
 
     def test_if_post_one_object_to_db_as_anonymous_will_fail(self):
         cluster_data = {
-            "uuid": "aaec5482-59ef-4c0e-9ea4-4e5451c3cbda",
-            "package_type": Cluster.Package.AUTOMATIC,
-            "status": Cluster.Status.STARTING,
+            "package": Cluster.Package.AUTOMATIC,
             "additional_params": {},
             "size": 5,
-            "owner": self.owner.id
         }
+        clusters_count_before_request = Cluster.objects.all().count()
 
         response = self.client.post(reverse('cluster-list'), data=cluster_data, format="json")
 
         self.assertEquals(response.status_code, status.HTTP_401_UNAUTHORIZED)
-        self.assertFalse(Cluster.objects.filter(uuid=cluster_data["uuid"]).exists())
+        self.assertEquals(Cluster.objects.all().count(), clusters_count_before_request)
 
     def test_read_one_object_from_db_as_registered_user(self):
-        cluster = self.create_cluster_object(owner=self.owner)
-
+        cluster = self.create_cluster_object(self.owner)
         self.client.force_authenticate(user=self.owner)
 
-        get_response = self.client.get(reverse('cluster-detail', args=(cluster.uuid,)))
+        get_response = self.client.get(reverse('cluster-detail', args=(cluster.id,)))
 
         self.assertEquals(get_response.status_code, status.HTTP_200_OK)
-        self.assertEquals(get_response.data["package_type"], cluster.package_type)
+        self.assertEquals(get_response.data["id"], cluster.id)
+        self.assertEquals(get_response.data["package"], cluster.package)
         self.assertEquals(get_response.data["status"], cluster.status)
         self.assertEquals(get_response.data["additional_params"], cluster.additional_params)
         self.assertEquals(get_response.data["size"], cluster.size)
-        self.assertEquals(get_response.data["owner"], cluster.owner_id)
+        self.assertIn('created_at', get_response.data)
+        self.assertIn('last_update', get_response.data)
 
     def test_read_list_of_3_db_objects_as_registered_user(self):
         uuids = {
@@ -88,14 +83,14 @@ class ClusterViewSetTest(APITestCase):
             "ccec5482-59ef-4c0e-9ea4-4e5451c3cbda"
         }
         for uuid in uuids:
-            self.create_cluster_object(uuid=uuid, owner=self.owner)
+            self.create_cluster_object(self.owner, cluster_id=uuid)
 
         self.client.force_authenticate(user=self.owner)
 
         list_response = self.client.get(reverse('cluster-list'))
 
         self.assertEquals(list_response.status_code, status.HTTP_200_OK)
-        response_uuids = {list_element["uuid"] for list_element in list_response.data}
+        response_uuids = {list_element["id"] for list_element in list_response.data}
         self.assertSetEqual(response_uuids, uuids)
 
     def test_read_list_of_3_db_objects_as_anonymous_user(self):
@@ -105,7 +100,7 @@ class ClusterViewSetTest(APITestCase):
             "ccec5482-59ef-4c0e-9ea4-4e5451c3cbda"
         }
         for uuid in uuids:
-            self.create_cluster_object(uuid=uuid, owner=self.owner)
+            self.create_cluster_object(self.owner, cluster_id=uuid)
 
         list_response = self.client.get(reverse('cluster-list'))
 
@@ -118,8 +113,8 @@ class ClusterViewSetTest(APITestCase):
             "ccec5482-59ef-4c0e-9ea4-4e5451c3cbda",
         }
         for uuid in uuids:
-            self.create_cluster_object(uuid=uuid, owner=self.owner)
-        cluster = self.create_cluster_object(uuid="dcec5482-59ef-4c0e-9ea4-4e5451c3cbda", owner=self.owner)
+            self.create_cluster_object(self.owner, cluster_id=uuid)
+        cluster = self.create_cluster_object(self.owner, cluster_id="dcec5482-59ef-4c0e-9ea4-4e5451c3cbda")
         cluster.is_deleted = True
         cluster.save()
 
@@ -128,102 +123,109 @@ class ClusterViewSetTest(APITestCase):
         list_response = self.client.get(reverse('cluster-list'))
 
         self.assertEquals(list_response.status_code, status.HTTP_200_OK)
-        response_uuids = {list_element["uuid"] for list_element in list_response.data}
+        response_uuids = {list_element["id"] for list_element in list_response.data}
         self.assertSetEqual(response_uuids, uuids)
 
     def test_update_by_owner(self):
-        cluster = self.create_cluster_object(owner=self.owner)
+        cluster = self.create_cluster_object(self.owner)
 
         self.client.force_authenticate(user=self.owner)
 
         update_response = self.client.patch(
-            reverse('cluster-detail', args=(cluster.uuid,)),
-            data={'size': cluster.size + 1}
-        )
-
-        self.assertEquals(update_response.status_code, status.HTTP_200_OK)
-        self.assertEquals(Cluster.objects.get(uuid=cluster.uuid).size, 6)
-
-    def test_update_2_fields_by_owner(self):
-        cluster = self.create_cluster_object(owner=self.owner)
-
-        self.client.force_authenticate(user=self.owner)
-
-        update_response = self.client.patch(
-            reverse('cluster-detail', args=(cluster.uuid,)),
-            data={'size': cluster.size + 1, 'package_type': Cluster.Package.JUPYTER}
+            reverse('cluster-detail', args=(cluster.id,)),
+            data={'size': 3}
         )
 
         cluster.refresh_from_db()
         self.assertEquals(update_response.status_code, status.HTTP_200_OK)
-        self.assertEquals(cluster.size, 6)
-        self.assertEquals(cluster.package_type, Cluster.Package.AUTOMATIC)
+        self.assertEquals(cluster.size, 3)
+
+    def test_update_2_fields_by_owner_should_update_only_size(self):
+        cluster = self.create_cluster_object(self.owner)
+
+        self.client.force_authenticate(user=self.owner)
+
+        update_response = self.client.patch(
+            reverse('cluster-detail', args=(cluster.id,)),
+            data={'size': 3, 'additional_params': {'xyz': '123'}},
+            format='json'
+        )
+
+        cluster.refresh_from_db()
+        self.assertEquals(update_response.status_code, status.HTTP_200_OK)
+        self.assertEquals(cluster.size, 3)
+        self.assertEquals(cluster.additional_params, {})
 
     def test_update_by_user_not_owner(self):
-        cluster = self.create_cluster_object(owner=self.owner)
+        cluster = self.create_cluster_object(self.owner)
 
         self.client.force_authenticate(user=self.insignificant_user)
 
         update_response = self.client.patch(
-            reverse('cluster-detail', args=(cluster.uuid, )),
-            data={'size': cluster.size+1},
+            reverse('cluster-detail', args=(cluster.id, )),
+            data={'size': 3},
         )
 
+        cluster.refresh_from_db()
         self.assertEquals(update_response.status_code, status.HTTP_403_FORBIDDEN)
-        self.assertEquals(Cluster.objects.get(uuid=cluster.uuid).size, 5)
+        self.assertEquals(cluster.size, 2)
 
     def test_update_by_anonymous_user(self):
-        cluster = self.create_cluster_object(owner=self.owner)
+        cluster = self.create_cluster_object(self.owner)
 
         update_response = self.client.patch(
-            reverse('cluster-detail', args=(cluster.uuid, )),
-            data={'size': cluster.size+1}
+            reverse('cluster-detail', args=(cluster.id, )),
+            data={'size': 3}
         )
 
+        cluster.refresh_from_db()
         self.assertEquals(update_response.status_code, status.HTTP_401_UNAUTHORIZED)
-        self.assertEquals(Cluster.objects.get(uuid=cluster.uuid).size, 5)
+        self.assertEquals(cluster.size, 2)
 
     def test_put_turned_off(self):
-        cluster = self.create_cluster_object(owner=self.owner)
+        cluster = self.create_cluster_object(self.owner)
         self.client.force_authenticate(user=self.owner)
 
         put_response = self.client.put(
-            reverse('cluster-detail', args=(cluster.uuid, )),
-            data={'size': cluster.size+1}
+            reverse('cluster-detail', args=(cluster.id, )),
+            data={'size': 3}
         )
 
+        cluster.refresh_from_db()
         self.assertEquals(put_response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
+        self.assertEquals(cluster.size, 2)
 
     def test_delete_by_owner(self):
-        cluster = self.create_cluster_object(owner=self.owner)
+        cluster = self.create_cluster_object(self.owner)
 
-        self.assertFalse(Cluster.objects.get(uuid=cluster.uuid).is_deleted)
+        self.assertFalse(cluster.is_deleted)
 
         self.client.force_authenticate(user=self.owner)
+        delete_response = self.client.delete(reverse('cluster-detail', args=(cluster.id,)))
 
-        delete_response = self.client.delete(reverse('cluster-detail', args=(cluster.uuid,)))
-
+        cluster.refresh_from_db()
         self.assertEquals(delete_response.status_code, status.HTTP_204_NO_CONTENT)
-        self.assertTrue(Cluster.objects.get(uuid=cluster.uuid).is_deleted)
+        self.assertTrue(cluster.is_deleted)
 
     def test_delete_by_user_not_owner(self):
-        cluster = self.create_cluster_object(owner=self.owner)
+        cluster = self.create_cluster_object(self.owner)
 
-        self.assertFalse(Cluster.objects.get(uuid=cluster.uuid).is_deleted)
+        self.assertFalse(cluster.is_deleted)
 
         self.client.force_authenticate(user=self.insignificant_user)
+        delete_response = self.client.delete(reverse('cluster-detail', args=(cluster.id,)))
 
-        delete_response = self.client.delete(reverse('cluster-detail', args=(cluster.uuid,)))
-
+        cluster.refresh_from_db()
         self.assertEquals(delete_response.status_code, status.HTTP_403_FORBIDDEN)
-        self.assertFalse(Cluster.objects.get(uuid=cluster.uuid).is_deleted)
+        self.assertFalse(cluster.is_deleted)
 
     def test_delete_by_anonymous_user(self):
-        cluster = self.create_cluster_object(owner=self.owner)
+        cluster = self.create_cluster_object(self.owner)
 
-        self.assertFalse(Cluster.objects.get(uuid=cluster.uuid).is_deleted)
+        self.assertFalse(cluster.is_deleted)
 
-        delete_response = self.client.delete(reverse('cluster-detail', args=(cluster.uuid,)))
+        delete_response = self.client.delete(reverse('cluster-detail', args=(cluster.id,)))
 
+        cluster.refresh_from_db()
         self.assertEquals(delete_response.status_code, status.HTTP_401_UNAUTHORIZED)
-        self.assertFalse(Cluster.objects.get(uuid=cluster.uuid).is_deleted)
+        self.assertFalse(cluster.is_deleted)
