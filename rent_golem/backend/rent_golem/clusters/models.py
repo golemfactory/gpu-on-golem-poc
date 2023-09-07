@@ -19,7 +19,7 @@ class Cluster(models.Model):
         TERMINATED = 'terminated'  # When cluster runner finished
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    owner = models.ForeignKey(User, on_delete=models.PROTECT, default=None)
+    owner = models.ForeignKey(User, on_delete=models.PROTECT)
     package = models.CharField(max_length=255, choices=Package.choices)
     status = models.CharField(max_length=255, choices=Status.choices, default=Status.PENDING)
     additional_params = models.JSONField(blank=True, default=dict)
