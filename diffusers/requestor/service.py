@@ -219,13 +219,16 @@ def print_instances():
 
 
 def run_sd_service():
+    global cluster
+    
     try:
         asyncio.run(main(CLUSTER_INSTANCES_NUMBER))
     except KeyboardInterrupt:
         logger.info('Interruption')
     finally:
         logger.info('Stopping cluster')
-        cluster.stop()
+        if cluster is not None:
+            cluster.stop()
         asyncio.run(set_service_data({}))
 
 
