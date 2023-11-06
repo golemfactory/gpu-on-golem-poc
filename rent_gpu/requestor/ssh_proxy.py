@@ -38,7 +38,7 @@ class SshService(SocketProxyService):
         return await vm.repo(
             image_hash='856a5ed05eb3055e2b130a44e104d2f34f0a28fa8fa5ae7a958f9cea',
             image_url='http://gpu-on-golem.s3.eu-central-1.amazonaws.com/rent_gpu-856a5ed05eb3055e2b130a44e104d2f34f0a28fa8fa5ae7a958f9cea.gvmi',
-            capabilities=[vm.VM_CAPS_VPN, 'cuda*'],
+            capabilities=[vm.VM_CAPS_VPN],
         )
 
     async def start(self):

@@ -44,7 +44,7 @@ class TextUIService(SocketProxyService):
         return await vm.repo(
             image_hash='54e16c800935e8831adc5b47a89a7d69c8093b861ec4c62c1989a2d6',
             image_url='http://gpu-on-golem.s3.eu-central-1.amazonaws.com/text-webui-golem-54e16c800935e8831adc5b47a89a7d69c8093b861ec4c62c1989a2d6.gvmi',
-            capabilities=[vm.VM_CAPS_VPN, 'cuda*'],
+            capabilities=[vm.VM_CAPS_VPN],
         )
 
     async def start(self):

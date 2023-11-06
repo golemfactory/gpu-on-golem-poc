@@ -39,7 +39,7 @@ class JupyterService(SocketProxyService):
         return await vm.repo(
             image_hash='4e93ab5f3e8c120d08f3be258e9d8b02d30cb9ecfafd7e1f47268d96',
             image_url='http://gpu-on-golem.s3.eu-central-1.amazonaws.com/jupyter-golem-4e93ab5f3e8c120d08f3be258e9d8b02d30cb9ecfafd7e1f47268d96.gvmi',
-            capabilities=[vm.VM_CAPS_VPN, 'cuda*'],
+            capabilities=[vm.VM_CAPS_VPN],
         )
 
     async def start(self):

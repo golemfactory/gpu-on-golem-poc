@@ -53,7 +53,7 @@ class AutomaticService(SocketProxyService):
 
         return await vm.manifest(
             manifest=manifest,
-            capabilities=["inet", "manifest-support", vm.VM_CAPS_VPN, 'cuda*'],
+            capabilities=["inet", "manifest-support", vm.VM_CAPS_VPN],
         )
 
     async def start(self):

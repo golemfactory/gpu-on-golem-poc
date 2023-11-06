@@ -40,7 +40,7 @@ class AutomaticService(SocketProxyService):
         return await vm.repo(
             image_hash='89d3d833ea24c7a96f463d9650121c43c0bf3f8a3daf433894545aa1',
             image_url='http://gpu-on-golem.s3.eu-central-1.amazonaws.com/automatic-golem-89d3d833ea24c7a96f463d9650121c43c0bf3f8a3daf433894545aa1.gvmi',
-            capabilities=[vm.VM_CAPS_VPN, 'cuda*'],
+            capabilities=[vm.VM_CAPS_VPN],
         )
 
     async def start(self):
