@@ -1,6 +1,5 @@
 import asyncio
 from datetime import datetime, timedelta
-import pathlib
 import random
 import string
 import sys
@@ -9,13 +8,13 @@ from sqlmodel import Session, select
 from yapapi import Golem
 from yapapi.contrib.service.socket_proxy import SocketProxy, SocketProxyService
 from yapapi.payload import vm
+from yapapi.payload.vm import _VmPackage, resolve_repo_srv, _DEFAULT_REPO_SRV, _VmConstraints
 from yapapi.strategy import SCORE_REJECTED, SCORE_TRUSTED, MarketStrategy
 
 from rent_gpu.requestor.db import engine, Offer, OfferStatus, MACHINE_LIFETIME
 
-
-examples_dir = pathlib.Path(__file__).resolve().parent.parent
-sys.path.append(str(examples_dir))
+SINGLE_RENT_BUDGET = 1.0
+YAGNA_SUBNET = 'gpu-test'
 
 
 class ConcreteProviderStrategy(MarketStrategy):
@@ -24,6 +23,20 @@ class ConcreteProviderStrategy(MarketStrategy):
 
     async def score_offer(self, offer):
         return SCORE_TRUSTED if offer.issuer == self.provider_id else SCORE_REJECTED
+
+
+async def get_nvidia_payload(
+        min_mem_gib: float = 0.5,
+        min_storage_gib: float = 2.0,
+        min_cpu_threads: int = 1,
+        capabilities=None,
+):
+    return _VmPackage(
+        repo_url=resolve_repo_srv(_DEFAULT_REPO_SRV),
+        image_hash='856a5ed05eb3055e2b130a44e104d2f34f0a28fa8fa5ae7a958f9cea',
+        image_url='http://gpu-on-golem.s3.eu-central-1.amazonaws.com/rent_gpu-856a5ed05eb3055e2b130a44e104d2f34f0a28fa8fa5ae7a958f9cea.gvmi',
+        constraints=_VmConstraints(min_mem_gib, min_storage_gib, min_cpu_threads, capabilities, 'vm-nvidia'),
+    )
 
 
 class SshService(SocketProxyService):
@@ -35,15 +48,9 @@ class SshService(SocketProxyService):
 
     @staticmethod
     async def get_payload():
-        return await vm.repo(
-            image_hash='856a5ed05eb3055e2b130a44e104d2f34f0a28fa8fa5ae7a958f9cea',
-            image_url='http://gpu-on-golem.s3.eu-central-1.amazonaws.com/rent_gpu-856a5ed05eb3055e2b130a44e104d2f34f0a28fa8fa5ae7a958f9cea.gvmi',
-            capabilities=[vm.VM_CAPS_VPN],
-        )
+        return await get_nvidia_payload(capabilities=[vm.VM_CAPS_VPN])
 
     async def start(self):
-        # perform the initialization of the Service
-        # (which includes sending the network details within the `deploy` command)
         async for script in super().start():
             yield script
 
@@ -78,7 +85,11 @@ async def main(provider_id: str, local_port: int):
     :param local_port: The port on requestor through which tunnel is opened to provider machine.
     """
 
-    async with Golem(budget=1.0, subnet_tag='gpu-test', strategy=ConcreteProviderStrategy(provider_id)) as golem:
+    async with Golem(
+            budget=SINGLE_RENT_BUDGET,
+            subnet_tag=YAGNA_SUBNET,
+            strategy=ConcreteProviderStrategy(provider_id)
+    ) as golem:
 
         network = await golem.create_network("192.168.0.1/24")
         proxy = SocketProxy(address='0.0.0.0', ports=[local_port])
