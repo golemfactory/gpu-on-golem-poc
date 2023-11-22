@@ -12,6 +12,7 @@ import sentry_sdk
 from yapapi import Golem
 from yapapi.log import enable_default_logger
 from yapapi.payload import vm
+from yapapi.payload.vm import _VmPackage, resolve_repo_srv, _DEFAULT_REPO_SRV, _VmConstraints
 from yapapi.services import Service, ServiceState, Cluster
 
 from api.choices import JobStatus
@@ -36,6 +37,20 @@ logger = logging.getLogger('yapapi')
 cluster: Optional[Cluster] = None
 
 
+async def get_vm_nvidia_payload(
+        min_mem_gib: float = 0.5,
+        min_storage_gib: float = 2.0,
+        min_cpu_threads: int = 1,
+        capabilities=None,
+):
+    return _VmPackage(
+        repo_url=resolve_repo_srv(_DEFAULT_REPO_SRV),
+        image_hash='2076c1bfe344fa5248c3c62567cf2484118561f9a48e73460bf7c477',
+        image_url='http://gpu-on-golem.s3.eu-central-1.amazonaws.com/docker-txt2img-golem-latest-86465aabf7.gvmi',
+        constraints=_VmConstraints(min_mem_gib, min_storage_gib, min_cpu_threads, capabilities, 'vm-nvidia'),
+    )
+
+
 class GenerateImageService(Service):
     def __init__(self, *args, instance_name: str, **kwargs):
         super().__init__(*args, **kwargs)
@@ -43,12 +58,7 @@ class GenerateImageService(Service):
 
     @staticmethod
     async def get_payload():
-        return await vm.repo(
-            # Stable diffusion 1.5
-            image_hash='2076c1bfe344fa5248c3c62567cf2484118561f9a48e73460bf7c477',
-            image_url='http://gpu-on-golem.s3.eu-central-1.amazonaws.com/docker-txt2img-golem-latest-86465aabf7.gvmi',
-            capabilities=['vpn', 'cuda*'],
-        )
+        return await get_vm_nvidia_payload(capabilities=[vm.VM_CAPS_VPN])
 
     async def start(self):
         async for script in super().start():
@@ -220,7 +230,7 @@ def print_instances():
 
 def run_sd_service():
     global cluster
-    
+
     try:
         asyncio.run(main(CLUSTER_INSTANCES_NUMBER))
     except KeyboardInterrupt:
