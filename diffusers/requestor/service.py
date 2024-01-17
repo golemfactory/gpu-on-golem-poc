@@ -13,21 +13,25 @@ from yapapi import Golem
 from yapapi.log import enable_default_logger
 from yapapi.payload import vm
 from yapapi.payload.vm import _VmPackage, resolve_repo_srv, _DEFAULT_REPO_SRV, _VmConstraints
+from yapapi.rest.market import OfferProposal
 from yapapi.services import Service, ServiceState, Cluster
+from yapapi.strategy import MarketStrategy, SCORE_REJECTED, SCORE_TRUSTED
 
 from api.choices import JobStatus
 from config import SENTRY_DSN
 from redis_db.functions import update_job_data, set_service_data, jobs_queue, set_provider_processing_time
 
 
-CLUSTER_INSTANCES_NUMBER = os.environ.get('GPUOG_INSTANCES_NUMBER', 1)
+CLUSTER_INSTANCES_NUMBER = int(os.environ.get('GPUOG_INSTANCES_NUMBER', 1))
 CLUSTER_SUBNET_TAG = os.environ.get('GPUOG_SUBNET', 'public')
-CLUSTER_BUDGET = 10.0
+CLUSTER_BUDGET = float(os.environ.get('GPUOG_CLUSTER_BUDGET', 250.0))
 CLUSTER_EXPIRATION_TIME = datetime.timedelta(days=365)
 INTERMEDIARY_IMAGES_NUMBER = 3
 # MD5 hash of a black image provided by service when NSFW content is detected
 NSFW_IMAGE_HASH = '4518b9ae5041f25d03106e4bb7d019d1'
 JOB_EXPIRATION_TIME = datetime.timedelta(hours=1)
+LINEAR_PRICING_MODEL_NAME = 'linear'
+
 
 sentry_sdk.init(dsn=SENTRY_DSN, traces_sample_rate=1.0)
 data_dir = Path(os.environ.get("GPUOG_DATA_DIR") or Path(__file__).parent.joinpath('../../api').absolute())
@@ -35,6 +39,28 @@ enable_default_logger(log_file=str(data_dir / 'sd-golem-service.log'))
 logger = logging.getLogger('yapapi')
 
 cluster: Optional[Cluster] = None
+
+class LinearPriceBelowLimitStrategy(MarketStrategy):
+    """Strategy that checks if provider's price is linear and below limit and if so making provider trusted."""
+    MAX_GLM_PRICE_PER_HOUR = float(os.environ.get('GPUOG_MAX_GLM_PRICE_PER_HOUR', 1.0))
+
+    async def score_offer(self, offer: OfferProposal):
+        pricing_model = offer.props.get('golem.com.pricing.model', '')
+        price_coefficients = offer.props.get('golem.com.pricing.model.linear.coeffs', [float('inf'), 0.0, 0.0])
+        if len(price_coefficients) != 3:
+            logger.info("Offer has unexpected number of coefficients.",
+                        extra={'issuer': offer.issuer, 'price_coefficients': price_coefficients})
+            return SCORE_REJECTED
+
+        seconds_in_hour = datetime.timedelta(hours=1).total_seconds()
+        price_per_hour = (price_coefficients[0] + price_coefficients[1]) * seconds_in_hour + price_coefficients[2]
+
+        if pricing_model == LINEAR_PRICING_MODEL_NAME and price_per_hour <= self.MAX_GLM_PRICE_PER_HOUR:
+            return SCORE_TRUSTED
+        else:
+            logger.debug("Offer rejected because of too high price.",
+                         extra={'issuer': offer.issuer, 'price_coefficients': price_coefficients})
+            return SCORE_REJECTED
 
 
 async def get_vm_nvidia_payload(
@@ -163,8 +189,9 @@ async def main(num_instances):
         pass
 
     while True:
+        strategy = LinearPriceBelowLimitStrategy()
         try:
-            async with Golem(budget=CLUSTER_BUDGET, subnet_tag=CLUSTER_SUBNET_TAG) as golem:
+            async with Golem(budget=CLUSTER_BUDGET, subnet_tag=CLUSTER_SUBNET_TAG, strategy=strategy) as golem:
                 cluster = await golem.run_service(
                     GenerateImageService,
                     instance_params=[{"instance_name": f"sd-service-{i + 1}"} for i in range(num_instances)],
