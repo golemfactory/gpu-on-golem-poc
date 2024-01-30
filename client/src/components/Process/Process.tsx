@@ -6,12 +6,14 @@ import { selectNodes } from 'slices/nodes';
 function Process() {
   const data = useSelector(selectData);
   const nodes = useSelector(selectNodes);
+  const runningNodes = nodes.filter((node) => node.state === 'running')
 
   const progress = data?.progress ?? 0;
   const instance: NodeInstance = nodes.find((node: NodeInstance) => node.provider_name === data?.provider) ?? {
     name: '',
     provider_id: '',
     provider_name: '',
+    state: '',
   };
 
   const renderShortAddress = (address?: string | null, start: number = 6, stop: number = 4) =>
@@ -37,7 +39,7 @@ function Process() {
         <div className="top-[2rem] right-0 inline-flex justify-center md:absolute md:justify-end">
           <Countdown customStyles="relative before:hidden md:before:block text-12" />
           <span className="relative ml-[1.4rem] inline-flex before:absolute before:-left-[0.8rem] before:leading-[1.2rem] before:content-['|']">
-            {nodes.length ?? '-'} {nodes.length === 1 ? 'node' : 'nodes'} connected
+            {runningNodes.length ?? '-'} {runningNodes.length === 1 ? 'node' : 'nodes'} connected
           </span>
         </div>
       </div>

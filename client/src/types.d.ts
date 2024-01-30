@@ -11,6 +11,7 @@ type NodeInstance = {
   name: string;
   provider_id: string;
   provider_name: string;
+  state: string;
 };
 
 type Noop = () => void;
