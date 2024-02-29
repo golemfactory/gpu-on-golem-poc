@@ -1,10 +1,10 @@
-import { ReactNode } from 'react';
+import { PropsWithChildren } from 'react';
 import placeholderPNG from 'assets/placeholder.png';
 
-function Placeholder({ children }: { children?: ReactNode }) {
+function Placeholder({ children }: PropsWithChildren) {
   return (
     <div
-      className="relative mx-auto h-[33.2rem] w-[33.2rem] bg-[length:25%] md:h-[36.2rem] md:w-[36.2rem]"
+      className="relative mx-auto h-[256px] w-[256px] bg-[length:25%]"
       style={{ backgroundImage: `url(${placeholderPNG.src})` }}
     >
       {children}

@@ -14,7 +14,7 @@ function Terms({ disabled, terms }: { disabled: boolean; terms: useCheckboxType 
   }, [remember.on]);
 
   return (
-    <div className="flex w-[19rem] items-center justify-between">
+    <div className="flex min-w-[216px] items-center justify-between">
       <Checkbox name="terms" label="I accept the" link="Terms of Use" href="/terms" disabled={disabled} {...terms} />
       {!terms.error && (
         <Tooltip type="help">

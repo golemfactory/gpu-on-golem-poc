@@ -1,5 +1,5 @@
 import { useRouter } from 'next/router';
-import { Background, Error, Layout } from 'components';
+import { Error, Layout } from 'components';
 
 function ErrorPage() {
   const router = useRouter();
@@ -8,8 +8,7 @@ function ErrorPage() {
 
   return (
     <Layout>
-      <Background />
-      <Error heading="404" text="This page doesn't exist." button={{ label: 'Go Home', onClick: handleClick }} />
+      <Error heading="404" text="This page doesn't exist." button={{ label: 'Go to homepage', onClick: handleClick }} />
     </Layout>
   );
 }

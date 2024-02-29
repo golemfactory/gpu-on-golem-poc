@@ -1,13 +1,10 @@
-export { default as Background } from './Background';
 export { default as Checkbox, useCheckbox } from './Checkbox';
 export { default as CookieBanner } from './CookieBanner';
 export { default as Copy } from './Copy';
 export { default as Countdown } from './Countdown';
 export { default as Error } from './Error';
-export { default as Facts } from './Facts';
 export { default as Footer } from './Footer';
 export { default as Form, useForm, useFormError } from './Form';
-export { default as GoogleAnalytics, gaEvent } from './GoogleAnalytics';
 export { default as Header } from './Header';
 export { default as Hero } from './Hero';
 export { default as Layout } from './Layout';

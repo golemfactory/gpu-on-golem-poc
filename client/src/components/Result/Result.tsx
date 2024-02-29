@@ -1,7 +1,9 @@
 import { ReactNode } from 'react';
 import { useSelector } from 'react-redux';
+import Image from 'next/image';
 import { Status } from 'enums/status';
-import { Copy, Placeholder, Process, View } from 'components';
+import { renderIcon } from 'assets/utils';
+import { Copy, Process, View } from 'components';
 import { selectData } from 'slices/data';
 import { useStatusState } from 'utils/hooks';
 
@@ -14,48 +16,44 @@ function Result({ value, onReset }: { value: string; onReset: Noop }) {
 
   const handleOpen = () => window.open('https://discord.com/channels/684703559954333727/1072529851346595840');
 
-  const renderText = (children: ReactNode) => (
-    <p className="mt-[3.6rem] -mb-[3.2rem] min-h-[9.5rem] text-14">{children}</p>
-  );
+  const renderText = (children: ReactNode) => <p className="mt-[1.6rem] text-14 font-light">{children}</p>;
 
   return (
-    <div className="mt-[18rem] mb-[2.4rem] md:mb-0 xl:mt-[12rem]">
-      <h2 className="text-24">Your artwork based on the following keywords:</h2>
-      <div className="relative mx-auto pr-[2rem] md:max-w-[50%] md:pr-0">
-        <h3 className="mt-[1.2rem] mb-[2.8rem] text-12 text-stone">{value}</h3>
+    <div className="mt-[12rem] mb-[2.4rem] md:mb-0 xl:mt-[12rem]">
+      <div className="relative mx-auto mb-[1.6rem] flex gap-4 bg-white p-3 pr-10 md:w-[75%]">
+        <h3 className="mx-auto flex flex-col text-12 uppercase md:flex-row">
+          Your prompt:<span className="ml-2 w-[300px] truncate text-blue md:w-[400px]">{value}</span>
+        </h3>
         <Copy value={value} />
       </div>
       {forState([Status.Processing]) && (
         <div className="mx-auto md:w-[75%]">
-          {!!intermediary_image ? <View intermediary_image={intermediary_image} value={value} /> : <Placeholder />}
-          <br />
-          <br />
+          <View intermediary_image={intermediary_image} value={value} />
           <Process />
         </div>
       )}
       {forState([Status.Finished]) && (
         <div className="mx-auto md:w-[75%]">
-          <View value={value} />
+          <View value={value} onReset={onReset} />
           {renderText(
-            'Want to give us feedback? Go to our Discord, find the channel GPU PoC - AI Image Generator and get involved!',
+            'Want to give us feedback? Go to our Discord, find the channel "image-generator-discussion" and get involved!',
           )}
         </div>
       )}
       {forState([Status.Blocked]) && (
         <div className="mx-auto md:w-[75%]">
-          <View value={value} blocked />
-          {renderText('Sorry, this image violates our NSFW filters :(')}
+          <View value={value} onReset={onReset} blocked />
+          {renderText('Sorry, this image violates our NSFW filters.')}
         </div>
       )}
       {forState([Status.Finished, Status.Blocked]) && (
-        <div className="mb-[1.8rem] flex justify-center">
-          <button className="button mx-[0.5rem] bg-white text-black md:mx-[1.8rem]" onClick={onReset}>
-            Start over
-          </button>
-          <button className="button mx-[0.5rem] md:mx-[1.8rem]" onClick={handleOpen}>
-            Go to Discord
-          </button>
-        </div>
+        <button
+          className="min-w-10 mx-auto mt-[2.4rem] flex border-[#5865F2] bg-[#5865F2] p-[12px] text-[12px] tracking-[2px] hover:border-[#5865F2] hover:bg-[#5865F2] hover:text-white"
+          onClick={handleOpen}
+        >
+          <Image className="mr-4" src={renderIcon('discordWhite')} alt="discord logo" width={18} height={18} />
+          Join Discord
+        </button>
       )}
     </div>
   );

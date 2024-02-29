@@ -1,21 +1,8 @@
 import { useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Status } from 'enums/status';
-import {
-  Background,
-  Error,
-  Form,
-  gaEvent,
-  Hero,
-  Layout,
-  Loader,
-  Queue,
-  Result,
-  useForm,
-  useNodes,
-  useQueue,
-  useResult,
-} from 'components';
+import { Error, Form, Hero, Layout, Loader, Queue, Result, useForm, useNodes, useQueue, useResult } from 'components';
+import { gaEvent } from 'services/GoogleAnalytics';
 import { selectJobId } from 'slices/data';
 import { selectError } from 'slices/error';
 import { resetQueue } from 'slices/queue';
@@ -85,19 +72,11 @@ function Main() {
 
   return (
     <Layout>
-      {notForState([Status.Processing, Status.Finished, Status.Blocked]) && <Background />}
       <Loader />
       {notForState([Status.Processing, Status.Finished, Status.Blocked, Status.Error]) && (
         <Hero>
           <Form value={value} onExample={onExample} {...form} />
         </Hero>
-      )}
-      {forState([Status.Ready]) && (
-        <p className="mt-[5.7rem] text-14">
-          We have integrated the AI Stable Diffusion image generator with the Golem Network to showcase its computation
-          possibilities with a GPU. We are currently using limited resources - 2 computers with a GPU, therefore, you
-          may encounter difficulties using the application.
-        </p>
       )}
       {forState([Status.Queued]) && <Queue />}
       {forState([Status.Processing, Status.Finished, Status.Blocked]) && <Result value={value} onReset={handleReset} />}

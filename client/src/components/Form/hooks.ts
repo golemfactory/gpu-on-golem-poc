@@ -1,9 +1,10 @@
 import { FormEvent, useRef, useState } from 'react';
-import { useEffectOnce } from 'react-use';
 import { useDispatch, useSelector } from 'react-redux';
+import { useEffectOnce } from 'react-use';
 import { adjectives, animals, colors, uniqueNamesGenerator } from 'unique-names-generator';
 import { Api } from 'enums/api';
-import { gaEvent, useCheckbox, useTermsRemember } from 'components';
+import { useCheckbox, useTermsRemember } from 'components';
+import { gaEvent } from 'services/GoogleAnalytics';
 import { selectJobId, setJobId } from 'slices/data';
 import { setQueue } from 'slices/queue';
 import { setStatus } from 'slices/status';

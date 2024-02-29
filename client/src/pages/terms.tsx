@@ -1,7 +1,7 @@
 import { ReactNode, useState } from 'react';
 import { twMerge } from 'tailwind-merge';
-import { Layout } from 'components';
 import { renderIcon } from 'assets/utils';
+import { Layout } from 'components';
 
 function Terms() {
   const [state, setState] = useState('terms');
@@ -263,7 +263,7 @@ function Terms() {
                 </>,
                 <>
                   {underline('Current version.')} The current Terms are available at{' '}
-                  {link('https://gpu.dev-test.golem.network/')}.
+                  {link('https://image.golem.network/')}.
                 </>,
                 <>
                   {underline('Updates.')} The Terms may be regularly reviewed and updated as required. Each document
@@ -705,21 +705,21 @@ function Terms() {
                     'These cookies generally collect information about how visitors use our website, for instance which pages visitors go to most often, and the pages that they don’t. This helps us to understand and improve the site so it is easy to use and includes helpful content. They allow us to fix bugs or glitches on the website. These cookies don’t collect information that identifies visitors, so we can’t identify you. For example, we use “Google Analytics” cookies (a web analytics service provided by Google, Inc).',
                 },
               ])}
-              <div className="ml-[2.6rem] mb-[2.6rem] border border-b-0 border-r-0 border-grey text-left">
-                <div className="flex border-b border-grey font-bold">
+              <div className="ml-[2.6rem] mb-[2.6rem] border border-b-0 border-r-0 border-stone text-left">
+                <div className="flex border-b border-stone">
                   {cookieTableHeadings.map((heading, idx) => (
-                    <span key={idx} className="w-1/4 border-r border-grey p-1.5">
+                    <span key={idx} className="w-1/4 border-r border-stone p-1.5">
                       {heading}
                     </span>
                   ))}
                 </div>
                 <div className="flex flex-col text-14">
                   {cookieTableData.map(({ name, description, type, duration }, idx) => (
-                    <div key={idx} className="flex border-b border-grey">
-                      <span className="w-1/4 border-r border-grey p-1.5">{name}</span>
-                      <span className="w-1/4 border-r border-grey p-1.5">{description}</span>
-                      <span className="w-1/4 border-r border-grey p-1.5">{type}</span>
-                      <span className="w-1/4 border-r border-grey p-1.5">{duration}</span>
+                    <div key={idx} className="flex border-b border-stone font-light">
+                      <span className="w-1/4 border-r border-stone p-1.5">{name}</span>
+                      <span className="w-1/4 border-r border-stone p-1.5">{description}</span>
+                      <span className="w-1/4 border-r border-stone p-1.5">{type}</span>
+                      <span className="w-1/4 border-r border-stone p-1.5">{duration}</span>
                     </div>
                   ))}
                 </div>
@@ -773,8 +773,8 @@ function link(text: string, href?: string) {
 
 function renderSimpleList(title: string, items: { subtitle?: string; content: string }[]) {
   return (
-    <li className="mb-[2.4rem] font-sans text-14">
-      <span className="text-16 font-bold">{title}</span>
+    <li className="mb-[2.4rem] font-sans text-14 font-light">
+      <span className="text-16 font-light">{title}</span>
       {items.map((item) => (
         <>
           <div className="mt-[1.2rem]">{underline(item.subtitle ?? '')}</div>

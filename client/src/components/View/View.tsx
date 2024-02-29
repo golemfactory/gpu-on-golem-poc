@@ -13,10 +13,12 @@ function View({
   intermediary_image,
   value,
   blocked,
+  onReset,
 }: {
   intermediary_image?: string;
   value: string;
   blocked?: boolean;
+  onReset?: () => void;
 }) {
   const data = useSelector(selectData);
 
@@ -36,16 +38,44 @@ function View({
 
   const handleSave = () => !!src && saveAs(src, `${value}.jpeg`);
 
+  const disabled = forState([Status.Processing]);
+
   return (
-    <div className="relative mx-auto w-[33.2rem] md:w-[36.2rem]">
-      <Placeholder>{!!src && <Image src={src} alt={value} fill />}</Placeholder>
-      {!blocked && (
+    <div className="flex flex-col gap-8 md:flex-row">
+      <div className="relative mx-auto w-[288px] bg-white p-[1.6rem]">
+        <Placeholder>{!intermediary_image && !src ? null : !!src && <Image src={src} alt={value} fill />}</Placeholder>
+      </div>
+      <div className="flex flex-col items-center justify-center gap-10">
         <button
-          className="absolute bottom-[1rem] right-[1rem] h-[2rem] w-[1.8rem] bg-black bg-center bg-no-repeat"
-          style={{ backgroundImage: `url(${renderIcon('download')})` }}
-          onClick={handleSave}
-        />
-      )}
+          className="flex h-[44px] w-[288px] flex-col items-center justify-center bg-blue text-[12px] leading-[1.2] tracking-[2px] disabled:border-grey disabled:bg-grey disabled:text-black md:w-[215px]"
+          onClick={onReset}
+          disabled={disabled}
+        >
+          Try again
+        </button>
+        {!blocked && (
+          <div className="flex flex-col gap-2">
+            <button
+              className="flex w-[288px] items-center justify-center bg-white p-[12px] text-[12px] tracking-[2px] text-blue disabled:border-grey disabled:bg-white disabled:text-stone md:w-[215px]"
+              onClick={handleSave}
+              disabled={disabled}
+            >
+              <Image
+                className="mr-4"
+                src={renderIcon(disabled ? 'downloadStone' : 'download')}
+                alt="download image"
+                width={12}
+                height={12}
+              />
+              Download Image
+            </button>
+            <div className="flex w-[288px] justify-between font-light md:w-[215px]">
+              <span>Resolution</span>
+              <span>2048x2048</span>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

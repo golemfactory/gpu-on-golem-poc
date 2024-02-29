@@ -1,5 +1,5 @@
-import { configureStore } from '@reduxjs/toolkit';
 import { createWrapper } from 'next-redux-wrapper';
+import { configureStore } from '@reduxjs/toolkit';
 import dataSlice from 'slices/data';
 import errorSlice from 'slices/error';
 import nodesSlice from 'slices/nodes';

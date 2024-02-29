@@ -1,9 +1,10 @@
+import { Provider } from 'react-redux';
 import type { AppProps } from 'next/app';
 import Head from 'next/head';
-import { Provider } from 'react-redux';
 import wrapper from 'store';
 import 'styles/globals.css';
-import { CookieBanner, GoogleAnalytics } from 'components';
+import { CookieBanner } from 'components';
+import GoogleAnalytics from 'services/GoogleAnalytics';
 
 function App({ Component, pageProps, ...rest }: AppProps) {
   const { store } = wrapper.useWrappedStore(rest);
@@ -11,7 +12,7 @@ function App({ Component, pageProps, ...rest }: AppProps) {
   return (
     <>
       <Head>
-        <title>GPU on Golem</title>
+        <title>{process.env.NEXT_PUBLIC_PROJECT_NAME}</title>
       </Head>
       <GoogleAnalytics />
       <CookieBanner />

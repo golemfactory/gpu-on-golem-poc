@@ -1,11 +1,13 @@
-import { ReactNode } from 'react';
+import { PropsWithChildren } from 'react';
 
-function Hero({ children }: { children: ReactNode }) {
+function Hero({ children }: PropsWithChildren) {
   return (
-    <div className="mt-[20rem]">
-      <h1 className="mb-[5.7rem] text-24 md:text-34">
-        Use AI harnessed by the Golem Network to produce artwork from keywords
-      </h1>
+    <div className="mt-80 flex flex-col gap-10">
+      <h1 className="text-24 md:text-34">Use AI harnessed by the Golem Network to produce artwork from keywords</h1>
+      <p className="text-14 font-light">
+        Link your wallet with a minimum of <span className="text-blue underline">100 GLM</span> to unlock unlimited
+        access to Golem's AI Image Generator.
+      </p>
       {children}
     </div>
   );
