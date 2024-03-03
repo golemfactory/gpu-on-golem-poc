@@ -13,7 +13,7 @@ const renderLink = (name: string, href: string) => (
 
 function Footer() {
   return (
-    <footer className="absolute inset-x-0 bottom-0 flex min-h-[4rem] flex-col items-center justify-between p-6 uppercase text-black lg:flex-row">
+    <footer className="absolute inset-x-0 bottom-[6.5rem] flex min-h-[4rem] flex-col items-center justify-between p-6 uppercase text-black md:bottom-0 lg:flex-row">
       <div className="mb-[0.6rem] flex items-end">
         <span className="mr-1 text-[12px]">©</span>2024 Golem Network. All rights reserved.
       </div>

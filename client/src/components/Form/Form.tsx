@@ -1,8 +1,10 @@
 import Image from 'next/image';
 import { renderIcon } from 'assets/utils';
-import { Terms } from 'components';
+import { Locked, Terms, useLocked } from 'components';
 
 function Form({ value, onChange, error, disabled, onSubmit, terms }: useFormType) {
+  const { locked, until, onUpdate } = useLocked();
+
   return (
     <>
       <form
@@ -18,11 +20,11 @@ function Form({ value, onChange, error, disabled, onSubmit, terms }: useFormType
           value={value}
           onChange={onChange}
           placeholder="Type something"
-          disabled={disabled}
+          disabled={disabled || !!until}
         />
         <button
           className="py-[12px] px-[12px] text-14 tracking-[2px] hover:bg-blue hover:text-white focus:outline-none focus:ring disabled:border-grey disabled:bg-grey disabled:text-black md:px-[30px]"
-          disabled={disabled}
+          disabled={disabled || !!until}
           onClick={onSubmit}
         >
           <Image
@@ -40,11 +42,24 @@ function Form({ value, onChange, error, disabled, onSubmit, terms }: useFormType
           </span>
         )}
       </form>
-      {!disabled && (
-        <div className="relative mx-auto flex justify-between">
-          <Terms disabled={disabled} terms={terms} />
-        </div>
-      )}
+      <div className="mx-auto flex flex-col items-center gap-10 md:flex-row">
+        {!!until ? (
+          <div className="bg-white p-[12px] text-[12px] font-light uppercase">
+            <Locked until={until} onUpdate={onUpdate} />
+          </div>
+        ) : (
+          locked && (
+            <div className="bg-white p-[12px] text-[12px] font-light uppercase">
+              Use limit: <span className="text-blue">One per hour</span>
+            </div>
+          )
+        )}
+        {!disabled && (
+          <div className="relative flex justify-between">
+            <Terms disabled={disabled} terms={terms} />
+          </div>
+        )}
+      </div>
     </>
   );
 }

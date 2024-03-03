@@ -4,7 +4,7 @@ import Image from 'next/image';
 import { saveAs } from 'file-saver';
 import { Status } from 'enums/status';
 import { renderIcon } from 'assets/utils';
-import { Placeholder } from 'components';
+import { Locked, Placeholder, useLocked } from 'components';
 import { selectData } from 'slices/data';
 import { useStatusState } from 'utils/hooks';
 import url from 'utils/url';
@@ -20,6 +20,8 @@ function View({
   blocked?: boolean;
   onReset?: () => void;
 }) {
+  const { locked, until, onUpdate } = useLocked();
+
   const data = useSelector(selectData);
 
   const { forState } = useStatusState();
@@ -40,19 +42,36 @@ function View({
 
   const disabled = forState([Status.Processing]);
 
+  useEffect(() => {
+    if (locked && !intermediary_image && !!src) {
+      onUpdate(Date.now() + 60 * 60 * 1000);
+    }
+  }, [locked, intermediary_image, src]);
+
   return (
     <div className="flex flex-col gap-8 md:flex-row">
       <div className="relative mx-auto w-[288px] bg-white p-[1.6rem]">
         <Placeholder>{!intermediary_image && !src ? null : !!src && <Image src={src} alt={value} fill />}</Placeholder>
       </div>
       <div className="flex flex-col items-center justify-center gap-10">
-        <button
-          className="flex h-[44px] w-[288px] flex-col items-center justify-center bg-blue text-[12px] leading-[1.2] tracking-[2px] disabled:border-grey disabled:bg-grey disabled:text-black md:w-[215px]"
-          onClick={onReset}
-          disabled={disabled}
-        >
-          Try again
-        </button>
+        <div className="flex flex-col items-center gap-4">
+          <button
+            className="flex h-[44px] w-[288px] flex-col items-center justify-center bg-blue text-[12px] leading-[1.2] tracking-[2px] disabled:border-grey disabled:bg-grey disabled:text-black md:w-[215px]"
+            onClick={onReset}
+            disabled={disabled || !!until}
+          >
+            Try again
+            {!!until && <Locked until={until} onUpdate={onUpdate} />}
+          </button>
+          {!!until && (
+            <button
+              className="flex h-[44px] w-[288px] items-center justify-center bg-blue text-[12px] leading-[1.2] tracking-[2px] md:w-[215px]"
+              onClick={onReset}
+            >
+              Go to homepage
+            </button>
+          )}
+        </div>
         {!blocked && (
           <div className="flex flex-col gap-2">
             <button
