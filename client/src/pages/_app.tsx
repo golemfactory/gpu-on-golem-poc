@@ -5,6 +5,7 @@ import wrapper from 'store';
 import 'styles/globals.css';
 import { CookieBanner } from 'components';
 import GoogleAnalytics from 'services/GoogleAnalytics';
+import Web3ModalProvider from 'services/Web3Modal';
 
 function App({ Component, pageProps, ...rest }: AppProps) {
   const { store } = wrapper.useWrappedStore(rest);
@@ -17,7 +18,9 @@ function App({ Component, pageProps, ...rest }: AppProps) {
       <GoogleAnalytics />
       <CookieBanner />
       <Provider store={store}>
-        <Component {...pageProps} />
+        <Web3ModalProvider>
+          <Component {...pageProps} />
+        </Web3ModalProvider>
       </Provider>
     </>
   );
