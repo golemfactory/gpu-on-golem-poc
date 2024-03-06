@@ -1,4 +1,4 @@
-FROM maugnorbert/docker_golem_cuda_base:latest
+FROM nvidia/cuda:12.3.1-base-ubuntu22.04
 
 WORKDIR /usr/src/app
 VOLUME /usr/src/app/output
