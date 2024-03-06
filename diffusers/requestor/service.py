@@ -71,7 +71,7 @@ async def get_vm_nvidia_payload(
 ):
     return _VmPackage(
         repo_url=resolve_repo_srv(_DEFAULT_REPO_SRV),
-        image_hash='809de8a21e2a134dd94059e0a218a085558a55d55339f1bddc864501aaeafa1a',
+        image_hash='eb2ccc25299d01377c7a5afa952dcda4674adc5d01f83a7bac24a12a',
         image_url='http://registry.golem.network/download/809de8a21e2a134dd94059e0a218a085558a55d55339f1bddc864501aaeafa1a',
         constraints=_VmConstraints(min_mem_gib, min_storage_gib, min_cpu_threads, capabilities, 'vm-nvidia'),
     )
