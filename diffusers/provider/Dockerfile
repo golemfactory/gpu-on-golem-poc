@@ -1,9 +1,10 @@
-FROM maugnorbert/docker_golem_cuda_base:latest
+FROM nvidia/cuda:12.3.1-base-ubuntu22.04
 
 WORKDIR /usr/src/app
 VOLUME /usr/src/app/output
 
-COPY stable-diffusion-v1-5 ./stable-diffusion-v1-5
+COPY stable-diffusion-xl-base-1.0 ./stable-diffusion-xl-base-1.0
+COPY sdxl_lightning_4step_unet.safetensors ./
 COPY requirements.txt ./
 COPY worker.py ./
 COPY service.py ./

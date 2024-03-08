@@ -4,7 +4,6 @@ import logging
 import sys
 
 from diffusers import StableDiffusionXLPipeline, UNet2DConditionModel, EulerDiscreteScheduler
-from PIL import Image
 from safetensors.torch import load_file
 import portalocker
 import torch
@@ -18,7 +17,6 @@ logging.basicConfig(filename='output/debug.log',
 logger = logging.getLogger(__name__)
 
 STABLE_DIFFUSION_ITERATIONS_NUMBER = 5
-intermediary_images_number: int = 0
 
 
 def handle_exception(exc_type, exc_value, exc_traceback):
@@ -39,37 +37,12 @@ vae = pipe.vae
 pipe.scheduler = EulerDiscreteScheduler.from_config(pipe.scheduler.config, timestep_spacing="trailing")
 pipe.enable_sequential_cpu_offload()
 
-def latents_to_pil(latents):
-    latents = (1 / 0.18215) * latents
-    with torch.no_grad():
-        image = vae.decode(latents).sample
-    image = (image / 2 + 0.5).clamp(0, 1)
-    image = image.detach().cpu().permute(0, 2, 3, 1).numpy()
-    images = (image * 255).round().astype("uint8")
-    pil_images = [Image.fromarray(image) for image in images]
-    return pil_images
-
-
 def latents_callback(i, t, latents):
     progress = int(i / (STABLE_DIFFUSION_ITERATIONS_NUMBER - 1) * 100)
     # Do not save 100% progress in callback. We want to do this when all is over.
     progress = progress if progress < 100 else None
 
     intermediary_img_path = None
-    if intermediary_images_number > 0:
-        iterations_to_generate = set(
-            list(
-                range(0, STABLE_DIFFUSION_ITERATIONS_NUMBER - 1,
-                      int((STABLE_DIFFUSION_ITERATIONS_NUMBER - 1) / intermediary_images_number)
-                      )
-            )[:intermediary_images_number]
-        )
-        if i in iterations_to_generate:
-            image = latents_to_pil(latents)
-            rgb_img = image[0].convert('RGB').resize((256, 256))
-            intermediary_img_path = f"output/iteration_{i}.jpg"
-            rgb_img.save(intermediary_img_path, optimize=True, quality=50)
-
     update_status(progress=progress, new_image_path=intermediary_img_path)
 
 
@@ -122,5 +95,4 @@ async def main():
 
 
 if __name__ == '__main__':
-    intermediary_images_number = int(sys.argv[1])
     asyncio.run(main())
