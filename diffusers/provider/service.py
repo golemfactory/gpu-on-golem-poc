@@ -36,10 +36,8 @@ unet.load_state_dict(load_file("./sdxl_lightning_4step_unet.safetensors"))
 pipe = StableDiffusionXLPipeline.from_pretrained("./stable-diffusion-xl-base-1.0", unet=unet, torch_dtype=torch.float16, variant="fp16").to(
     "cuda")
 vae = pipe.vae
-
-# Ensure sampler uses "trailing" timesteps.
 pipe.scheduler = EulerDiscreteScheduler.from_config(pipe.scheduler.config, timestep_spacing="trailing")
-
+pipe.enable_sequential_cpu_offload()
 
 def latents_to_pil(latents):
     latents = (1 / 0.18215) * latents
@@ -105,13 +103,14 @@ async def main():
                 phrase = f.readline()
                 if len(phrase.strip()) > 0:
                     logger.info('Running generation')
-                    image = pipe(
-                        phrase,
-                        callback=latents_callback,
-                        callback_steps=1,
-                        num_inference_steps=4,
-                        guidance_scale=0
-                    ).images[0]
+                    with torch.inference_mode():
+                        image = pipe(
+                            phrase,
+                            callback=latents_callback,
+                            callback_steps=1,
+                            num_inference_steps=4,
+                            guidance_scale=0
+                        ).images[0]
                     logger.info('Saving image')
                     rgb_img = image.convert('RGB')
                     rgb_img.save("./output/img.jpg", optimize=True, quality=80)
