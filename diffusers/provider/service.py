@@ -36,6 +36,7 @@ pipe = StableDiffusionXLPipeline.from_pretrained("./stable-diffusion-xl-base-1.0
 pipe.scheduler = EulerDiscreteScheduler.from_config(pipe.scheduler.config, timestep_spacing="trailing")
 pipe.enable_sequential_cpu_offload()
 
+
 def latents_callback(i, t, latents):
     progress = int(i / (STABLE_DIFFUSION_ITERATIONS_NUMBER - 1) * 100)
     # Do not save 100% progress in callback. We want to do this when all is over.
