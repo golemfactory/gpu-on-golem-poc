@@ -31,10 +31,10 @@ sys.excepthook = handle_exception
 
 unet = UNet2DConditionModel.from_config("./stable-diffusion-xl-base-1.0", subfolder="unet").to("cuda", torch.float16)
 unet.load_state_dict(load_file("./sdxl_lightning_4step_unet.safetensors"))
-pipe = StableDiffusionXLPipeline.from_pretrained("./stable-diffusion-xl-base-1.0", unet=unet, torch_dtype=torch.float16, variant="fp16").to("cuda")
-
-# Ensure sampler uses "trailing" timesteps.
+pipe = StableDiffusionXLPipeline.from_pretrained("./stable-diffusion-xl-base-1.0", unet=unet, torch_dtype=torch.float16, variant="fp16").to(
+    "cuda")
 pipe.scheduler = EulerDiscreteScheduler.from_config(pipe.scheduler.config, timestep_spacing="trailing")
+pipe.enable_sequential_cpu_offload()
 
 
 def latents_callback(i, t, latents):
