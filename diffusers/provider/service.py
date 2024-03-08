@@ -75,14 +75,13 @@ async def main():
                 phrase = f.readline()
                 if len(phrase.strip()) > 0:
                     logger.info('Running generation')
-                    with torch.inference_mode():
-                        image = pipe(
-                            phrase,
-                            callback=latents_callback,
-                            callback_steps=1,
-                            num_inference_steps=4,
-                            guidance_scale=0
-                        ).images[0]
+                    image = pipe(
+                        phrase,
+                        callback=latents_callback,
+                        callback_steps=1,
+                        num_inference_steps=4,
+                        guidance_scale=0
+                    ).images[0]
                     logger.info('Saving image')
                     rgb_img = image.convert('RGB')
                     rgb_img.save("./output/img.jpg", optimize=True, quality=80)
