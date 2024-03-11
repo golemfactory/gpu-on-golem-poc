@@ -3,7 +3,26 @@ import { renderIcon } from 'assets/utils';
 import { Locked, Terms, useLocked } from 'components';
 
 function Form({ value, onChange, error, disabled, onSubmit, terms }: useFormType) {
-  const { locked, until, onUpdate } = useLocked();
+  const { limited, locked, until, onUpdate } = useLocked();
+
+  const renderLockTime = (time: string | undefined) => {
+    if (!time) return '';
+
+    const seconds = parseInt(time);
+
+    if (isNaN(seconds)) return '';
+
+    const minutes = Math.floor(seconds / 60);
+    const hours = Math.floor(minutes / 60);
+
+    if (hours > 0) {
+      return `${hours} hour${hours > 1 ? 's' : ''}`;
+    } else if (minutes > 0) {
+      return `${minutes} minute${minutes > 1 ? 's' : ''}`;
+    } else {
+      return `${seconds} second${seconds > 1 ? 's' : ''}`;
+    }
+  };
 
   return (
     <>
@@ -20,11 +39,11 @@ function Form({ value, onChange, error, disabled, onSubmit, terms }: useFormType
           value={value}
           onChange={onChange}
           placeholder="Type something"
-          disabled={disabled || !!until}
+          disabled={disabled || limited}
         />
         <button
           className="py-[12px] px-[12px] text-14 tracking-[2px] hover:bg-blue hover:text-white focus:outline-none focus:ring disabled:border-grey disabled:bg-grey disabled:text-black md:px-[30px]"
-          disabled={disabled || !!until}
+          disabled={disabled || limited}
           onClick={onSubmit}
         >
           <Image
@@ -43,14 +62,17 @@ function Form({ value, onChange, error, disabled, onSubmit, terms }: useFormType
         )}
       </form>
       <div className="mx-auto flex flex-col items-center gap-10 md:flex-row">
-        {!!until ? (
+        {limited ? (
           <div className="bg-white p-[12px] text-[12px] font-light uppercase">
-            <Locked until={until} onUpdate={onUpdate} />
+            <Locked until={until!} onUpdate={onUpdate} />
           </div>
         ) : (
           locked && (
             <div className="bg-white p-[12px] text-[12px] font-light uppercase">
-              Use limit: <span className="text-blue">One per hour</span>
+              Use limit:{' '}
+              <span className="text-blue">
+                {process.env.NEXT_PUBLIC_LOCK_COUNT} per {renderLockTime(process.env.NEXT_PUBLIC_LOCK_TIME_IN_SEC)}
+              </span>
             </div>
           )
         )}

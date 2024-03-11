@@ -1,13 +1,19 @@
 import ReactCountdown, { CountdownRenderProps } from 'react-countdown';
 
-function Locked({ until, onUpdate }: { until: number | null; onUpdate: (value: number | null) => void }) {
+function Locked({
+  until,
+  onUpdate,
+}: {
+  until: number | null;
+  onUpdate: (value: number | null, count: number) => void;
+}) {
   return (
     <ReactCountdown
       date={!!until ? new Date(until) : undefined}
       intervalDelay={0}
       precision={0}
       renderer={renderer}
-      onComplete={() => onUpdate(null)}
+      onComplete={() => onUpdate(null, 0)}
     />
   );
 }

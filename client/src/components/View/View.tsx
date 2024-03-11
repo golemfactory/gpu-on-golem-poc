@@ -20,7 +20,7 @@ function View({
   blocked?: boolean;
   onReset?: () => void;
 }) {
-  const { locked, until, onUpdate } = useLocked();
+  const { limited, locked, count, until, onUpdate } = useLocked();
 
   const data = useSelector(selectData);
 
@@ -44,7 +44,11 @@ function View({
 
   useEffect(() => {
     if (locked && !intermediary_image && !!src) {
-      onUpdate(Date.now() + 60 * 60 * 1000);
+      if (!count) {
+        onUpdate(Date.now() + parseFloat(process.env.NEXT_PUBLIC_LOCK_TIME_IN_SEC!) * 1000, 1);
+      } else {
+        onUpdate(until!, count + 1);
+      }
     }
   }, [locked, intermediary_image, src]);
 
@@ -58,12 +62,12 @@ function View({
           <button
             className="flex h-[44px] w-[288px] flex-col items-center justify-center bg-blue text-[12px] leading-[1.2] tracking-[2px] disabled:border-grey disabled:bg-grey disabled:text-black md:w-[215px]"
             onClick={onReset}
-            disabled={disabled || !!until}
+            disabled={disabled || limited}
           >
             Try again
-            {!!until && <Locked until={until} onUpdate={onUpdate} />}
+            {limited && <Locked until={until!} onUpdate={onUpdate} />}
           </button>
-          {!!until && (
+          {limited && (
             <button
               className="flex h-[44px] w-[288px] items-center justify-center bg-blue text-[12px] leading-[1.2] tracking-[2px] md:w-[215px]"
               onClick={onReset}

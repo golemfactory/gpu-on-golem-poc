@@ -5,9 +5,14 @@ import { useWeb3ModalAccount, useWeb3ModalProvider } from '@web3modal/ethers/rea
 import { BrowserProvider, Contract, formatUnits } from 'ethers';
 import abi from './erc20.json';
 
+enum SupportedChains {
+  Ethereum = 1,
+  Polygon = 137,
+}
+
 const glm_address = {
-  1: '0x7DD9c5Cba05E151C895FDe1CF355C9A1D5DA6429',
-  137: '0x0B220b82F3eA3B7F6d9A1D8ab58930C064A2b5Bf',
+  [SupportedChains.Ethereum]: '0x7DD9c5Cba05E151C895FDe1CF355C9A1D5DA6429',
+  [SupportedChains.Polygon]: '0x0B220b82F3eA3B7F6d9A1D8ab58930C064A2b5Bf',
 };
 
 export const useBalance = () => {
@@ -33,7 +38,10 @@ export const useBalance = () => {
   };
 
   useEffect(() => {
-    walletProvider && address && chainId && handleBalance();
+    walletProvider &&
+      address &&
+      [SupportedChains.Ethereum, SupportedChains.Polygon].includes(chainId!) &&
+      handleBalance();
   }, [walletProvider, address, chainId]);
 
   return { balance };

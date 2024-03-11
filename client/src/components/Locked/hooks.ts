@@ -1,12 +1,22 @@
 import { useEffect, useState } from 'react';
 import { useLocalStorage } from 'react-use';
+import { useWeb3ModalProvider } from '@web3modal/ethers/react';
 import { useBalance } from 'hooks/useBalance';
 
 export const useLocked = () => {
+  const { walletProvider } = useWeb3ModalProvider();
   const { balance } = useBalance();
-  const [until, update] = useLocalStorage<number | null>('golem-locked-until', undefined);
-  const locked = balance === null || parseFloat(balance!) < parseFloat(process.env.NEXT_PUBLIC_GLM_LIMIT!);
-  const unlocked = balance !== null && parseFloat(balance!) >= parseFloat(process.env.NEXT_PUBLIC_GLM_LIMIT!);
+  const [count, updateCount] = useLocalStorage<number>('golem-locked-count', 0);
+  const [until, updateUntil] = useLocalStorage<number | null>('golem-locked-until', null);
+  const [locked, setLocked] = useState(true);
+
+  useEffect(() => {
+    if (!walletProvider) {
+      setLocked(true);
+    } else {
+      setLocked(!(parseFloat(balance!) >= parseFloat(process.env.NEXT_PUBLIC_GLM_LIMIT!)));
+    }
+  }, [walletProvider, balance]);
 
   const [, setCurrentTime] = useState(Date.now());
 
@@ -19,15 +29,20 @@ export const useLocked = () => {
   }, []);
 
   useEffect(() => {
-    if (unlocked || (until !== null && until! < Date.now())) {
-      update(null);
+    if (!locked || (until !== null && until! < Date.now())) {
+      updateCount(0);
+      updateUntil(null);
     }
-  }, [unlocked, until]);
+  }, [locked, until]);
 
   return {
+    limited: count! >= Number(process.env.NEXT_PUBLIC_LOCK_COUNT) && !!until,
     locked,
-    unlocked,
+    count,
     until,
-    onUpdate: (value: number | null) => update(value),
+    onUpdate: (until: number | null, count: number) => {
+      updateCount(count);
+      updateUntil(until);
+    },
   };
 };
