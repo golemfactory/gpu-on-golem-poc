@@ -76,11 +76,9 @@ function Form({ value, onChange, error, disabled, onSubmit, terms }: useFormType
             </div>
           )
         )}
-        {!disabled && (
-          <div className="relative flex justify-between">
-            <Terms disabled={disabled} terms={terms} />
-          </div>
-        )}
+        <div className="relative flex min-w-[216px] justify-between">
+          {!disabled && <Terms disabled={disabled} terms={terms} />}
+        </div>
       </div>
     </>
   );
