@@ -15,6 +15,8 @@ function Header() {
 
   const renderBalance = () => `${address && balance ? balance : '0.00'} GLM`;
 
+  const handleRedirect = () => window.open('https://glm.golem.network/', '_blank');
+
   return (
     <>
       <header className="absolute inset-x-0 top-8 flex items-center justify-between px-12 md:flex-row lg:top-12 lg:px-20">
@@ -33,10 +35,13 @@ function Header() {
             {renderBalance()}
           </div>
           <div className="flex gap-[0.8rem]">
-            {/*<button className="hidden items-center bg-transparent py-[12px] px-[24px] font-semibold tracking-[2px] text-blue hover:bg-ghost md:flex">*/}
-            {/*  <Image className="mr-4" src={renderIcon('cart')} alt="glm" width={12} height={12} />*/}
-            {/*  Buy GLM*/}
-            {/*</button>*/}
+            <button
+              className="hidden items-center bg-transparent py-[12px] px-[24px] font-semibold tracking-[2px] text-blue hover:bg-ghost md:flex"
+              onClick={handleRedirect}
+            >
+              <Image className="mr-4" src={renderIcon('cart')} alt="glm" width={12} height={12} />
+              Buy GLM
+            </button>
             <button className="min-w-[185px] py-[12px] px-[24px] font-semibold tracking-[2px]" onClick={() => open()}>
               {address ? ellipsis(address) : 'Connect Wallet'}
             </button>
@@ -48,10 +53,13 @@ function Header() {
           <Image className="mr-4" src={renderIcon('glm')} alt="glm" width={18} height={18} />
           {renderBalance()}
         </div>
-        {/*<button className="flex items-center bg-transparent py-[12px] px-[24px] font-semibold tracking-[2px] text-blue hover:bg-ghost">*/}
-        {/*  <Image className="mr-4" src={renderIcon('cart')} alt="glm" width={12} height={12} />*/}
-        {/*  Buy GLM*/}
-        {/*</button>*/}
+        <button
+          className="flex items-center bg-transparent py-[12px] px-[24px] font-semibold tracking-[2px] text-blue hover:bg-ghost"
+          onClick={handleRedirect}
+        >
+          <Image className="mr-4" src={renderIcon('cart')} alt="glm" width={12} height={12} />
+          Buy GLM
+        </button>
       </div>
     </>
   );
