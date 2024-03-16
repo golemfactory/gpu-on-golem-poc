@@ -1,8 +1,9 @@
 import Image from 'next/image';
+import Link from 'next/link';
 import { renderIcon } from 'assets/utils';
-import { Locked, Terms, useLocked } from 'components';
+import { Locked, useLocked } from 'components';
 
-function Form({ value, onChange, error, disabled, onSubmit, terms }: useFormType) {
+function Form({ value, onChange, error, disabled, onSubmit }: useFormType) {
   const { limited, locked, until, onUpdate } = useLocked();
 
   const renderLockTime = (time: string | undefined) => {
@@ -76,8 +77,15 @@ function Form({ value, onChange, error, disabled, onSubmit, terms }: useFormType
             </div>
           )
         )}
-        <div className="relative flex min-w-[216px] justify-between">
-          {!disabled && <Terms disabled={disabled} terms={terms} />}
+        <div className="w-[250px] text-left">
+          {!disabled && (
+            <span className="text-[12px] font-light uppercase">
+              By clicking "Generate" you confirm acceptance of our{' '}
+              <Link className="underline" href="/terms">
+                Terms of Use
+              </Link>
+            </span>
+          )}
         </div>
       </div>
     </>

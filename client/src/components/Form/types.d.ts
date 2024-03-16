@@ -17,5 +17,4 @@ type useFormType = {
   onSubmit: FormEventType;
   onExample: Noop;
   onClear: Noop;
-  terms: useTermsType;
 };

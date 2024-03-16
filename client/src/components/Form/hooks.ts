@@ -3,7 +3,6 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useEffectOnce } from 'react-use';
 import { adjectives, animals, colors, uniqueNamesGenerator } from 'unique-names-generator';
 import { Api } from 'enums/api';
-import { useCheckbox, useTermsRemember } from 'components';
 import { gaEvent } from 'services/GoogleAnalytics';
 import { selectJobId, setJobId } from 'slices/data';
 import { setQueue } from 'slices/queue';
@@ -37,8 +36,6 @@ export function useForm(): useFormType {
 
   const [value, setValue] = useState<string>('');
   const { error, onError } = useFormError();
-  const terms_remember = useTermsRemember();
-  const terms = useCheckbox(terms_remember.value);
 
   const disabled = !!job_id;
 
@@ -82,7 +79,6 @@ export function useForm(): useFormType {
     e.preventDefault();
 
     if (!value.length) return onError('This field is required');
-    if (!terms.on) return terms.onError('Consent is required');
 
     const result = await handlePost(url(Api.txt2img, false), {
       body: queryBuild({ prompt: value }),
@@ -111,6 +107,5 @@ export function useForm(): useFormType {
     onSubmit: handleSubmit,
     onExample: handleExample,
     onClear: handleClear,
-    terms,
   };
 }
