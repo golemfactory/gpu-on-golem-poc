@@ -8,7 +8,7 @@ const projectId = process.env.NEXT_PUBLIC_PROJECT_ID;
 if (!projectId) throw new Error('Project ID is not defined');
 
 const metadata = {
-  name: process.env.NEXT_PUBLIC_PROJECT_NAME ?? '',
+  name: process.env.NEXT_PUBLIC_PROJECT_TITLE ?? '',
   description: '',
   url: 'https://image.golem.network/',
   icons: [],
