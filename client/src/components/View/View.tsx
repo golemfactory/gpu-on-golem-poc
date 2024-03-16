@@ -73,14 +73,6 @@ function View({
             Try again
             {limited && <Locked until={until!} onUpdate={onUpdate} />}
           </button>
-          {limited && (
-            <button
-              className="flex h-[44px] w-[288px] items-center justify-center bg-blue text-[12px] leading-[1.2] tracking-[2px] md:w-[215px]"
-              onClick={onReset}
-            >
-              Go to homepage
-            </button>
-          )}
         </div>
         {!blocked && (
           <div className="flex flex-col gap-2">

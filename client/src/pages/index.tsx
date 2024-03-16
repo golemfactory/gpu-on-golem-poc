@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Status } from 'enums/status';
 import { Error, Form, Hero, Layout, Loader, Queue, Result, useForm, useNodes, useQueue, useResult } from 'components';
 import { gaEvent } from 'services/GoogleAnalytics';
-import { selectJobId } from 'slices/data';
+import { resetData, selectJobId } from 'slices/data';
 import { selectError } from 'slices/error';
 import { resetQueue } from 'slices/queue';
 import { selectStatus, setStatus } from 'slices/status';
@@ -20,8 +20,8 @@ function Main() {
 
   useQueue();
   useNodes();
+  useResult();
   const { value, onExample, ...form } = useForm();
-  const { onReset } = useResult();
 
   const start_queued = useRef<number>();
   const stop_queued = useRef<number>();
@@ -64,8 +64,8 @@ function Main() {
   const handleReset = () => {
     dispatch(setStatus(Status.Ready));
     dispatch(resetQueue());
+    dispatch(resetData());
     onExample();
-    onReset();
   };
 
   const handleReload = () => window.location.reload();

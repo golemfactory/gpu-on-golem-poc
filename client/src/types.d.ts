@@ -5,6 +5,7 @@ type Data = {
   job_id: string | undefined;
   progress: number | undefined;
   provider: string | undefined;
+  socketUrl: string | null;
 };
 
 type NodeInstance = {
