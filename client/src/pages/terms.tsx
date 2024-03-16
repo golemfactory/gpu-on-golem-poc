@@ -123,6 +123,12 @@ function Terms() {
                   connection with the Services are subject to their own terms, and we are not responsible for third
                   party products.
                 </>,
+                <>
+                  {underline('Limitations of use.')} Golem may limit the access to the Golem Art Diffuser to the users
+                  that have not linked their wallet with a amount of {process.env.NEXT_PUBLIC_GLM_LIMIT} GLM or minimum
+                  amount determined each time by Golem. In particular, Golem can limit the number of interactions that
+                  can be conducted as part of the Services within the particular time period.
+                </>,
               ])}
               {renderList('Content', [
                 <>
