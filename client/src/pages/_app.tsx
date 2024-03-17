@@ -13,9 +13,15 @@ function App({ Component, pageProps, ...rest }: AppProps) {
   return (
     <>
       <Head>
-        <title>{process.env.NEXT_PUBLIC_PROJECT_NAME}</title>
-        <meta name="title" content={process.env.NEXT_PUBLIC_PROJECT_NAME} />
-        <meta name="description" content="Use AI harnessed by the Golem Network to produce artwork from keywords." />
+        <title>{process.env.NEXT_PUBLIC_PROJECT_TITLE}</title>
+        <meta name="title" content={process.env.NEXT_PUBLIC_PROJECT_TITLE} />
+        <meta name="description" content={process.env.NEXT_PUBLIC_PROJECT_DESCRIPTION} />
+        <meta property="og:title" content={process.env.NEXT_PUBLIC_PROJECT_TITLE} />
+        <meta property="og:description" content={process.env.NEXT_PUBLIC_PROJECT_DESCRIPTION} />
+        <meta property="og:type" content="website" />
+        <meta property="og:image" content="https://image.golem.network/image.png" />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
       </Head>
       <GoogleAnalytics />
       <CookieBanner />
