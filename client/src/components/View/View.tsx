@@ -60,9 +60,11 @@ function View({
     <div className="flex flex-col gap-8 md:flex-row">
       <div className="relative mx-auto w-[288px] bg-white p-[1.6rem]">
         <Placeholder>
-          {!intermediary_image && !src
-            ? null
-            : !!src && <Image src={src} alt={value} fill className="cursor-pointer" onClick={handleOpen} />}
+          {!intermediary_image && !src ? (
+            <div className="h-full w-full bg-grey motion-safe:animate-pulse" />
+          ) : (
+            !!src && <Image src={src} alt={value} fill className="cursor-pointer" onClick={handleOpen} />
+          )}
         </Placeholder>
       </div>
       <div className="flex flex-col items-center justify-center gap-10">

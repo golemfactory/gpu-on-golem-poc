@@ -1,6 +1,7 @@
 import { ReactNode } from 'react';
 import { useSelector } from 'react-redux';
 import Image from 'next/image';
+import { twMerge } from 'tailwind-merge';
 import { Status } from 'enums/status';
 import { renderIcon } from 'assets/utils';
 import { Copy, Process, View } from 'components';
@@ -16,7 +17,9 @@ function Result({ value, onReset }: { value: string; onReset: Noop }) {
 
   const handleOpen = () => window.open('https://discord.com/channels/684703559954333727/1072529851346595840');
 
-  const renderText = (children: ReactNode) => <p className="mt-[1.6rem] text-14 font-light">{children}</p>;
+  const renderText = (children: ReactNode, className?: string) => (
+    <p className={twMerge('mt-[1.6rem] text-14 font-light', className)}>{children}</p>
+  );
 
   return (
     <div className="my-[12rem] md:mb-0 xl:mt-[12rem]">
@@ -37,6 +40,7 @@ function Result({ value, onReset }: { value: string; onReset: Noop }) {
           <View value={value} onReset={onReset} />
           {renderText(
             'Want to give us feedback? Go to our Discord, find the channel "image-generator-discussion" and get involved!',
+            'md:mt-[4.6rem]',
           )}
         </div>
       )}
