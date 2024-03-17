@@ -54,6 +54,8 @@ function View({
     }
   }, [locked, intermediary_image, src]);
 
+  const total = Number(process.env.NEXT_PUBLIC_LOCK_COUNT);
+
   return (
     <div className="flex flex-col gap-8 md:flex-row">
       <div className="relative mx-auto w-[288px] bg-white p-[1.6rem]">
@@ -71,6 +73,11 @@ function View({
             disabled={disabled || limited}
           >
             Try again
+            {!disabled && Boolean(count) && count !== total && (
+              <span>
+                ({total - count!} of {total} left)
+              </span>
+            )}
             {limited && <Locked until={until!} onUpdate={onUpdate} />}
           </button>
         </div>
