@@ -32,7 +32,7 @@ function Form({ value, onChange, onClear, onExample, error, disabled, onSubmit }
         onSubmit={onSubmit}
       >
         <input
-          className="w-full border-[1px] border-solid border-grey bg-[#fafafa] py-[1.7rem] pl-[1.2rem] pr-[2.4rem] font-normal focus:border-blue focus:outline-none focus:ring-1 focus:ring-blue disabled:bg-[#f9f9f9] disabled:text-stone"
+          className="w-full rounded-none border-[1px] border-solid border-grey bg-paper py-[1.7rem] pl-[1.2rem] pr-[2.4rem] font-normal focus:border-blue focus:outline-none focus:ring-1 focus:ring-blue disabled:bg-[#f9f9f9] disabled:text-stone"
           id="phrase"
           name="phrase"
           type="text"

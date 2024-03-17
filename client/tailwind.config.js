@@ -6,6 +6,7 @@ module.exports = {
       white: '#ffffff',
       blue: '#181ea9',
       black: '#000000',
+      paper: '#fafafa',
       ghost: '#f6f8fc',
       grey: '#cfcfcf',
       stone: '#9c9c9c',

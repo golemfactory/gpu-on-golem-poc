@@ -49,29 +49,32 @@ function Header() {
           </div>
           <div className="flex gap-[0.8rem]">
             <button
-              className="hidden items-center bg-transparent py-[12px] px-[24px] font-semibold tracking-[2px] text-blue hover:bg-ghost md:flex"
+              className="hidden items-center bg-transparent py-[1.2rem] px-[2.4rem] font-semibold tracking-[2px] text-blue hover:bg-ghost md:flex"
               onClick={handleRedirect}
             >
               <Image className="mr-4" src={renderIcon('cart')} alt="glm" width={12} height={12} />
-              Buy GLM
+              Get GLM
             </button>
-            <button className="min-w-[185px] py-[12px] px-[24px] font-semibold tracking-[2px]" onClick={() => open()}>
+            <button
+              className="min-w-[185px] py-[1.2rem] px-[2.4rem] font-semibold tracking-[2px]"
+              onClick={() => open()}
+            >
               {address ? ellipsis(address) : 'Connect Wallet'}
             </button>
           </div>
         </div>
       </header>
-      <div className="fixed inset-x-0 bottom-0 z-10 flex justify-between bg-white p-[12px] md:hidden">
+      <div className="fixed inset-x-0 bottom-0 z-10 flex justify-between bg-white p-[1.2rem] md:hidden">
         <div className="flex items-center text-[14px]">
           <Image className="mr-4" src={renderIcon('glm')} alt="glm" width={18} height={18} />
           {renderBalance()}
         </div>
         <button
-          className="flex items-center bg-transparent py-[12px] px-[24px] font-semibold tracking-[2px] text-blue hover:bg-ghost"
+          className="flex items-center bg-transparent py-[1.2rem] px-[2.4rem] font-semibold tracking-[2px] text-blue hover:bg-ghost"
           onClick={handleRedirect}
         >
           <Image className="mr-4" src={renderIcon('cart')} alt="glm" width={12} height={12} />
-          Buy GLM
+          Get GLM
         </button>
       </div>
     </>

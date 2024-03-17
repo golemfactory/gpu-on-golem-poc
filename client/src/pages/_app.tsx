@@ -22,6 +22,7 @@ function App({ Component, pageProps, ...rest }: AppProps) {
         <meta property="og:image" content="https://image.golem.network/image.png" />
         <meta property="og:image:width" content="1200" />
         <meta property="og:image:height" content="630" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
       </Head>
       <GoogleAnalytics />
       <CookieBanner />
