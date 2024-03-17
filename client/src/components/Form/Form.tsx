@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { renderIcon } from 'assets/utils';
 import { Locked, useLocked } from 'components';
 
-function Form({ value, onChange, error, disabled, onSubmit }: useFormType) {
+function Form({ value, onChange, onClear, onExample, error, disabled, onSubmit }: useFormType) {
   const { limited, locked, until, onUpdate } = useLocked();
 
   const renderLockTime = (time: string | undefined) => {
@@ -39,13 +39,19 @@ function Form({ value, onChange, error, disabled, onSubmit }: useFormType) {
           autoComplete="off"
           value={value}
           onChange={onChange}
-          placeholder="Type something"
+          onFocus={onClear}
+          onBlur={(e) => {
+            if (!Boolean(value) && e.relatedTarget?.id !== 'submit') {
+              onExample();
+            }
+          }}
+          placeholder="Enter your prompt"
           disabled={disabled || limited}
         />
         <button
+          id="submit"
           className="py-[12px] px-[12px] text-14 tracking-[2px] hover:bg-blue hover:text-white focus:outline-none focus:ring disabled:border-grey disabled:bg-grey disabled:text-black md:px-[30px]"
           disabled={disabled || limited}
-          onClick={onSubmit}
         >
           <Image
             className="md:hidden"
@@ -57,7 +63,7 @@ function Form({ value, onChange, error, disabled, onSubmit }: useFormType) {
           <span className="hidden md:block">Generate</span>
         </button>
         {error?.length && (
-          <span className="absolute top-[7.5rem] right-0 text-right text-10 font-light text-[#ff0000] sm:right-[17rem] sm:max-w-[50%]">
+          <span className="absolute top-[8rem] right-[7.7rem] text-right text-10 font-light text-[#ff0000] sm:right-[18.7rem] sm:max-w-[50%]">
             {error}
           </span>
         )}
