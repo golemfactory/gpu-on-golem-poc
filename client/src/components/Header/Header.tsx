@@ -1,30 +1,17 @@
 'use client';
 
-import { useDispatch } from 'react-redux';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useWeb3Modal, useWeb3ModalAccount } from '@web3modal/ethers/react';
 import { useBalance } from 'hooks/useBalance';
-import { Status } from 'enums/status';
 import { renderIcon } from 'assets/utils';
-import { resetData } from 'slices/data';
-import { resetQueue } from 'slices/queue';
-import { setStatus } from 'slices/status';
 import ellipsis from 'utils/ellipsis';
 
-function Header() {
-  const dispatch = useDispatch();
-
+function Header({ onReset }: { onReset?: Noop }) {
   const { open } = useWeb3Modal();
   const { address } = useWeb3ModalAccount();
 
   const { balance } = useBalance();
-
-  const handleReset = () => {
-    dispatch(setStatus(Status.Ready));
-    dispatch(resetQueue());
-    dispatch(resetData());
-  };
 
   const renderBalance = () => `${address && balance ? balance : '0.00'} GLM`;
 
@@ -33,7 +20,7 @@ function Header() {
   return (
     <>
       <header className="absolute inset-x-0 top-8 flex items-center justify-between px-12 md:flex-row lg:top-12 lg:px-20">
-        <Link href="/" onClick={handleReset}>
+        <Link href="/" onClick={onReset}>
           <Image
             className="max-w-[90px] md:max-w-[135px]"
             src={renderIcon('logo')}

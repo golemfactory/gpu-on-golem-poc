@@ -15,6 +15,5 @@ type useFormType = {
   error: ErrorType;
   disabled: boolean;
   onSubmit: FormEventType;
-  onExample: Noop;
   onClear: Noop;
 };

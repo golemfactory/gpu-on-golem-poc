@@ -49,8 +49,6 @@ export function useForm(): useFormType {
   };
 
   useEffectOnce(() => {
-    handleGenerate();
-
     return () => {
       setValue('');
     };
@@ -105,7 +103,6 @@ export function useForm(): useFormType {
     error,
     disabled,
     onSubmit: handleSubmit,
-    onExample: handleExample,
     onClear: handleClear,
   };
 }

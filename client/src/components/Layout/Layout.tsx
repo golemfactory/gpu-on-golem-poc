@@ -2,10 +2,10 @@ import { PropsWithChildren } from 'react';
 import backgroundJPEG from 'assets/background.jpeg';
 import { Footer, Header } from 'components';
 
-function Layout({ children, footer = true }: { footer?: boolean } & PropsWithChildren) {
+function Layout({ children, onReset, footer = true }: { onReset?: Noop; footer?: boolean } & PropsWithChildren) {
   return (
     <>
-      <Header />
+      <Header onReset={onReset} />
       <main
         className="bg-cover bg-center bg-no-repeat"
         style={{ backgroundImage: footer ? `url(${backgroundJPEG.src})` : '' }}
