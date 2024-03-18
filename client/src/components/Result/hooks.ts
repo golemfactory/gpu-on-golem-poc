@@ -1,9 +1,19 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import useWebSocket from 'react-use-websocket';
 import { Api } from 'enums/api';
 import { Status } from 'enums/status';
-import { resetData, selectData, selectEta, selectJobId, setData, setEta, setJobId, setProvider } from 'slices/data';
+import {
+  selectData,
+  selectEta,
+  selectJobId,
+  selectSocketUrl,
+  setData,
+  setEta,
+  setJobId,
+  setProvider,
+  setSocketUrl,
+} from 'slices/data';
 import { selectQueue, setQueue } from 'slices/queue';
 import { selectStatus, setStatus } from 'slices/status';
 import { useStatusState } from 'utils/hooks';
@@ -11,6 +21,7 @@ import url from 'utils/url';
 
 export function useResult() {
   const dispatch = useDispatch();
+  const socketUrl = useSelector(selectSocketUrl);
   const job_id = useSelector(selectJobId);
   const data = useSelector(selectData);
   const eta = useSelector(selectEta);
@@ -19,11 +30,10 @@ export function useResult() {
 
   const { forState } = useStatusState();
 
-  const [socketUrl, setSocketUrl] = useState<string | null>(null);
   const { lastMessage, readyState, getWebSocket } = useWebSocket(socketUrl);
 
   useEffect(() => {
-    !!job_id && setSocketUrl(url(Api.txt2img, true, job_id));
+    !!job_id && dispatch(setSocketUrl(url(Api.txt2img, true, job_id)));
   }, [job_id]);
 
   useEffect(() => {
@@ -56,11 +66,4 @@ export function useResult() {
       }
     }
   }, [dispatch, readyState, lastMessage, data.provider, job_id, status, queue, forState, getWebSocket]);
-
-  const handleReset = () => {
-    dispatch(resetData());
-    setSocketUrl(null);
-  };
-
-  return { onReset: handleReset };
 }

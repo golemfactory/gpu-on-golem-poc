@@ -1,22 +1,9 @@
 import { useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Status } from 'enums/status';
-import {
-  Background,
-  Error,
-  Form,
-  gaEvent,
-  Hero,
-  Layout,
-  Loader,
-  Queue,
-  Result,
-  useForm,
-  useNodes,
-  useQueue,
-  useResult,
-} from 'components';
-import { selectJobId } from 'slices/data';
+import { Error, Form, Hero, Layout, Loader, Queue, Result, useForm, useNodes, useQueue, useResult } from 'components';
+import { gaEvent } from 'services/GoogleAnalytics';
+import { resetData, selectJobId } from 'slices/data';
 import { selectError } from 'slices/error';
 import { resetQueue } from 'slices/queue';
 import { selectStatus, setStatus } from 'slices/status';
@@ -33,8 +20,8 @@ function Main() {
 
   useQueue();
   useNodes();
+  useResult();
   const { value, onExample, ...form } = useForm();
-  const { onReset } = useResult();
 
   const start_queued = useRef<number>();
   const stop_queued = useRef<number>();
@@ -77,27 +64,19 @@ function Main() {
   const handleReset = () => {
     dispatch(setStatus(Status.Ready));
     dispatch(resetQueue());
+    dispatch(resetData());
     onExample();
-    onReset();
   };
 
   const handleReload = () => window.location.reload();
 
   return (
     <Layout>
-      {notForState([Status.Processing, Status.Finished, Status.Blocked]) && <Background />}
       <Loader />
       {notForState([Status.Processing, Status.Finished, Status.Blocked, Status.Error]) && (
         <Hero>
           <Form value={value} onExample={onExample} {...form} />
         </Hero>
-      )}
-      {forState([Status.Ready]) && (
-        <p className="mt-[5.7rem] text-14">
-          We have integrated the AI Stable Diffusion image generator with the Golem Network to showcase its computation
-          possibilities with a GPU. We are currently using limited resources - 2 computers with a GPU, therefore, you
-          may encounter difficulties using the application.
-        </p>
       )}
       {forState([Status.Queued]) && <Queue />}
       {forState([Status.Processing, Status.Finished, Status.Blocked]) && <Result value={value} onReset={handleReset} />}

@@ -4,9 +4,11 @@ module.exports = {
   theme: {
     colors: {
       white: '#ffffff',
-      blue: '#007dff',
+      blue: '#181ea9',
       black: '#000000',
-      grey: '#c3c3c3',
+      paper: '#fafafa',
+      ghost: '#f6f8fc',
+      grey: '#cfcfcf',
       stone: '#9c9c9c',
       transparent: 'transparent',
     },
@@ -77,13 +79,6 @@ module.exports = {
           lineHeight: '4.1rem',
           letterSpacing: '0.025rem',
           fontWeight: '700',
-        },
-      ],
-      36: [
-        '3.6rem',
-        {
-          lineHeight: '4.4rem',
-          fontWeight: '500',
         },
       ],
     },

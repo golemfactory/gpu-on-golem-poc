@@ -7,7 +7,7 @@ function Copy({ value }: { value: string }) {
   const handleCopy = () => copyToClipboard(value);
 
   const sharedStyles =
-    'bg-transparent absolute right-[0.4rem] md:-right-[1.2rem] top-0 h-[1.8rem] w-[1.8rem] bg-center bg-no-repeat';
+    'bg-transparent absolute right-2.5 top-2.5 h-[1.8rem] w-[1.8rem] border-none bg-center bg-no-repeat';
 
   return copy.value ? (
     <div className={sharedStyles} style={{ backgroundImage: `url(${renderIcon('checkmark')})` }} />

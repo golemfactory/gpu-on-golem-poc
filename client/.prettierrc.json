@@ -1,5 +1,21 @@
 {
+  "plugins": ["@trivago/prettier-plugin-sort-imports"],
   "trailingComma": "all",
   "singleQuote": true,
-  "printWidth": 120
+  "semi": true,
+  "printWidth": 120,
+  "importOrder": [
+    "^react",
+    "^next",
+    "<THIRD_PARTY_MODULES>",
+    "enums",
+    "assets",
+    "components",
+    "services",
+    "slices",
+    "utils",
+    "^[./]"
+  ],
+  "importOrderSortSpecifiers": true,
+  "importOrderCaseInsensitive": true
 }

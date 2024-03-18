@@ -1,9 +1,9 @@
-import { ReactNode } from 'react';
+import { PropsWithChildren } from 'react';
 
-function Progress({ width, children }: { width: number; children: ReactNode }) {
+function Progress({ width, children }: { width: number } & PropsWithChildren) {
   return (
-    <div className="progress-bar">
-      <div className="progress-bar-indicator" style={{ maxWidth: `calc(${width}% - 0.4rem)` }} />
+    <div className="relative h-[48px] w-full border-[1px] border-solid border-grey bg-paper">
+      <div className="h-[47px] bg-grey" style={{ maxWidth: `${width}%` }} />
       {children}
     </div>
   );

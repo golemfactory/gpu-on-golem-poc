@@ -1,65 +1,99 @@
-import { twMerge } from 'tailwind-merge';
+import Image from 'next/image';
+import Link from 'next/link';
 import { renderIcon } from 'assets/utils';
-import { Terms } from 'components';
+import { Locked, useLocked } from 'components';
 
-function Form({ value, onChange, error, disabled, onSubmit, onExample, onClear, terms }: useFormType) {
+function Form({ value, onChange, onClear, onExample, error, disabled, onSubmit }: useFormType) {
+  const { limited, locked, until, onUpdate } = useLocked();
+
+  const renderLockTime = (time: string | undefined) => {
+    if (!time) return '';
+
+    const seconds = parseInt(time);
+
+    if (isNaN(seconds)) return '';
+
+    const minutes = Math.floor(seconds / 60);
+    const hours = Math.floor(minutes / 60);
+
+    if (hours > 0) {
+      return `${hours} hour${hours > 1 ? 's' : ''}`;
+    } else if (minutes > 0) {
+      return `${minutes} minute${minutes > 1 ? 's' : ''}`;
+    } else {
+      return `${seconds} second${seconds > 1 ? 's' : ''}`;
+    }
+  };
+
   return (
     <>
-      <form className="relative my-[2.6rem] flex justify-center text-12 text-black" onSubmit={onSubmit}>
-        <label
-          className={twMerge(
-            'min-w-[8.4rem] rounded-l-full bg-[#e8e8e8] p-[1.7rem] text-right',
-            disabled && 'text-[#6d6d6d]',
-          )}
-          htmlFor="phrase"
-        >
-          Type:
-        </label>
+      <form
+        className="relative flex justify-center gap-[0.8rem] bg-white p-[24px] text-12 text-black"
+        onSubmit={onSubmit}
+      >
         <input
-          className="w-full rounded-[0] bg-[#f9f9f9] py-[1.7rem] pl-[1.2rem] pr-[2.4rem] focus:outline-none focus:ring disabled:bg-[#f9f9f9] disabled:text-stone"
+          className="w-full rounded-none border-[1px] border-solid border-grey bg-paper py-[1.7rem] pl-[1.2rem] pr-[2.4rem] font-normal focus:border-blue focus:outline-none focus:ring-1 focus:ring-blue disabled:bg-[#f9f9f9] disabled:text-stone"
           id="phrase"
           name="phrase"
           type="text"
           autoComplete="off"
           value={value}
           onChange={onChange}
-          placeholder="Type something or generate new example"
-          disabled={disabled}
+          onFocus={onClear}
+          onBlur={(e) => {
+            if (!Boolean(value) && e.relatedTarget?.id !== 'submit') {
+              onExample();
+            }
+          }}
+          placeholder="Enter your prompt"
+          disabled={disabled || limited}
         />
-        {!!value && !disabled && (
-          <button
-            className="absolute top-[1.7rem] right-[15rem] h-[2rem] w-[2rem] bg-center bg-no-repeat"
-            type="button"
-            style={{ backgroundImage: `url(${renderIcon('clear')})` }}
-            onClick={onClear}
-          />
-        )}
         <button
-          className="min-w-[14.4rem] rounded-r-full bg-[right_2rem_center] bg-no-repeat p-[1.7rem] text-left text-14 focus:outline-none focus:ring disabled:bg-[#6d6d6d]"
-          style={{ backgroundImage: `url(${renderIcon('play')})` }}
-          disabled={disabled}
-          onClick={onSubmit}
+          id="submit"
+          className="py-[12px] px-[12px] text-14 tracking-[2px] hover:bg-blue hover:text-white focus:outline-none focus:ring disabled:border-grey disabled:bg-grey disabled:text-black md:px-[30px]"
+          disabled={disabled || limited}
         >
-          Generate
+          <Image
+            className="md:hidden"
+            src={renderIcon(disabled ? 'playBlack' : 'play')}
+            alt="generate image"
+            width={24}
+            height={24}
+          />
+          <span className="hidden md:block">Generate</span>
         </button>
         {error?.length && (
-          <span className="absolute top-[6.2rem] right-0 text-right text-10 text-[#ff0000] sm:right-[15.4rem] sm:max-w-[50%]">
+          <span className="absolute top-[8rem] right-[7.7rem] text-right text-10 font-light text-[#ff0000] sm:right-[18.7rem] sm:max-w-[50%]">
             {error}
           </span>
         )}
       </form>
-      {!disabled && (
-        <div className="relative flex justify-between sm:ml-[3rem] sm:-mt-[1.8rem] sm:ml-[8.4rem] sm:mr-[14.4rem]">
-          <Terms disabled={disabled} terms={terms} />
-          <button
-            className="text-left uppercase underline sm:translate-x-full sm:-translate-y-[0.1rem]"
-            type="button"
-            onClick={onExample}
-          >
-            New Example
-          </button>
+      <div className="mx-auto flex flex-col items-center gap-10 md:flex-row">
+        {limited ? (
+          <div className="bg-white p-[12px] text-[12px] font-light uppercase">
+            <Locked until={until!} onUpdate={onUpdate} />
+          </div>
+        ) : (
+          locked && (
+            <div className="bg-white p-[12px] text-[12px] font-light uppercase">
+              Use limit:{' '}
+              <span className="text-blue">
+                {process.env.NEXT_PUBLIC_LOCK_COUNT} per {renderLockTime(process.env.NEXT_PUBLIC_LOCK_TIME_IN_SEC)}
+              </span>
+            </div>
+          )
+        )}
+        <div className="w-[250px] text-left">
+          {!disabled && (
+            <span className="text-[12px] font-light uppercase">
+              By clicking "Generate" you confirm acceptance of our{' '}
+              <Link className="underline" href="/terms">
+                Terms of Use
+              </Link>
+            </span>
+          )}
         </div>
-      )}
+      </div>
     </>
   );
 }

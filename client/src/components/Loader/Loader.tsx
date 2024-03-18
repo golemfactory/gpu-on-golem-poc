@@ -19,7 +19,7 @@ function Loader() {
 
   return (
     <>
-      {forState([Status.Loading, Status.Waiting]) && <div className="fixed inset-0 z-10 bg-black opacity-60" />}
+      {forState([Status.Loading, Status.Waiting]) && <div className="fixed inset-0 z-10 bg-black opacity-40" />}
       {forState([Status.Loading]) && (
         <div className="fixed top-[10rem] left-0 z-20 min-w-[100%]">
           <h2 className="text-16">Checking queue...</h2>
