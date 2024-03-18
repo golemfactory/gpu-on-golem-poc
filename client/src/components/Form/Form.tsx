@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { renderIcon } from 'assets/utils';
 import { Locked, useLocked } from 'components';
 
-function Form({ value, onChange, onClear, onExample, error, disabled, onSubmit }: useFormType) {
+function Form({ value, onChange, error, disabled, onSubmit }: useFormType) {
   const { limited, locked, until, onUpdate } = useLocked();
 
   const renderLockTime = (time: string | undefined) => {
@@ -39,12 +39,6 @@ function Form({ value, onChange, onClear, onExample, error, disabled, onSubmit }
           autoComplete="off"
           value={value}
           onChange={onChange}
-          onFocus={onClear}
-          onBlur={(e) => {
-            if (!Boolean(value) && e.relatedTarget?.id !== 'submit') {
-              onExample();
-            }
-          }}
           placeholder="Enter your prompt"
           disabled={disabled || limited}
         />

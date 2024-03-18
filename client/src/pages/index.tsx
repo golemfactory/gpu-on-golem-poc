@@ -21,7 +21,7 @@ function Main() {
   useQueue();
   useNodes();
   useResult();
-  const { value, onExample, ...form } = useForm();
+  const { value, ...form } = useForm();
 
   const start_queued = useRef<number>();
   const stop_queued = useRef<number>();
@@ -65,17 +65,17 @@ function Main() {
     dispatch(setStatus(Status.Ready));
     dispatch(resetQueue());
     dispatch(resetData());
-    onExample();
+    form.onClear();
   };
 
   const handleReload = () => window.location.reload();
 
   return (
-    <Layout>
+    <Layout onReset={handleReset}>
       <Loader />
       {notForState([Status.Processing, Status.Finished, Status.Blocked, Status.Error]) && (
         <Hero>
-          <Form value={value} onExample={onExample} {...form} />
+          <Form value={value} {...form} />
         </Hero>
       )}
       {forState([Status.Queued]) && <Queue />}
