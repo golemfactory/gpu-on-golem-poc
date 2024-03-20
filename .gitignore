@@ -17,3 +17,6 @@ client/out
 client/npm-debug.log*
 client/*.tsbuildinfo
 client/next-env.d.ts
+
+*.log
+__pycache__
