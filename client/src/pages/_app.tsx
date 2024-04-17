@@ -24,12 +24,12 @@ function App({ Component, pageProps, ...rest }: AppProps) {
         <meta property="og:image:width" content="1200" />
         <meta property="og:image:height" content="630" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-        <Script
-          id="cookieyes"
-          type="text/javascript"
-          src="https://cdn-cookieyes.com/client_data/8d9e86c3dd88742506b050d9/script.js"
-        />
       </Head>
+      <Script
+        id="cookieyes"
+        type="text/javascript"
+        src="https://cdn-cookieyes.com/client_data/8d9e86c3dd88742506b050d9/script.js"
+      />
       <GoogleAnalytics />
       <CookieBanner />
       <Provider store={store}>
