@@ -1,6 +1,7 @@
 import { Provider } from 'react-redux';
 import type { AppProps } from 'next/app';
 import Head from 'next/head';
+import Script from 'next/script';
 import wrapper from 'store';
 import 'styles/globals.css';
 import { CookieBanner } from 'components';
@@ -23,6 +24,11 @@ function App({ Component, pageProps, ...rest }: AppProps) {
         <meta property="og:image:width" content="1200" />
         <meta property="og:image:height" content="630" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+        <Script
+          id="cookieyes"
+          type="text/javascript"
+          src="https://cdn-cookieyes.com/client_data/8d9e86c3dd88742506b050d9/script.js"
+        />
       </Head>
       <GoogleAnalytics />
       <CookieBanner />
