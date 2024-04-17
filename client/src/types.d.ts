@@ -1,5 +1,6 @@
 type Data = {
   eta: number | undefined;
+  image: string | undefined;
   img_url: string | undefined;
   intermediary_images: string[] | undefined;
   job_id: string | undefined;

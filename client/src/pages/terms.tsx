@@ -269,7 +269,7 @@ function Terms() {
                 </>,
                 <>
                   {underline('Current version.')} The current Terms are available at{' '}
-                  {link('https://image.golem.network/')}.
+                  {link(`${process.env.NEXT_PUBLIC_HOSTNAME}/`)}.
                 </>,
                 <>
                   {underline('Updates.')} The Terms may be regularly reviewed and updated as required. Each document

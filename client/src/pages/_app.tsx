@@ -19,7 +19,7 @@ function App({ Component, pageProps, ...rest }: AppProps) {
         <meta property="og:title" content={process.env.NEXT_PUBLIC_PROJECT_TITLE} />
         <meta property="og:description" content={process.env.NEXT_PUBLIC_PROJECT_DESCRIPTION} />
         <meta property="og:type" content="website" />
-        <meta property="og:image" content="https://image.golem.network/static/image.png" />
+        <meta property="og:image" content={`https://${process.env.NEXT_PUBLIC_HOSTNAME}/static/image.png`} />
         <meta property="og:image:width" content="1200" />
         <meta property="og:image:height" content="630" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />

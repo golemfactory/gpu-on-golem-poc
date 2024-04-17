@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useToggle } from 'react-use';
 import Image from 'next/image';
+import Link from 'next/link';
 import { Dialog } from '@headlessui/react';
 import { saveAs } from 'file-saver';
 import { Status } from 'enums/status';
@@ -20,7 +21,7 @@ function View({
   intermediary_image?: string;
   value: string;
   blocked?: boolean;
-  onReset?: () => void;
+  onReset?: Noop;
 }) {
   const { limited, locked, count, until, onUpdate } = useLocked();
 
@@ -29,7 +30,15 @@ function View({
   const { forState } = useStatusState();
 
   const [src, setSrc] = useState<string | undefined>(undefined);
-  let [preview, onTogglePreview] = useToggle(false);
+  const [preview, onTogglePreview] = useToggle(false);
+
+  useEffect(() => {
+    !!data.image && forState([Status.Finished]) && handleImage(data.image);
+  }, [data.image, forState]);
+
+  useEffect(() => {
+    !value && data.image && !!src && onTogglePreview();
+  }, [value, data.image, src]);
 
   const handleImage = (src: string) => setSrc(url(src, false));
 
@@ -46,7 +55,7 @@ function View({
   const disabled = forState([Status.Processing]);
 
   useEffect(() => {
-    if (locked && !intermediary_image && !!src) {
+    if (locked && !intermediary_image && !!src && value) {
       if (!count) {
         onUpdate(Date.now() + parseFloat(process.env.NEXT_PUBLIC_LOCK_TIME_IN_SEC!) * 1000, 1);
       } else {
@@ -56,6 +65,14 @@ function View({
   }, [locked, intermediary_image, src]);
 
   const total = Number(process.env.NEXT_PUBLIC_LOCK_COUNT);
+
+  const text = 'Check out my artwork created with the Golem AI Image Generator!';
+  const hashtags = ['GolemNetwork $GLM', 'AI'];
+
+  const handleOpen = () =>
+    window.open(
+      `https://twitter.com/intent/post?text=${text}&url=${window.location.href}images/${data.job_id}&hashtags=${hashtags}`,
+    );
 
   return (
     <>
@@ -69,21 +86,31 @@ function View({
             )}
           </Placeholder>
         </div>
-        <div className="flex flex-col items-center justify-center gap-10">
+        <div className="flex flex-col items-center justify-end gap-10">
           <div className="flex flex-col items-center gap-4">
-            <button
-              className="flex h-[44px] w-[288px] flex-col items-center justify-center bg-blue text-[12px] leading-[1.2] tracking-[2px] disabled:border-grey disabled:bg-grey disabled:text-black md:w-[215px]"
-              onClick={onReset}
-              disabled={disabled || limited}
-            >
-              Try again
-              {!disabled && Boolean(count) && count !== total && (
-                <span>
-                  ({total - count!} of {total} left)
-                </span>
-              )}
-              {limited && <Locked until={until!} onUpdate={onUpdate} />}
-            </button>
+            {!value && !limited ? (
+              <Link
+                className="flex h-[44px] w-[288px] flex-col items-center justify-center border-[1px] border-solid border-blue bg-blue font-sans text-[12px] font-semibold uppercase leading-[1.2] tracking-[2px] text-white hover:bg-transparent hover:text-blue md:w-[215px]"
+                href="/"
+                onClick={onReset}
+              >
+                Check it out
+              </Link>
+            ) : (
+              <button
+                className="flex h-[44px] w-[288px] flex-col items-center justify-center bg-blue text-[12px] leading-[1.2] tracking-[2px] disabled:border-grey disabled:bg-grey disabled:text-black md:w-[215px]"
+                onClick={onReset}
+                disabled={disabled || limited}
+              >
+                Try again
+                {!disabled && Boolean(count) && count !== total && (
+                  <span>
+                    ({total - count!} of {total} left)
+                  </span>
+                )}
+                {limited && <Locked until={until!} onUpdate={onUpdate} />}
+              </button>
+            )}
           </div>
           {!blocked && (
             <div className="flex flex-col gap-2">
@@ -107,6 +134,16 @@ function View({
               </div>
             </div>
           )}
+          {!!src && forState([Status.Finished]) ? (
+            <button
+              className="flex w-[288px] items-center justify-center bg-white p-[12px] text-[12px] tracking-[2px] text-blue md:w-[215px]"
+              onClick={handleOpen}
+            >
+              Share on X
+            </button>
+          ) : (
+            <div className="h-[44px]" />
+          )}
         </div>
       </div>
       <Dialog open={preview} onClose={onTogglePreview} className="relative z-50">
@@ -116,7 +153,7 @@ function View({
               src={src!}
               alt={value}
               fill
-              className="!inset-1/2 !h-auto -translate-x-1/2 -translate-y-1/2 transform p-[1.6rem] md:!h-full md:!w-auto md:p-[3.6rem]"
+              className="!inset-1/2 !h-auto -translate-x-1/2 -translate-y-2/3 transform p-[1.6rem] md:!h-full md:!w-auto md:-translate-y-1/2 md:p-[10.6rem]"
             />
           </Dialog.Panel>
         </div>

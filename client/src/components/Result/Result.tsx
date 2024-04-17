@@ -23,11 +23,20 @@ function Result({ value, onReset }: { value: string; onReset: Noop }) {
 
   return (
     <div className="my-[12rem] md:mb-0 xl:mt-[12rem]">
-      <div className="relative mx-auto mb-[1.6rem] flex gap-4 bg-white p-3 pr-10 md:w-[75%]">
-        <h3 className="mx-auto flex flex-col text-12 uppercase md:flex-row">
-          Your prompt:<span className="ml-2 w-[300px] truncate text-blue md:w-[400px]">{value}</span>
-        </h3>
-        <Copy value={value} />
+      <div
+        className={twMerge(
+          'relative mx-auto mb-[1.6rem] flex min-h-[31px] gap-4 p-3 pr-10 md:w-[75%]',
+          value && 'bg-white',
+        )}
+      >
+        {value && (
+          <>
+            <h3 className="mx-auto flex flex-col text-12 uppercase md:flex-row">
+              Your prompt:<span className="ml-2 w-[300px] truncate text-blue md:w-[400px]">{value}</span>
+            </h3>
+            <Copy value={value} />
+          </>
+        )}
       </div>
       {forState([Status.Processing]) && (
         <div className="mx-auto md:w-[75%]">

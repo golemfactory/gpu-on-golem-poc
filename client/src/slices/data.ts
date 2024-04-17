@@ -4,6 +4,7 @@ import { RootState } from 'store';
 
 const initialState: Data = {
   eta: undefined,
+  image: undefined,
   img_url: undefined,
   intermediary_images: undefined,
   job_id: undefined,
