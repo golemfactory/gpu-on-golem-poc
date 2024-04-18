@@ -64,7 +64,7 @@ async def job_detail(request: Request, job_id: str):
     if job_data:
         final_img_path = f'images/{job_id}.jpg'
         local_img_path = data_dir / final_img_path
-        job_data["image"] = final_img_path if local_img_path.exists() else None,
+        job_data["image"] = final_img_path if local_img_path.exists() else None
         return JSONResponse(job_data, status_code=status.HTTP_200_OK)
     else:
         return JSONResponse({'error': 'Not found'}, status_code=status.HTTP_404_NOT_FOUND)
