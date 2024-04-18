@@ -174,6 +174,7 @@ class GenerateImageService(Service):
                 "progress": progress,
                 "processing_time": (datetime.datetime.now() - job_started_at).total_seconds(),
                 "img_url": final_img_path,
+                "image": f'images/{job["job_id"]}.jpg',
                 "intermediary_images": intermediary_images,
                 'queue_position': 0,
                 "jobs_in_queue": await jobs_queue.qsize(),
