@@ -4,7 +4,6 @@ import Head from 'next/head';
 import Script from 'next/script';
 import wrapper from 'store';
 import 'styles/globals.css';
-import { CookieBanner } from 'components';
 import GoogleAnalytics from 'services/GoogleAnalytics';
 import Web3ModalProvider from 'services/Web3Modal';
 
@@ -31,7 +30,6 @@ function App({ Component, pageProps, ...rest }: AppProps) {
         src="https://cdn-cookieyes.com/client_data/8d9e86c3dd88742506b050d9/script.js"
       />
       <GoogleAnalytics />
-      <CookieBanner />
       <Provider store={store}>
         <Web3ModalProvider>
           <Component {...pageProps} />

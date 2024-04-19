@@ -1,5 +1,4 @@
 export { default as Checkbox, useCheckbox } from './Checkbox';
-export { default as CookieBanner } from './CookieBanner';
 export { default as Copy } from './Copy';
 export { default as Countdown } from './Countdown';
 export { default as Error } from './Error';
